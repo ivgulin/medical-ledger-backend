@@ -1,0 +1,15 @@
+server:
+  port: 8000
+
+jwt:
+  secret: test
+#security:
+#  oauth2:
+#    resource:
+#      filter-item: 3
+
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        web: DEBUG
