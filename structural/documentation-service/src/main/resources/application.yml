@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: documentation-service
+
+server:
+  port: 8002
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+
+swagger:
+  config:
+#    refreshrate: 1800000
+    refreshrate: 5000
+  excluded:
+    - documentation-service
+    - zuul-gateway

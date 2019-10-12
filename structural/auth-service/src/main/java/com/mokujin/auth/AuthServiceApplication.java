@@ -13,10 +13,10 @@ import org.springframework.context.annotation.Configuration;
 @EnableAutoConfiguration
 @EnableEurekaClient
 @ComponentScan("com.mokujin.**")
-public class AuthApplication {
+public class AuthServiceApplication {
 
     public static void main(String[] args) {
         log.info("app is running");
-        SpringApplication.run(AuthApplication.class, args);
+        SpringApplication.run(AuthServiceApplication.class, args);
     }
 }

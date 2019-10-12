@@ -20,6 +20,7 @@
         <java.version>1.8</java.version>
         <junit.version>5.5.2</junit.version>
         <spring-cloud.version>Finchley.M9</spring-cloud.version>
+        <springfox.swagger.version>2.5.0</springfox.swagger.version>
     </properties>
 
     <dependencies>
@@ -36,11 +37,11 @@
             <scope>test</scope>
         </dependency>
 
-      <!--  <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>-->
+        <!--  <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-test</artifactId>
+              <scope>test</scope>
+          </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -95,5 +96,6 @@
         <module>business/test-service</module>
         <module>structural/zuul-gateway</module>
         <module>integration/common-service</module>
+        <module>structural/documentation-service</module>
     </modules>
 </project>
