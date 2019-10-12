@@ -10,6 +10,14 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka
 
+security:
+  jwt:
+    uri: /api/auth/**
+    header: Authorization
+    prefix: Bearer
+    expiration: 86400
+    secret: test
+
 zuul:
   prefix: /api
   ignoredServices: '*'
@@ -17,3 +25,8 @@ zuul:
     user-service:
       path: /user/**
       serviceId: user-service
+    auth-service:
+      path: /auth/**
+      serviceId: auth-service
+      stripPrefix: false
+      sensitiveHeaders: Cookie,Set-Cookie
