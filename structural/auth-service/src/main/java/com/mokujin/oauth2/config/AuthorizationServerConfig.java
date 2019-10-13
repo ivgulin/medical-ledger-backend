@@ -53,11 +53,12 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         clients
                 .inMemory()
                 .withClient(WEB_CLIENT_ID)
-                .authorizedGrantTypes("password")
+                .authorizedGrantTypes("password", "authorization_code", "refresh_token")
                 .scopes("read", "write")
                 .secret(passwordEncoder.encode(WEB_CLIENT_SECRET))
                 .authorities("web-client")
-                .accessTokenValiditySeconds(3600);
+                .accessTokenValiditySeconds(3600)
+                .refreshTokenValiditySeconds(5000);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .exceptionTranslator(this::handleException);
     }
 
-    public ResponseEntity<OAuth2Exception> handleException(Exception e){
+    public ResponseEntity<OAuth2Exception> handleException(Exception e) {
         return ResponseEntity
                 .status(((OAuth2Exception) e).getHttpErrorCode())
                 .body(new CustomOauthException(e.getMessage()));
