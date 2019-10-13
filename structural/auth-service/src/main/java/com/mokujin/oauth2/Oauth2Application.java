@@ -1,4 +1,4 @@
-package com.mokujin.auth;
+package com.mokujin.oauth2;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +13,10 @@ import org.springframework.context.annotation.Configuration;
 @EnableAutoConfiguration
 @EnableEurekaClient
 @ComponentScan("com.mokujin.**")
-public class AuthServiceApplication {
+public class Oauth2Application {
 
     public static void main(String[] args) {
         log.info("app is running");
-        SpringApplication.run(AuthServiceApplication.class, args);
+        SpringApplication.run(Oauth2Application.class, args);
     }
 }

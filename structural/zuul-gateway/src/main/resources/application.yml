@@ -10,16 +10,7 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka
 
-security:
-  jwt:
-    uri: /api/auth/**
-    header: Authorization
-    prefix: Bearer
-    expiration: 86400
-    secret: test
-
 zuul:
-  prefix: /api
   ignoredServices: '*'
   routes:
     user-service:
@@ -28,5 +19,19 @@ zuul:
     auth-service:
       path: /auth/**
       serviceId: auth-service
-      stripPrefix: false
       sensitiveHeaders: Cookie,Set-Cookie
+    documentation-service:
+      path: /docs/**
+      serviceId: documentation-service
+
+auth:
+  server:
+    url: http://localhost:8000/oauth/check_token
+    clientId: web_client_id
+    clientSecret: web_client_secret
+
+logging:
+  level:
+    org:
+      springframework:
+        web: TRACE

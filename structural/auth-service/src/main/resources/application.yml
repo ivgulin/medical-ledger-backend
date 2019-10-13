@@ -1,19 +1,23 @@
 spring:
   application:
     name: auth-service
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+redis:
+  host: redis://localhost:6379
 
 server:
   port: 8000
-
-security:
-  jwt:
-    uri: /auth/**
-    header: Authorization
-    prefix: Bearer
-    expiration: 86400
-    secret: test
 
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG

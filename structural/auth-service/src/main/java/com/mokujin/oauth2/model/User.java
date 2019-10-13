@@ -1,4 +1,4 @@
-package com.mokujin.auth.model;
+package com.mokujin.oauth2.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

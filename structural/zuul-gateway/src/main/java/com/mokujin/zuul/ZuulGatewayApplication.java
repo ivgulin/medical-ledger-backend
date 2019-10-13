@@ -8,7 +8,6 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 import org.springframework.context.annotation.ComponentScan;
 
-@Slf4j
 @SpringBootApplication
 @EnableConfigurationProperties
 @EnableEurekaClient
@@ -17,7 +16,6 @@ import org.springframework.context.annotation.ComponentScan;
 public class ZuulGatewayApplication {
 
     public static void main(String[] args) {
-        log.info("app is running");
         SpringApplication.run(ZuulGatewayApplication.class, args);
     }
 }

@@ -12,8 +12,7 @@ eureka:
 
 swagger:
   config:
-#    refreshrate: 1800000
-    refreshrate: 5000
+    refreshrate: 1800000
   excluded:
     - documentation-service
     - zuul-gateway
