@@ -19,7 +19,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class DocumentationServiceApplication {
 
     public static void main(String[] args) {
-        log.info("app is running");
         SpringApplication.run(DocumentationServiceApplication.class, args);
     }
 }

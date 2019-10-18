@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 public class Oauth2Application {
 
     public static void main(String[] args) {
-        log.info("app is running");
         SpringApplication.run(Oauth2Application.class, args);
     }
 }

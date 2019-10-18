@@ -15,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 public class UserServiceApplication {
 
     public static void main(String[] args) {
-        log.info("app is running");
         SpringApplication.run(UserServiceApplication.class, args);
     }
 
