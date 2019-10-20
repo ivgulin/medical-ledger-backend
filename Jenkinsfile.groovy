@@ -16,14 +16,18 @@ def userService = new Structure(
 def testService = new Structure(
         "test-service",
         "business/test-service/build/Dockerfile")
+def governmentService = new Structure(
+        "government-service",
+        "business/fake-government-service/build/Dockerfile")
 
 def modules = [
         eurekaServer,
         zuulGateway,
         authService,
-        documentationService,
         userService,
-        testService
+        testService,
+        governmentService,
+        documentationService
 ]
 
 pipeline {

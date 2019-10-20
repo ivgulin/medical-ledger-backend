@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: test-service
+  datasource:
+    username: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/postgres
+
+server:
+  port: 8012
+
+file:
+  storage:
+    path: /var/government/files/
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka

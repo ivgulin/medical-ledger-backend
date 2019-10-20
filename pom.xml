@@ -96,5 +96,6 @@
         <module>structural/zuul-gateway</module>
         <!--<module>integration/common-service</module>-->
         <module>structural/documentation-service</module>
+        <module>business/fake-government-service</module>
     </modules>
 </project>

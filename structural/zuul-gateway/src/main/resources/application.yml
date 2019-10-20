@@ -23,6 +23,9 @@ zuul:
     documentation-service:
       path: /docs/**
       serviceId: documentation-service
+    fake-government-service:
+      path: /gov/**
+      serviceId: fake-government-service
 
 auth:
   server:
