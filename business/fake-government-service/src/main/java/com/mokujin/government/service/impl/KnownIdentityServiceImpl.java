@@ -17,8 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class KnownIdentityServiceImpl implements KnownIdentityService {
 
     private final KnownIdentityRepository knownIdentityRepository;
@@ -39,6 +39,7 @@ public class KnownIdentityServiceImpl implements KnownIdentityService {
 
         KnownIdentity knownIdentity = knownIdentityRepository.findById(identityId)
                 .orElseThrow(() -> new ResourceNotFoundException("Identity hasn't been found."));
+        log.info("knownIdentity has been found in uploadPhoto: '{}'", knownIdentity);
 
         String fileName = fileService.saveFile(multipartFile);
 
@@ -62,6 +63,7 @@ public class KnownIdentityServiceImpl implements KnownIdentityService {
                         && i.getNationalPassport().getFatherName().equals(person.getFatherName())
                         && i.getNationalPassport().getDateOfBirth().equals(person.getDateOfBirth()))
                 .orElseThrow(() -> new ResourceNotFoundException("Identity hasn't been found.")));
+        log.info("knownIdentity has been found in getWithImage: '{}'", knownIdentity);
 
         NationalPassportDTO nationalPassport = new NationalPassportDTO(knownIdentity.getNationalPassport());
 

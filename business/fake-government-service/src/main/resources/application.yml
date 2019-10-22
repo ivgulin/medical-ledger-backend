@@ -1,6 +1,6 @@
 spring:
   application:
-    name: test-service
+    name: government-service
   datasource:
     username: postgres
     password: postgres

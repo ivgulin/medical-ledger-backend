@@ -37,11 +37,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!--  <dependency>
+          <dependency>
               <groupId>org.springframework.boot</groupId>
               <artifactId>spring-boot-starter-test</artifactId>
               <scope>test</scope>
-          </dependency>-->
+          </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -92,9 +92,8 @@
         <module>structural/auth-service</module>
         <module>business/user-service</module>
         <module>structural/eureka-server</module>
-        <module>business/test-service</module>
+        <module>business/self-sovereign-identity-service</module>
         <module>structural/zuul-gateway</module>
-        <!--<module>integration/common-service</module>-->
         <module>structural/documentation-service</module>
         <module>business/fake-government-service</module>
     </modules>

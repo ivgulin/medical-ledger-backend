@@ -36,10 +36,8 @@ public class FileServiceImpl implements FileService {
         boolean newFile = file.createNewFile();
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-
             if (newFile) copy(multipartFile.getInputStream(), fileOutputStream);
             else throw new FileUploadFailureException();
-
         } catch (Exception e) {
             log.error("Fail to save on disc multipart file, e = {}", e);
             throw new FileUploadFailureException();
