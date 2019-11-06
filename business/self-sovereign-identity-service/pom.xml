@@ -18,6 +18,18 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.hyperledger</groupId>
+            <artifactId>indy</artifactId>
+            <version>1.12.0</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>sovrin</id>
+            <url>https://repo.sovrin.org/repository/maven-public</url>
+        </repository>
+    </repositories>
 
 </project>
