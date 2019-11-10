@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/registration")
 public class RegistrationController {
 
-    private RegistrationService registrationService;
+    private final RegistrationService registrationService;
 
     @PostMapping("/create-wallet")
     public ResponseEntity<ProcessedUserCredentials> createWallet(@RequestBody UserCredentials userCredentials) {

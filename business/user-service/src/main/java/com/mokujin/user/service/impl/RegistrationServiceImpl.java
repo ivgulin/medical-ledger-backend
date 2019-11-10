@@ -8,6 +8,8 @@ import com.mokujin.user.service.RegistrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.NotImplementedException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,27 +18,32 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class RegistrationServiceImpl implements RegistrationService {
 
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
     private final RestTemplate restTemplate;
 
     @Override
     public ProcessedUserCredentials createWallet(UserCredentials userCredentials) {
 
-        throw new NotImplementedException();
+        String encryptedPassword = bCryptPasswordEncoder
+                .encode(userCredentials.getEmail() + userCredentials.getPassword());
+        log.info("encryptedPassword =  '{}'", encryptedPassword);
 
-        // TODO: 10/22/2019 encrypt password
-        //String encryptedPassword = null;
-
-        // TODO: 10/22/2019 complete request to newly created blockchain service
-      /*  restTemplate.getForObject("http://test-service/test-integration", String.class);
-
-        return ProcessedUserCredentials.builder()
+        ProcessedUserCredentials processedUserCredentials = ProcessedUserCredentials.builder()
                 .publicKey(userCredentials.getEmail())
                 .privateKey(encryptedPassword)
-                .build();*/
+                .build();
+
+        restTemplate.postForLocation("http://self-sovereign-identity-service/ledger/register",
+                processedUserCredentials);
+
+        return processedUserCredentials;
     }
 
     @Override
     public User registerUser(UserRegistrationDetails userRegistrationDetails) {
-        throw new NotImplementedException();
+
+        return restTemplate.postForObject("http://self-sovereign-identity-service/ledger/register",
+                userRegistrationDetails, User.class);
     }
 }

@@ -1,6 +1,7 @@
-package com.mokujin.ssi.model;
+package com.mokujin.ssi.model.internal;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class Contact {
 
     private String photo;
 
+    @JsonIgnore
     private boolean isVerinym;
 
 }

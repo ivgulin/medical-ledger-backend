@@ -1,4 +1,4 @@
-package com.mokujin.ssi.model;
+package com.mokujin.ssi.model.internal;
 
 
 import lombok.*;
@@ -7,8 +7,6 @@ import org.hyperledger.indy.sdk.wallet.Wallet;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static lombok.AccessLevel.PRIVATE;
 
 @Data
 @NoArgsConstructor

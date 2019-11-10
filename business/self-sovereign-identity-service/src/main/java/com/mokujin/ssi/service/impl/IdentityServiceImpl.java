@@ -2,9 +2,9 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mokujin.ssi.model.DidWithMetadata;
-import com.mokujin.ssi.model.Identity;
-import com.mokujin.ssi.model.Pseudonym;
+import com.mokujin.ssi.model.internal.DidWithMetadata;
+import com.mokujin.ssi.model.internal.Identity;
+import com.mokujin.ssi.model.internal.Pseudonym;
 import com.mokujin.ssi.service.IdentityService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

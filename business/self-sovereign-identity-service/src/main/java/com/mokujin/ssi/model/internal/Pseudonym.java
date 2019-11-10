@@ -1,4 +1,4 @@
-package com.mokujin.ssi.model;
+package com.mokujin.ssi.model.internal;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

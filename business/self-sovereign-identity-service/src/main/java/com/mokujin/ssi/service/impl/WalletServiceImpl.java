@@ -21,7 +21,7 @@ public class WalletServiceImpl implements WalletService {
         try {
             return openWallet(config, credentials).get();
         } catch (Exception e) {
-            log.error("Exception was thrown: '{}'", e);
+            log.error("Exception was thrown: " + e);
             createWallet(config, credentials).get();
             return ofNullable(openWallet(config, credentials).get())
                     .orElseThrow(() -> new LedgerException("Unable to create wallet."));
@@ -36,7 +36,7 @@ public class WalletServiceImpl implements WalletService {
             wallet.closeWallet();
             return true;
         } catch (Exception e) {
-            log.error("Exception was thrown: '{}'", e);
+            log.error("Exception was thrown: " + e);
             return false;
         }
     }

@@ -1,6 +1,5 @@
 package com.mokujin.zuul;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -12,7 +11,6 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableConfigurationProperties
 @EnableEurekaClient
 @EnableZuulProxy
-@ComponentScan("com.mokujin.**")
 public class ZuulGatewayApplication {
 
     public static void main(String[] args) {

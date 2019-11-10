@@ -1,14 +1,20 @@
 package com.mokujin.ssi.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mokujin.ssi.model.Contact;
-import com.mokujin.ssi.model.Identity;
-import com.mokujin.ssi.model.Pseudonym;
+import com.mokujin.ssi.model.internal.Contact;
+import com.mokujin.ssi.model.internal.Identity;
+import com.mokujin.ssi.model.internal.Pseudonym;
+import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.service.IdentityService;
 import com.mokujin.ssi.service.WalletService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hyperledger.indy.sdk.anoncreds.AnoncredsResults;
+import org.hyperledger.indy.sdk.cache.Cache;
 import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.did.DidResults;
 import org.hyperledger.indy.sdk.pool.Pool;
@@ -20,10 +26,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static java.util.Objects.isNull;
+import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateAndStoreCredentialDef;
+import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateSchema;
 import static org.hyperledger.indy.sdk.did.Did.createAndStoreMyDid;
-import static org.hyperledger.indy.sdk.ledger.Ledger.buildNymRequest;
-import static org.hyperledger.indy.sdk.ledger.Ledger.signAndSubmitRequest;
+import static org.hyperledger.indy.sdk.ledger.Ledger.*;
+import static org.hyperledger.indy.sdk.ledger.Ledger.buildCredDefRequest;
 import static org.hyperledger.indy.sdk.pool.Pool.*;
 
 @Slf4j
@@ -91,7 +102,7 @@ public class LedgerConfig {
         try {
             createPoolLedgerConfig(POOL_NAME, poolConfig.toString()).get();
         } catch (Exception e) {
-            log.error("Exception was thrown: '{}'", e);
+            log.error("Exception was thrown: " + e);
         }
 
         return openPoolLedger(POOL_NAME, "{}").get();
@@ -271,5 +282,143 @@ public class LedgerConfig {
                 stewardIdentity.getVerinymDid(),
                 nymRegisterTrustAnchorVerinym).get();
         log.info("'nymRegisterTrustAnchorVerinymResponse={}'", nymRegisterTrustAnchorVerinymResponse);
+    }
+
+
+    @SneakyThrows
+    @Bean("passportSchema")
+    @DependsOn("government")
+    public Schema getPassportSchema(Pool pool, @Qualifier("government") Identity government) {
+
+        String schemaName = "Passport";
+        String tag = "passport";
+
+        ArrayNode attributes = objectMapper.createArrayNode();
+        attributes
+                .add("firstName")
+                .add("lastName")
+                .add("fatherName")
+                .add("dateOfBirth")
+                .add("placeOfBirth")
+                .add("imageName")
+                .add("sex")
+                .add("issuer")
+                .add("dateOfIssue");
+
+        Schema schema = getSchema(pool, government, schemaName, tag, attributes);
+        log.info("'passport schema={}'", schema);
+
+        return schema;
+    }
+
+    @SneakyThrows
+    @Bean("nationalNumberSchema")
+    @DependsOn("government")
+    public Schema getNationalNumberSchema(Pool pool, @Qualifier("government") Identity government) {
+
+        String schemaName = "NationalNumber";
+        String tag = "national_number";
+
+        ArrayNode attributes = objectMapper.createArrayNode();
+        attributes
+                .add("number")
+                .add("registrationDate")
+                .add("issuer");
+
+        Schema schema = getSchema(pool, government, schemaName, tag, attributes);
+        log.info("'national number schema={}'", schema);
+
+        return schema;
+    }
+
+    @SneakyThrows
+    private Schema getSchema(Pool pool, @Qualifier("government") Identity government, String schemaName,
+                             String tag, ArrayNode attributes) {
+        String version = "1.0";
+        String schemaId = government.getVerinymDid() + ":2:" + schemaName + ":" + version;
+        String schemaDefinitionId;
+        String schema;
+        String schemaDefinition;
+        try {
+            schema = Cache.getSchema(pool, government.getWallet(), government.getVerinymDid(),
+                    schemaId, "{}").get();
+            log.info("'schema={}'", schema);
+
+            JsonNode properties = objectMapper.readTree(schema);
+            String seqNo = properties.get("seqNo").asText();
+
+            schemaDefinitionId = government.getVerinymDid() + ":3:CL:" + seqNo + ":" + tag;
+
+            schemaDefinition = Cache.getCredDef(pool, government.getWallet(),
+                    government.getVerinymDid(), schemaDefinitionId, "{}").get();
+        } catch (Exception e) {
+            log.error("Exception was thrown: " + e);
+
+            schema = this.createSchema(pool, government, schemaName, version, attributes.toString());
+
+            schemaDefinition = this.createSchemaDefinition(pool, government, tag, schema);
+
+            JsonNode properties = objectMapper.readTree(schemaDefinition);
+            schemaDefinitionId = properties.get("id").asText();
+        }
+
+        return Schema.builder()
+                .schemaId(schemaId)
+                .schema(schema)
+                .schemaDefinitionId(schemaDefinitionId)
+                .schemaDefinition(schemaDefinition)
+                .build();
+    }
+
+    @SneakyThrows
+    private String createSchema(Pool pool, Identity government, String schemaName,
+                                String version, String attributes) {
+
+        AnoncredsResults.IssuerCreateSchemaResult schemaBlueprint = issuerCreateSchema(
+                government.getVerinymDid(),
+                schemaName,
+                version,
+                attributes).get();
+        log.info("'schema={}'", schemaBlueprint);
+
+        String schemaRequest = buildSchemaRequest(
+                government.getVerinymDid(),
+                schemaBlueprint.getSchemaJson()).get();
+
+        String schemaResponse = signAndSubmitRequest(
+                pool,
+                government.getWallet(),
+                government.getVerinymDid(),
+                schemaRequest).get();
+        log.info("'schemaResponse={}'", schemaResponse);
+
+        return Cache.getSchema(pool, government.getWallet(), government.getVerinymDid(),
+                schemaBlueprint.getSchemaId(), "{}").get();
+    }
+
+    @SneakyThrows
+    private String createSchemaDefinition(Pool pool, Identity government, String tag, String schema) {
+        AnoncredsResults.IssuerCreateAndStoreCredentialDefResult schemaDefinition = issuerCreateAndStoreCredentialDef(
+                government.getWallet(),
+                government.getVerinymDid(),
+                schema,
+                tag,
+                null,
+                null)
+                .get();
+
+        String schemaDefinitionRequest = buildCredDefRequest(
+                government.getVerinymDid(),
+                schemaDefinition.getCredDefJson()).get();
+        log.info("'schemaDefinitionRequest={}'", schemaDefinitionRequest);
+        String schemaDefinitionResponse = signAndSubmitRequest(
+                pool,
+                government.getWallet(),
+                government.getVerinymDid(),
+                schemaDefinitionRequest).get();
+        log.info("'schemaDefinitionResponse={}'", schemaDefinitionResponse);
+
+        return Cache.getCredDef(pool, government.getWallet(),
+                government.getVerinymDid(), schemaDefinition.getCredDefId(), "{}").get();
     }
 }

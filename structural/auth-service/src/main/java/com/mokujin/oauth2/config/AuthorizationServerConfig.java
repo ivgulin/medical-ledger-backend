@@ -1,6 +1,7 @@
 package com.mokujin.oauth2.config;
 
 import com.mokujin.oauth2.exception.CustomOauthException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ import org.springframework.security.oauth2.provider.token.store.redis.RedisToken
 
 @Configuration
 @EnableAuthorizationServer
+@RequiredArgsConstructor
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
     private static final String WEB_CLIENT_ID = "web_client_id";
@@ -29,17 +31,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     private final PasswordEncoder passwordEncoder;
     private final TokenStore tokenStore;
     private final UserDetailsService userDetailsService;
-
-    @Autowired
-    public AuthorizationServerConfig(AuthenticationManager authenticationManager,
-                                     PasswordEncoder passwordEncoder,
-                                     TokenStore tokenStore,
-                                     UserDetailsService userDetailsService) {
-        this.authenticationManager = authenticationManager;
-        this.passwordEncoder = passwordEncoder;
-        this.tokenStore = tokenStore;
-        this.userDetailsService = userDetailsService;
-    }
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
