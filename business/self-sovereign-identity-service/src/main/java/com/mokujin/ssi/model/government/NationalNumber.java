@@ -6,7 +6,7 @@ import javax.print.Doc;
 import java.time.LocalDate;
 
 @Data
-public class NationalNumber extends Document {
+public class NationalNumber extends NationalDocument {
 
     private String number;
 

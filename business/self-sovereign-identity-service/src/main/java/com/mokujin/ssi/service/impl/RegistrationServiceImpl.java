@@ -77,7 +77,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
 
         KnownIdentity knownIdentity = validationService.validateNewbie(details);
-
         Wallet governmentWallet = government.getWallet();
 
         try {

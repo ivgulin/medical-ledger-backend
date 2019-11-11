@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @Data
-public class NationalPassport extends Document {
+public class NationalPassport extends NationalDocument {
 
     private String firstName;
 
@@ -25,7 +25,5 @@ public class NationalPassport extends Document {
     private String issuer;
 
     private LocalDate dateOfIssue;
-
-    private Set<PlaceOfResidence> placesOfResidence;
 
 }

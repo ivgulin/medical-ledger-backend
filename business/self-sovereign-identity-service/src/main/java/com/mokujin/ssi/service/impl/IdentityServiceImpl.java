@@ -2,6 +2,7 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.DidWithMetadata;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
@@ -9,10 +10,12 @@ import com.mokujin.ssi.service.IdentityService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hyperledger.indy.sdk.anoncreds.Anoncreds;
 import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,6 +55,14 @@ public class IdentityServiceImpl implements IdentityService {
                         .contact(d.getMetadata())
                         .build()).collect(Collectors.toList());
         identity.setPseudonyms(pseudonyms);
+
+        String credentials = Anoncreds.proverGetCredentials(wallet, "{}").get();
+        log.info("'credentials={}'", credentials);
+
+        List<Credential> credentialList = credentials.equals("[]")
+                ? new ArrayList<>()
+                : objectMapper.readValue(credentials, new TypeReference<List<Credential>>() {});
+        identity.setCredentials(credentialList);
 
         return identity;
     }

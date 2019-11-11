@@ -7,7 +7,7 @@ server:
 
 ledger:
   pool:
-    name: pool
+    name: Pool
     protocol:
       version: 2
   steward:

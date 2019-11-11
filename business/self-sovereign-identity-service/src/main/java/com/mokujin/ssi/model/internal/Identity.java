@@ -21,6 +21,8 @@ public class Identity {
 
     private List<Pseudonym> pseudonyms = new ArrayList<>();
 
+    private List<Credential> credentials = new ArrayList<>();
+
     public void addPseudonym(Pseudonym pseudonym) {
         pseudonyms.add(pseudonym);
     }

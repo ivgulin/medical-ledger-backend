@@ -1,6 +1,5 @@
 package com.mokujin.ssi.config;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -26,15 +25,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static java.util.Objects.isNull;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateAndStoreCredentialDef;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateSchema;
 import static org.hyperledger.indy.sdk.did.Did.createAndStoreMyDid;
 import static org.hyperledger.indy.sdk.ledger.Ledger.*;
-import static org.hyperledger.indy.sdk.ledger.Ledger.buildCredDefRequest;
 import static org.hyperledger.indy.sdk.pool.Pool.*;
 
 @Slf4j
@@ -92,7 +87,7 @@ public class LedgerConfig {
         this.objectMapper = objectMapper;
     }
 
-    @Bean
+    @Bean("pool")
     @SneakyThrows
     public Pool getPool() {
         setProtocolVersion(PROTOCOL_VERSION);
@@ -110,12 +105,14 @@ public class LedgerConfig {
 
     @Bean("stewardWallet")
     @SneakyThrows
+    @DependsOn("pool")
     public Wallet getStewardWallet() {
         return this.getWallet(STEWARD_ID, STEWARD_KEY);
     }
 
     @Bean("governmentWallet")
     @SneakyThrows
+    @DependsOn("pool")
     public Wallet getGovernmentWallet() {
         return this.getWallet(GOVERNMENT_ID, GOVERNMENT_KEY);
     }

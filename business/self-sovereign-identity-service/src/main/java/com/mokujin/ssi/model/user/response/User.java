@@ -1,7 +1,7 @@
 package com.mokujin.ssi.model.user.response;
 
-import com.mokujin.ssi.model.government.Document;
 import com.mokujin.ssi.model.internal.Contact;
+import com.mokujin.ssi.model.internal.Credential;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,21 +26,21 @@ public class User {
 
     private String photo;
 
-    private List<NationalDocument> nationalDocuments = new ArrayList<>();
+    private List<Credential> nationalCredentials = new ArrayList<>();
 
     private List<Contact> contacts = new ArrayList<>();
 
-    private List<Document> documents = new ArrayList<>();
+    private List<Credential> credentials = new ArrayList<>();
 
-    public void addNationalDocument(NationalDocument nationalDocument) {
-        nationalDocuments.add(nationalDocument);
+    public void addNationalCredential(Credential nationalCredential) {
+        nationalCredentials.add(nationalCredential);
     }
 
     public void addContact(Contact contact) {
         contacts.add(contact);
     }
 
-    public void addDocument(Document document) {
-        documents.add(document);
+    public void addCredential(Credential credential) {
+        credentials.add(credential);
     }
 }
