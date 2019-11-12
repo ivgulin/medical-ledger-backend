@@ -11,6 +11,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,9 +42,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public User registerUser(UserRegistrationDetails userRegistrationDetails) {
-
-        return restTemplate.postForObject("http://self-sovereign-identity-service/ledger/register",
-                userRegistrationDetails, User.class);
+    public User registerUser(UserRegistrationDetails userRegistrationDetails, String publicKey, String privateKey) {
+        String url = "http://self-sovereign-identity-service/ledger/register?public="
+                + publicKey + "&private=" + privateKey;
+        return restTemplate.postForObject(url, userRegistrationDetails, User.class);
     }
 }

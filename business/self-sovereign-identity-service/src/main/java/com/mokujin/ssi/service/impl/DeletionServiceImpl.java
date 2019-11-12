@@ -34,7 +34,8 @@ public class DeletionServiceImpl implements DeletionService {
                 throw new ResourceNotFoundException("No wallet was found for this user");
             }
 
-            Wallet userWallet = walletService.getOrCreateWallet(config.toString(), credentials.toString());
+            Wallet userWallet = walletService
+                    .getOrCreateWallet(userCredentials.getPublicKey(), userCredentials.getPrivateKey());
             userWallet.closeWallet().get();
             deleteWallet(config.toString(), credentials.toString()).get();
 

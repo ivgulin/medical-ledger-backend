@@ -7,7 +7,7 @@ server:
 
 ledger:
   pool:
-    name: Pool
+    name: pool
     protocol:
       version: 2
   steward:
@@ -27,8 +27,3 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka
-
-logging:
-  level:
-    org:
-      hyperledger: TRACE

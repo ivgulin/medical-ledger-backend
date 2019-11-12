@@ -23,18 +23,17 @@ public class CredentialServiceImpl implements CredentialService {
 
     @Override
     public String getCredential(Document document) {
-
         List<Field> fields = Arrays.stream(document.getClass().getDeclaredFields()).collect(Collectors.toList());
 
         ObjectNode credentialNode = objectMapper.createObjectNode();
 
         fields.forEach(f -> {
-
+            f.setAccessible(true);
             try {
                 ObjectNode attribute = objectMapper.createObjectNode();
                 attribute.put("raw", f.get(document).toString());
                 attribute.put("encoded", String.valueOf(Math.abs(new Random().nextLong())));
-                credentialNode.set(f.getName(), attribute);
+                credentialNode.set(f.getName().toLowerCase(), attribute);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

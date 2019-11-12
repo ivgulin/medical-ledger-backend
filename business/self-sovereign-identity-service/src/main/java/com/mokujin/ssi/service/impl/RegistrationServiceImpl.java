@@ -1,7 +1,6 @@
 package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.exception.LedgerException;
 import com.mokujin.ssi.model.government.KnownIdentity;
 import com.mokujin.ssi.model.government.document.Document;
@@ -17,12 +16,15 @@ import com.mokujin.ssi.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hyperledger.indy.sdk.IndyException;
 import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ExecutionException;
 
 import static java.util.Objects.isNull;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
@@ -57,14 +59,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     private String governmentPhoto;
 
     @Override
-    @SneakyThrows
     public User register(UserRegistrationDetails details, String publicKey, String privateKey) {
 
-        ObjectNode config = objectMapper.createObjectNode();
-        config.put("id", publicKey);
-        ObjectNode credentials = objectMapper.createObjectNode();
-        credentials.put("key", privateKey);
-        Wallet userWallet = walletService.getOrCreateWallet(config.toString(), credentials.toString());
+        Wallet userWallet = walletService.getOrCreateWallet(publicKey, privateKey);
 
         Identity userIdentity = identityService.findByWallet(userWallet);
 
@@ -102,7 +99,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             log.error("Exception was thrown: " + e);
             throw new LedgerException("Smth went wrong :(");
         } finally {
-            userWallet.closeWallet().get();
+            try {
+                userWallet.closeWallet().get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return user;
     }
@@ -213,6 +214,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.info("'proverCreateCredentialRequestResult={}'", proverCreateCredentialRequestResult);
 
         String credential = credentialService.getCredential(document);
+        log.info("'credential={}'", credential);
 
         IssuerCreateCredentialResult issuerCreateCredentialResult = issuerCreateCredential(
                 government.getWallet(),

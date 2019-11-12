@@ -22,7 +22,7 @@ public class ValidationServiceImpl implements ValidationService {
         log.info("'validateNewbie' invoked with params'{}'", details);
 
         KnownIdentity knownIdentity = restTemplate
-                .postForObject("http://fake-government-service/identity/issue-credentials",
+                .postForObject("http://government-service/identity/issue-credentials",
                         details, KnownIdentity.class);
 
         log.info("'validateNewbie' returned value '{}'", knownIdentity);

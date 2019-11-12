@@ -3,14 +3,12 @@ package com.mokujin.ssi.model.government;
 
 import lombok.Data;
 
-import java.time.LocalDate;
-
 @Data
 public class PlaceOfResidence {
 
-    private LocalDate startDate;
+    private Long startDate;
 
-    private LocalDate endDate;
+    private Long endDate;
 
     private Address address;
 

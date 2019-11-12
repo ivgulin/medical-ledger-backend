@@ -3,8 +3,6 @@ package com.mokujin.ssi.model.government.document.impl;
 import com.mokujin.ssi.model.government.document.NationalDocument;
 import lombok.Data;
 
-import java.time.LocalDate;
-
 @Data
 public class NationalPassport implements NationalDocument {
 
@@ -14,7 +12,7 @@ public class NationalPassport implements NationalDocument {
 
     private String fatherName;
 
-    private LocalDate dateOfBirth;
+    private Long dateOfBirth;
 
     private String placeOfBirth;
 
@@ -24,6 +22,6 @@ public class NationalPassport implements NationalDocument {
 
     private String issuer;
 
-    private LocalDate dateOfIssue;
+    private Long dateOfIssue;
 
 }

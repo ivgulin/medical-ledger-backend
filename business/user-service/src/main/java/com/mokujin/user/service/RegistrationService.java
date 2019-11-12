@@ -9,6 +9,6 @@ public interface RegistrationService {
 
     ProcessedUserCredentials createWallet(UserCredentials userCredentials);
 
-    User registerUser(UserRegistrationDetails userRegistrationDetails);
+    User registerUser(UserRegistrationDetails userRegistrationDetails, String publicKey, String privateKey);
 
 }

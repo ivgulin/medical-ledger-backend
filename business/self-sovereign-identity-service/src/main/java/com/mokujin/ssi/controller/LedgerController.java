@@ -26,7 +26,6 @@ public class LedgerController {
     private final RegistrationService registrationService;
     private final DeletionService deletionService;
 
-
     @SneakyThrows
     @PostMapping("/get-wallet")
     public ResponseEntity getWallet(@RequestBody UserCredentials credentials) {
@@ -41,8 +40,8 @@ public class LedgerController {
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody UserRegistrationDetails details,
-                                         @RequestParam("publicKey") String publicKey,
-                                         @RequestParam("privateKey") String privateKey) {
+                                         @RequestParam("public") String publicKey,
+                                         @RequestParam("private") String privateKey) {
         log.info("'register' invoked with params'{}'", details);
 
         User user = registrationService.register(details, publicKey, privateKey);

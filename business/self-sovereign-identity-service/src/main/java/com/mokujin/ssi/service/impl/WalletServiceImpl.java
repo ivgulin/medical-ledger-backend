@@ -1,7 +1,10 @@
 package com.mokujin.ssi.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.exception.LedgerException;
 import com.mokujin.ssi.service.WalletService;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.indy.sdk.wallet.Wallet;
@@ -13,17 +16,25 @@ import static org.hyperledger.indy.sdk.wallet.Wallet.openWallet;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class WalletServiceImpl implements WalletService {
+
+    private final ObjectMapper objectMapper;
 
     @Override
     @SneakyThrows
-    public Wallet getOrCreateWallet(String config, String credentials) {
+    public Wallet getOrCreateWallet(String publicKey, String privateKey) {
+
+        ObjectNode config = objectMapper.createObjectNode();
+        config.put("id", publicKey);
+        ObjectNode credentials = objectMapper.createObjectNode();
+        credentials.put("key", privateKey);
         try {
-            return openWallet(config, credentials).get();
+            return openWallet(config.toString(), credentials.toString()).get();
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
-            createWallet(config, credentials).get();
-            return ofNullable(openWallet(config, credentials).get())
+            createWallet(config.toString(), credentials.toString()).get();
+            return ofNullable(openWallet(config.toString(), credentials.toString()).get())
                     .orElseThrow(() -> new LedgerException("Unable to create wallet."));
         }
     }

@@ -119,12 +119,7 @@ public class LedgerConfig {
 
     @SneakyThrows
     private Wallet getWallet(String id, String key) {
-        ObjectNode config = objectMapper.createObjectNode();
-        config.put("id", id);
-        ObjectNode credentials = objectMapper.createObjectNode();
-        credentials.put("key", key);
-
-        return walletService.getOrCreateWallet(config.toString(), credentials.toString());
+        return walletService.getOrCreateWallet(id, key);
     }
 
     @Bean("steward")
