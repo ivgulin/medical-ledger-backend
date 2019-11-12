@@ -11,9 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,7 +32,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .privateKey(encryptedPassword)
                 .build();
 
-        restTemplate.postForLocation("http://self-sovereign-identity-service/ledger/register",
+        restTemplate.postForLocation("http://self-sovereign-identity-service/wallet/create",
                 processedUserCredentials);
 
         return processedUserCredentials;

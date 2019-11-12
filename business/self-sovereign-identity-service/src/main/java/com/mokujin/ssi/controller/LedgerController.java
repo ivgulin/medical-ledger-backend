@@ -22,27 +22,14 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 public class LedgerController {
 
-    private final WalletService walletService;
     private final RegistrationService registrationService;
     private final DeletionService deletionService;
-
-    @SneakyThrows
-    @PostMapping("/get-wallet")
-    public ResponseEntity getWallet(@RequestBody UserCredentials credentials) {
-        log.info("'register' invoked with params'{}'", credentials);
-
-        Wallet wallet = walletService.getOrCreateWallet(credentials.getPublicKey(), credentials.getPrivateKey());
-        wallet.close();
-
-        log.info("getWallet is executed successfully.");
-        return new ResponseEntity(OK);
-    }
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody UserRegistrationDetails details,
                                          @RequestParam("public") String publicKey,
                                          @RequestParam("private") String privateKey) {
-        log.info("'register' invoked with params'{}'", details);
+        log.info("'register' invoked with params '{}'", details);
 
         User user = registrationService.register(details, publicKey, privateKey);
 
@@ -52,7 +39,7 @@ public class LedgerController {
 
     @PostMapping("/delete")
     public ResponseEntity delete(@RequestBody UserCredentials credentials) {
-        log.info("'delete' invoked with params'{}'", credentials);
+        log.info("'delete' invoked with params '{}'", credentials);
 
         deletionService.delete(credentials);
 
