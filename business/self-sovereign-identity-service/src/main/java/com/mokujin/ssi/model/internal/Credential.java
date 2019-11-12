@@ -1,7 +1,7 @@
 package com.mokujin.ssi.model.internal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mokujin.ssi.model.government.Document;
+import com.mokujin.ssi.model.government.document.Document;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +18,7 @@ public class Credential {
     @JsonProperty("referent")
     private String id;
 
-    @JsonProperty("referent")
+    @JsonProperty("attrs")
     private Document document;
 
     @JsonProperty("schema_id")

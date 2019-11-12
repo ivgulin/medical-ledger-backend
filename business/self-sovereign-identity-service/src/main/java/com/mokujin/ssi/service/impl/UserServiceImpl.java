@@ -1,17 +1,15 @@
 package com.mokujin.ssi.service.impl;
 
 import com.mokujin.ssi.model.exception.ResourceNotFoundException;
-import com.mokujin.ssi.model.government.NationalDocument;
-import com.mokujin.ssi.model.government.NationalPassport;
+import com.mokujin.ssi.model.government.document.NationalDocument;
+import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
-import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.model.user.response.User;
 import com.mokujin.ssi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

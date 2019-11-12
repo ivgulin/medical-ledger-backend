@@ -1,12 +1,12 @@
-package com.mokujin.user.model.government;
+package com.mokujin.ssi.model.government.document.impl;
 
+import com.mokujin.ssi.model.government.document.NationalDocument;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 @Data
-public class NationalPassport {
+public class NationalPassport implements NationalDocument {
 
     private String firstName;
 
@@ -18,14 +18,12 @@ public class NationalPassport {
 
     private String placeOfBirth;
 
-    private String imageName;
+    private String image;
 
     private String sex;
 
     private String issuer;
 
     private LocalDate dateOfIssue;
-
-    private Set<PlaceOfResidence> placesOfResidence;
 
 }

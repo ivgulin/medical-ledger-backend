@@ -1,8 +1,9 @@
 package com.mokujin.user.model;
 
-import com.mokujin.user.model.government.NationalNumber;
-import com.mokujin.user.model.government.NationalPassport;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class User {
@@ -13,10 +14,12 @@ public class User {
 
     private String fatherName;
 
-    private String image;
+    private String photo;
 
-    private NationalPassport nationalPassport;
+    private List<Credential> nationalCredentials = new ArrayList<>();
 
-    private NationalNumber nationalNumber;
+    private List<Contact> contacts = new ArrayList<>();
+
+    private List<Credential> credentials = new ArrayList<>();
 
 }

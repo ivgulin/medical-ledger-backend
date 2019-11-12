@@ -1,6 +1,6 @@
 package com.mokujin.ssi.service;
 
-import com.mokujin.ssi.model.government.Document;
+import com.mokujin.ssi.model.government.document.Document;
 
 public interface CredentialService {
 

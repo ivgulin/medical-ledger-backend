@@ -5,7 +5,7 @@ import com.mokujin.government.model.dto.NationalPassportDTO;
 import com.mokujin.government.model.dto.Person;
 import com.mokujin.government.model.entity.KnownIdentity;
 import com.mokujin.government.model.entity.NationalPassport;
-import com.mokujin.government.model.exception.extension.ResourceNotFoundException;
+import com.mokujin.government.model.exception.ResourceNotFoundException;
 import com.mokujin.government.repository.KnownIdentityRepository;
 import com.mokujin.government.service.FileService;
 import com.mokujin.government.service.KnownIdentityService;

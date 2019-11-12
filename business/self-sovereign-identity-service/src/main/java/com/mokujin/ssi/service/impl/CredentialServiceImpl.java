@@ -2,10 +2,9 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mokujin.ssi.model.government.Document;
+import com.mokujin.ssi.model.government.document.Document;
 import com.mokujin.ssi.service.CredentialService;
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

@@ -1,5 +1,7 @@
 package com.mokujin.ssi.model.government;
 
+import com.mokujin.ssi.model.government.document.impl.NationalNumber;
+import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import lombok.Data;
 
 @Data

@@ -61,7 +61,8 @@ public class IdentityServiceImpl implements IdentityService {
 
         List<Credential> credentialList = credentials.equals("[]")
                 ? new ArrayList<>()
-                : objectMapper.readValue(credentials, new TypeReference<List<Credential>>() {});
+                : objectMapper.readValue(credentials, new TypeReference<List<Credential>>() {
+        });
         identity.setCredentials(credentialList);
 
         return identity;

@@ -6,7 +6,7 @@ public interface FileService {
 
     String saveFile(MultipartFile file);
 
-    void  deleteFile(String path);
+    void deleteFile(String path);
 
     String getBase64EncodedFile(String path);
 

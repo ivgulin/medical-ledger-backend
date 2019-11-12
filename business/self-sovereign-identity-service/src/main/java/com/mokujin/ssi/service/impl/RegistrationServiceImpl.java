@@ -3,10 +3,10 @@ package com.mokujin.ssi.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.exception.LedgerException;
-import com.mokujin.ssi.model.government.Document;
 import com.mokujin.ssi.model.government.KnownIdentity;
-import com.mokujin.ssi.model.government.NationalNumber;
-import com.mokujin.ssi.model.government.NationalPassport;
+import com.mokujin.ssi.model.government.document.Document;
+import com.mokujin.ssi.model.government.document.impl.NationalNumber;
+import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
@@ -49,15 +49,12 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final Identity government;
 
     private final Pool pool;
-
-    @Value(value = "${ledger.government.photo}")
-    private String governmentPhoto;
-
     @Qualifier("passportSchema")
     private final Schema passportSchema;
-
     @Qualifier("nationalNumberSchema")
     private final Schema nationalNumberSchema;
+    @Value(value = "${ledger.government.photo}")
+    private String governmentPhoto;
 
     @Override
     @SneakyThrows

@@ -1,8 +1,8 @@
 package com.mokujin.government.service.impl;
 
 
-import com.mokujin.government.model.exception.extension.FileDeletionFailureException;
-import com.mokujin.government.model.exception.extension.FileUploadFailureException;
+import com.mokujin.government.model.exception.FileDeletionFailureException;
+import com.mokujin.government.model.exception.FileUploadFailureException;
 import com.mokujin.government.service.FileService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

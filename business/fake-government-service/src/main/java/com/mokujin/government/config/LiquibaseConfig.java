@@ -13,7 +13,7 @@ public class LiquibaseConfig {
     private final HikariDataSource datasource;
 
     @Bean
-    public SpringLiquibase liquibase(){
+    public SpringLiquibase liquibase() {
         SpringLiquibase springLiquibase = new SpringLiquibase();
 
         springLiquibase.setDataSource(datasource);

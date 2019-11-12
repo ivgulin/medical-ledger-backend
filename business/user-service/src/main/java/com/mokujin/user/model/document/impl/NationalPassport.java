@@ -1,12 +1,12 @@
-package com.mokujin.ssi.model.government;
+package com.mokujin.user.model.document.impl;
 
+import com.mokujin.user.model.document.NationalDocument;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 @Data
-public class NationalPassport extends NationalDocument {
+public class NationalPassport implements NationalDocument {
 
     private String firstName;
 
