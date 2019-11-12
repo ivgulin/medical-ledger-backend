@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import static java.util.Optional.of;
@@ -39,7 +40,8 @@ public class FileServiceImpl implements FileService {
             if (newFile) copy(multipartFile.getInputStream(), fileOutputStream);
             else throw new FileUploadFailureException();
         } catch (Exception e) {
-            log.error("Fail to save on disc multipart file, e = {}", e);
+            log.error("Fail to save on disc multipart file, e = " + e);
+            file.delete();
             throw new FileUploadFailureException();
         }
 
@@ -62,7 +64,7 @@ public class FileServiceImpl implements FileService {
         byte[] bytes = new byte[(int) file.length()];
         fileInputStreamReader.read(bytes);
 
-        return new String(Base64.encodeBase64(bytes), "UTF-8");
+        return new String(Base64.encodeBase64(bytes), StandardCharsets.UTF_8);
     }
 
     private String generateFileName() {
