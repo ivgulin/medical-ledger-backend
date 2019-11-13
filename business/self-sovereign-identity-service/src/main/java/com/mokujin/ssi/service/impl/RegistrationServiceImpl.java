@@ -59,6 +59,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private String governmentPhoto;
 
     @Override
+    @SneakyThrows
     public User register(UserRegistrationDetails details, String publicKey, String privateKey) {
 
         Wallet userWallet = walletService.getOrCreateWallet(publicKey, privateKey);
@@ -66,7 +67,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         Identity userIdentity = identityService.findByWallet(userWallet);
 
         User user;
-        if (!isNull(userIdentity.getVerinymDid())) {
+        if (!userIdentity.getCredentials().isEmpty()) {
+            userWallet.close();
             return userService.convert(userIdentity);
         }
 
@@ -99,11 +101,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             log.error("Exception was thrown: " + e);
             throw new LedgerException("Smth went wrong :(");
         } finally {
-            try {
-                userWallet.closeWallet().get();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            userWallet.close();
         }
         return user;
     }
@@ -174,35 +172,36 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.info("'nymRegisterIdentityPseudonymResponse={}'", nymRegisterIdentityPseudonymResponse);
     }
 
+    @SneakyThrows
     private void issueCredentials(String publicKey, Wallet userWallet,
                                   CreateAndStoreMyDidResult governmentPseudonym,
                                   KnownIdentity knownIdentity) {
 
-        String passportSchemaDefinitionId = passportSchema.getSchemaDefinitionId();
-        String passportSchemaDefinition = passportSchema.getSchemaDefinition();
-        NationalPassport nationalPassport = knownIdentity.getNationalPassport();
-
-        issueCredential(publicKey, userWallet, governmentPseudonym, passportSchemaDefinitionId,
-                passportSchemaDefinition, nationalPassport);
+        String masterCardId = proverCreateMasterSecret(userWallet, publicKey).get();
 
         String nationalNumberSchemaDefinitionId = nationalNumberSchema.getSchemaDefinitionId();
         String nationalNumberSchemaDefinition = nationalNumberSchema.getSchemaDefinition();
         NationalNumber nationalNumber = knownIdentity.getNationalNumber();
 
-        issueCredential(publicKey, userWallet, governmentPseudonym, nationalNumberSchemaDefinitionId,
-                nationalNumberSchemaDefinition, nationalNumber);
+        issueCredential(userWallet, governmentPseudonym, nationalNumberSchemaDefinitionId,
+                nationalNumberSchemaDefinition, nationalNumber, masterCardId);
 
+        String passportSchemaDefinitionId = passportSchema.getSchemaDefinitionId();
+        String passportSchemaDefinition = passportSchema.getSchemaDefinition();
+        NationalPassport nationalPassport = knownIdentity.getNationalPassport();
+
+        issueCredential(userWallet, governmentPseudonym, passportSchemaDefinitionId,
+                passportSchemaDefinition, nationalPassport, masterCardId);
     }
 
     @SneakyThrows
-    private void issueCredential(String publicKey, Wallet userWallet, CreateAndStoreMyDidResult governmentPseudonym,
-                                 String schemaDefinitionId, String schemaDefinition, Document document) {
+    private void issueCredential(Wallet userWallet, CreateAndStoreMyDidResult governmentPseudonym,
+                                 String schemaDefinitionId, String schemaDefinition,
+                                 Document document, String masterCardId) {
         String credentialOffer = issuerCreateCredentialOffer(
                 government.getWallet(),
                 schemaDefinitionId).get();
         log.info("'credentialOffer={}'", credentialOffer);
-
-        String masterCardId = proverCreateMasterSecret(userWallet, publicKey).get();
 
         ProverCreateCredentialRequestResult proverCreateCredentialRequestResult = proverCreateCredentialReq(
                 userWallet,

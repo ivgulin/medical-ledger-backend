@@ -25,18 +25,18 @@ public class DeletionServiceImpl implements DeletionService {
     public void delete(UserCredentials userCredentials) {
 
         try {
-            ObjectNode config = objectMapper.createObjectNode();
-            config.put("id", userCredentials.getPublicKey());
-            ObjectNode credentials = objectMapper.createObjectNode();
-            credentials.put("key", userCredentials.getPrivateKey());
-
-            if (!walletService.doesWalletExist(config.toString(), credentials.toString())) {
+            if (!walletService.doesWalletExist(userCredentials.getPublicKey(), userCredentials.getPrivateKey())) {
                 throw new ResourceNotFoundException("No wallet was found for this user");
             }
 
             Wallet userWallet = walletService
                     .getOrCreateWallet(userCredentials.getPublicKey(), userCredentials.getPrivateKey());
             userWallet.close();
+
+            ObjectNode config = objectMapper.createObjectNode();
+            config.put("id", userCredentials.getPublicKey());
+            ObjectNode credentials = objectMapper.createObjectNode();
+            credentials.put("key", userCredentials.getPrivateKey());
             deleteWallet(config.toString(), credentials.toString()).get();
 
         } catch (Exception e) {

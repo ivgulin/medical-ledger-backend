@@ -287,12 +287,13 @@ public class LedgerConfig {
 
         ArrayNode attributes = objectMapper.createArrayNode();
         attributes
+                .add("type")
                 .add("firstName")
                 .add("lastName")
                 .add("fatherName")
                 .add("dateOfBirth")
                 .add("placeOfBirth")
-                .add("imageName")
+                .add("image")
                 .add("sex")
                 .add("issuer")
                 .add("dateOfIssue");
@@ -313,6 +314,7 @@ public class LedgerConfig {
 
         ArrayNode attributes = objectMapper.createArrayNode();
         attributes
+                .add("type")
                 .add("number")
                 .add("registrationDate")
                 .add("issuer");

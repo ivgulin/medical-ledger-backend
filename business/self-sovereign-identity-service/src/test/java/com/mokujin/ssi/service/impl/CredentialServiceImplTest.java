@@ -30,6 +30,7 @@ class CredentialServiceImplTest {
     void getCredential_everyDocumentIsProvided_jsonStringIsReturned(Document document, String expected) {
 
         String credential = credentialService.getCredential(document);
+        System.out.println("credential = " + credential);
         String result = credential.replaceAll(",\"encoded\":\"[^\"]*\"", "");
 
         assertEquals(expected, result);
@@ -54,30 +55,9 @@ class CredentialServiceImplTest {
         ObjectNode nationalNumberNode = getNationalNumber(nationalNumber, someDate, issuer, objectMapper);
 
         return Stream.of(
-                Arguments.of(
-                        NationalPassport.builder()
-                                .firstName(name)
-                                .lastName(lastName)
-                                .fatherName(name)
-                                .dateOfBirth(someDate)
-                                .placeOfBirth(placeOfBirth)
-                                .image(image)
-                                .sex(sex)
-                                .issuer(issuer)
-                                .dateOfIssue(someDate)
-                                .build()
-                        ,
-                        passportNode.toString()
-                ),
-                Arguments.of(
-                        NationalNumber.builder()
-                                .number(nationalNumber)
-                                .registrationDate(someDate)
-                                .issuer(issuer)
-                                .build()
-                        ,
-                        nationalNumberNode.toString()
-                )
+                Arguments.of(new NationalPassport(name, lastName, name, someDate, placeOfBirth,
+                        image, sex, issuer, someDate), passportNode.toString()),
+                Arguments.of(new NationalNumber(nationalNumber, someDate, issuer), nationalNumberNode.toString())
         );
     }
 
@@ -89,14 +69,18 @@ class CredentialServiceImplTest {
         attributeOne.put("raw", nationalNumber);
 
         ObjectNode attributeTwo = objectMapper.createObjectNode();
-        attributeTwo.put("raw", someDate);
+        attributeTwo.put("raw", String.valueOf(someDate));
 
         ObjectNode attributeThree = objectMapper.createObjectNode();
         attributeThree.put("raw", issuer);
 
+        ObjectNode attributeFour = objectMapper.createObjectNode();
+        attributeFour.put("raw", "number");
+
         nationalNumberNode.set("number", attributeOne);
         nationalNumberNode.set("registrationDate", attributeTwo);
         nationalNumberNode.set("issuer", attributeThree);
+        nationalNumberNode.set("type", attributeFour);
         return nationalNumberNode;
     }
 
@@ -115,7 +99,7 @@ class CredentialServiceImplTest {
         attributeThree.put("raw", name);
 
         ObjectNode attributeFour = objectMapper.createObjectNode();
-        attributeFour.put("raw", someDate);
+        attributeFour.put("raw", String.valueOf(someDate));
 
         ObjectNode attributeFive = objectMapper.createObjectNode();
         attributeFive.put("raw", placeOfBirth);
@@ -130,7 +114,10 @@ class CredentialServiceImplTest {
         attributeEight.put("raw", issuer);
 
         ObjectNode attributeNine = objectMapper.createObjectNode();
-        attributeNine.put("raw", someDate);
+        attributeNine.put("raw", String.valueOf(someDate));
+
+        ObjectNode attributeTen = objectMapper.createObjectNode();
+        attributeTen.put("raw", "passport");
 
         passportNode.set("firstName", attributeOne);
         passportNode.set("lastName", attributeTwo);
@@ -141,6 +128,7 @@ class CredentialServiceImplTest {
         passportNode.set("sex", attributeSeven);
         passportNode.set("issuer", attributeEight);
         passportNode.set("dateOfIssue", attributeNine);
+        passportNode.set("type", attributeTen);
         return passportNode;
     }
 

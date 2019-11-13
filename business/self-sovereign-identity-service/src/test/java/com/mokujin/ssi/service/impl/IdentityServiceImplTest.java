@@ -100,11 +100,11 @@ class IdentityServiceImplTest {
                 document.put("number", nationalNumber);
                 document.put("registrationDate", registrationDate);
                 document.put("issuer", issuer);
-                String documentInString = document.toString();
+                document.put("type", "number");
 
                 ObjectNode credential = objectMapper.createObjectNode();
                 credential.put("referent", credentialId);
-                credential.put("attrs", documentInString);
+                credential.set("attrs", document);
                 credential.put("schema_id", schemaId);
                 credential.put("cred_def_id", credDefId);
 
@@ -120,13 +120,10 @@ class IdentityServiceImplTest {
 
         Identity expected = Identity.builder()
                 .verinymDid(verinymDid)
+                .wallet(wallet)
                 .credentials(Collections.singletonList(Credential.builder()
                         .id(credentialId)
-                        .document(NationalNumber.builder()
-                                .number(nationalNumber)
-                                .registrationDate(registrationDate)
-                                .issuer(issuer)
-                                .build())
+                        .document(new NationalNumber(nationalNumber, registrationDate, issuer))
                         .schemaId(schemaId)
                         .schemaDefinitionId(credDefId)
                         .build()))
@@ -141,8 +138,45 @@ class IdentityServiceImplTest {
                 .build();
 
         Identity result = identityService.findByWallet(wallet);
+        System.out.println("result = " + result);
 
         Assertions.assertEquals(expected, result);
+    }
 
+
+    @Test
+    void findByWallet_didsAndCredentialsDoNotExistInLedger_identityWithoutDidsAndCredentialsIsReturned() {
+
+        Wallet wallet = mock(Wallet.class);
+
+        new MockUp<Did>() {
+            @Mock
+            public CompletableFuture<String> getListMyDidsWithMeta(Wallet wallet1) {
+                ArrayNode contacts = objectMapper.createArrayNode();
+                CompletableFuture<String> future = new CompletableFuture<>();
+                future.complete(contacts.toString());
+                return future;
+            }
+        };
+
+        new MockUp<Anoncreds>() {
+            @Mock
+            public CompletableFuture<String> proverGetCredentials(Wallet wallet1, String filter) {
+                ArrayNode credentials = objectMapper.createArrayNode();
+                CompletableFuture<String> future = new CompletableFuture<>();
+                future.complete(credentials.toString());
+                return future;
+            }
+        };
+
+        Identity expected = Identity.builder()
+                .wallet(wallet)
+                .credentials(Collections.emptyList())
+                .pseudonyms(Collections.emptyList())
+                .build();
+
+        Identity result = identityService.findByWallet(wallet);
+
+        Assertions.assertEquals(expected, result);
     }
 }

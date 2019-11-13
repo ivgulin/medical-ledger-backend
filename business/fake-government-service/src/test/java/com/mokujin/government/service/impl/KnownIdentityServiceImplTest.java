@@ -1,9 +1,11 @@
 package com.mokujin.government.service.impl;
 
 import com.mokujin.government.model.dto.KnownIdentityDTO;
+import com.mokujin.government.model.dto.NationalNumberDTO;
 import com.mokujin.government.model.dto.NationalPassportDTO;
 import com.mokujin.government.model.dto.Person;
 import com.mokujin.government.model.entity.KnownIdentity;
+import com.mokujin.government.model.entity.NationalNumber;
 import com.mokujin.government.model.entity.NationalPassport;
 import com.mokujin.government.model.exception.ResourceNotFoundException;
 import com.mokujin.government.repository.KnownIdentityRepository;
@@ -85,7 +87,7 @@ class KnownIdentityServiceImplTest {
 
     @Test
     void getWithImage_personIsOk_knownIdentityIsReturned() {
-        String nationalNumber = "number";
+        String nationalNumberValue = "number";
         String fatherName = "fathername";
         String firstName = "first";
         String lastName = "last";
@@ -93,7 +95,7 @@ class KnownIdentityServiceImplTest {
         String imageName = "test";
 
         Person person = Person.builder()
-                .nationalNumber(nationalNumber)
+                .nationalNumber(nationalNumberValue)
                 .fatherName(fatherName)
                 .firstName(firstName)
                 .lastName(lastName)
@@ -108,8 +110,13 @@ class KnownIdentityServiceImplTest {
                 .imageName(imageName)
                 .build();
 
+        NationalNumber nationalNumber = NationalNumber.builder()
+                .number(nationalNumberValue)
+                .build();
+
         KnownIdentity knownIdentity = KnownIdentity.builder()
                 .nationalPassport(nationalPassport)
+                .nationalNumber(nationalNumber)
                 .build();
 
         when(knownIdentityRepository.findByNationalNumber_Number(person.getNationalNumber()))
@@ -121,6 +128,8 @@ class KnownIdentityServiceImplTest {
         NationalPassportDTO expectedPassport = new NationalPassportDTO(nationalPassport);
         expectedPassport.setImage(encodedImageValue);
         expected.setNationalPassport(expectedPassport);
+        NationalNumberDTO expectedNationalNumber = new NationalNumberDTO(nationalNumber);
+        expected.setNationalNumber(expectedNationalNumber);
 
         KnownIdentityDTO result = knownIdentityService.getWithImage(person);
 

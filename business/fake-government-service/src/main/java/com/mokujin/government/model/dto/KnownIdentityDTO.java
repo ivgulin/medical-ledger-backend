@@ -9,4 +9,9 @@ public class KnownIdentityDTO extends KnownIdentity {
     public KnownIdentityDTO(KnownIdentity knownIdentity) {
         super(knownIdentity.getId(), knownIdentity.getNationalPassport(), knownIdentity.getNationalNumber());
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

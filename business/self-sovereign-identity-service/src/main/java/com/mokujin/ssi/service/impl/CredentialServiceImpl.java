@@ -3,6 +3,7 @@ package com.mokujin.ssi.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.government.document.Document;
+import com.mokujin.ssi.model.government.document.NationalDocument;
 import com.mokujin.ssi.service.CredentialService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,12 @@ public class CredentialServiceImpl implements CredentialService {
     public String getCredential(Document document) {
         List<Field> fields = Arrays.stream(document.getClass().getDeclaredFields()).collect(Collectors.toList());
 
+        Class<?> superclass = document.getClass().getSuperclass() == NationalDocument.class
+                ? document.getClass().getSuperclass().getSuperclass()
+                : document.getClass().getSuperclass();
+
+        fields.addAll(Arrays.stream(superclass.getDeclaredFields()).collect(Collectors.toList()));
+
         ObjectNode credentialNode = objectMapper.createObjectNode();
 
         fields.forEach(f -> {
@@ -32,14 +39,7 @@ public class CredentialServiceImpl implements CredentialService {
             try {
                 ObjectNode attribute = objectMapper.createObjectNode();
                 Object value = f.get(document);
-
-                if (f.getType().isAssignableFrom(Long.class)) {
-                    attribute.put("raw", (Long) value);
-                } else if (f.getType().isAssignableFrom(Boolean.class)) {
-                    attribute.put("raw", (Boolean) value);
-                } else {
-                    attribute.put("raw", value.toString());
-                }
+                attribute.put("raw", value.toString());
                 attribute.put("encoded", String.valueOf(Math.abs(new Random().nextLong())));
                 credentialNode.set(f.getName(), attribute);
             } catch (IllegalAccessException e) {

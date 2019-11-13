@@ -41,9 +41,15 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @SneakyThrows
-    public boolean doesWalletExist(String config, String credentials) {
+    public boolean doesWalletExist(String publicKey, String privateKey) {
+
+        ObjectNode config = objectMapper.createObjectNode();
+        config.put("id", publicKey);
+        ObjectNode credentials = objectMapper.createObjectNode();
+        credentials.put("key", privateKey);
+
         try {
-            Wallet wallet = openWallet(config, credentials).get();
+            Wallet wallet = openWallet(config.toString(), credentials.toString()).get();
             wallet.closeWallet();
             return true;
         } catch (Exception e) {
