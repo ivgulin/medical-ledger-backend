@@ -31,9 +31,17 @@ public class CredentialServiceImpl implements CredentialService {
             f.setAccessible(true);
             try {
                 ObjectNode attribute = objectMapper.createObjectNode();
-                attribute.put("raw", f.get(document).toString());
+                Object value = f.get(document);
+
+                if (f.getType().isAssignableFrom(Long.class)) {
+                    attribute.put("raw", (Long) value);
+                } else if (f.getType().isAssignableFrom(Boolean.class)) {
+                    attribute.put("raw", (Boolean) value);
+                } else {
+                    attribute.put("raw", value.toString());
+                }
                 attribute.put("encoded", String.valueOf(Math.abs(new Random().nextLong())));
-                credentialNode.set(f.getName().toLowerCase(), attribute);
+                credentialNode.set(f.getName(), attribute);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

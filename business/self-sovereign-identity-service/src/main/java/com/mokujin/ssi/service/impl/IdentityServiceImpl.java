@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -56,7 +58,7 @@ public class IdentityServiceImpl implements IdentityService {
                         .build()).collect(Collectors.toList());
         identity.setPseudonyms(pseudonyms);
 
-        String credentials = Anoncreds.proverGetCredentials(wallet, "{}").get();
+        String credentials = proverGetCredentials(wallet, "{}").get();
         log.info("'credentials={}'", credentials);
 
         List<Credential> credentialList = credentials.equals("[]")

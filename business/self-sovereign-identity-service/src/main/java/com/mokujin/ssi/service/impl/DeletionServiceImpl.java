@@ -36,7 +36,7 @@ public class DeletionServiceImpl implements DeletionService {
 
             Wallet userWallet = walletService
                     .getOrCreateWallet(userCredentials.getPublicKey(), userCredentials.getPrivateKey());
-            userWallet.closeWallet().get();
+            userWallet.close();
             deleteWallet(config.toString(), credentials.toString()).get();
 
         } catch (Exception e) {

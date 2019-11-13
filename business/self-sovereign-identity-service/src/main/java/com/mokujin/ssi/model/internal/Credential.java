@@ -25,6 +25,6 @@ public class Credential {
     private String schemaId;
 
     @JsonProperty("cred_def_id")
-    private String schemaCredentialId;
+    private String schemaDefinitionId;
 
 }
