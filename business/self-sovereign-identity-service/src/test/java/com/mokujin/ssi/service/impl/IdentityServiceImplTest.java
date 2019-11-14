@@ -9,33 +9,24 @@ import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
 import com.mokujin.ssi.service.IdentityService;
-import lombok.SneakyThrows;
-
 import mockit.Mock;
 import mockit.MockUp;
 import org.hyperledger.indy.sdk.anoncreds.Anoncreds;
 import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.wallet.Wallet;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 class IdentityServiceImplTest {
 
-    private IdentityService identityService;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
-    private ObjectMapper objectMapper;
-
-    @BeforeEach
-    void setUp() {
-        objectMapper = new ObjectMapper();
-        identityService = new IdentityServiceImpl(objectMapper);
-    }
+    private IdentityService identityService = new IdentityServiceImpl(objectMapper);
 
     @Test
     void findByWallet_didsAndCredentialsExistInLedger_identityWithDidsAndCredentialsIsReturned() {
@@ -140,7 +131,7 @@ class IdentityServiceImplTest {
         Identity result = identityService.findByWallet(wallet);
         System.out.println("result = " + result);
 
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
 
@@ -177,6 +168,6 @@ class IdentityServiceImplTest {
 
         Identity result = identityService.findByWallet(wallet);
 
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 }

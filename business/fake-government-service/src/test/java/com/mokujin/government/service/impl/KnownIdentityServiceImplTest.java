@@ -11,12 +11,12 @@ import com.mokujin.government.model.exception.ResourceNotFoundException;
 import com.mokujin.government.repository.KnownIdentityRepository;
 import com.mokujin.government.service.FileService;
 import com.mokujin.government.service.KnownIdentityService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
@@ -38,13 +38,8 @@ class KnownIdentityServiceImplTest {
     @Mock
     private FileService fileService;
 
-    private KnownIdentityService knownIdentityService;
-
-
-    @BeforeEach
-    void setUp() {
-        knownIdentityService = new KnownIdentityServiceImpl(knownIdentityRepository, fileService);
-    }
+    @InjectMocks
+    private KnownIdentityServiceImpl knownIdentityService;
 
     @Test
     void save_knownIdentityIsOk_savedKnownIdentityIsReturned() {

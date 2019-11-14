@@ -16,7 +16,6 @@ import com.mokujin.ssi.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.hyperledger.indy.sdk.IndyException;
 import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
@@ -24,9 +23,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ExecutionException;
-
-import static java.util.Objects.isNull;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
 import static org.hyperledger.indy.sdk.anoncreds.AnoncredsResults.IssuerCreateCredentialResult;
 import static org.hyperledger.indy.sdk.anoncreds.AnoncredsResults.ProverCreateCredentialRequestResult;
@@ -76,7 +72,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         Wallet governmentWallet = government.getWallet();
 
         try {
-
             CreateAndStoreMyDidResult governmentPseudonym = createAndStoreMyDid(
                     governmentWallet,
                     "{}")
@@ -107,42 +102,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @SneakyThrows
-    private void exchangeContacts(Identity userIdentity, KnownIdentity knownIdentity, Wallet governmentWallet,
-                                  CreateAndStoreMyDidResult governmentPseudonym,
-                                  CreateAndStoreMyDidResult userForGovernmentPseudonym) {
-        Contact trustAnchorContactForUser = Contact.builder()
-                .contactName("Government")
-                .photo(governmentPhoto)
-                .build();
-        String trustAnchorContactForUserJson = objectMapper.writeValueAsString(trustAnchorContactForUser);
-        Did.setDidMetadata(userIdentity.getWallet(), userForGovernmentPseudonym.getDid(), trustAnchorContactForUserJson).get();
-
-        String firstName = knownIdentity.getNationalPassport().getFirstName();
-        String lastName = knownIdentity.getNationalPassport().getLastName();
-        String fatherName = knownIdentity.getNationalPassport().getFatherName();
-        Contact userContactForTrustAnchor = Contact.builder()
-                .contactName(lastName + " " + firstName + " " + fatherName)
-                .photo(knownIdentity.getNationalPassport().getImage())
-                .build();
-        String stewardContactForTrustAnchorJson = objectMapper.writeValueAsString(userContactForTrustAnchor);
-        Did.setDidMetadata(governmentWallet, governmentPseudonym.getDid(), stewardContactForTrustAnchorJson).get();
-
-        userIdentity.addPseudonym(Pseudonym.builder()
-                .pseudonymDid(userForGovernmentPseudonym.getDid())
-                .contact(trustAnchorContactForUser)
-                .build());
-
-        government.addPseudonym(Pseudonym.builder()
-                .pseudonymDid(governmentPseudonym.getDid())
-                .contact(userContactForTrustAnchor)
-                .build());
-    }
-
-    @SneakyThrows
-    private void establishUserConnection(Identity trustAnchor,
-                                         CreateAndStoreMyDidResult trustAnchorPseudonym,
-                                         CreateAndStoreMyDidResult userForTrustAnchorPseudonym) {
-
+    void establishUserConnection(Identity trustAnchor,
+                                 CreateAndStoreMyDidResult trustAnchorPseudonym,
+                                 CreateAndStoreMyDidResult userForTrustAnchorPseudonym) {
         String nymRegisterTrustAnchorPseudonym = buildNymRequest(
                 trustAnchor.getVerinymDid(),
                 userForTrustAnchorPseudonym.getDid(),
@@ -173,31 +135,63 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @SneakyThrows
-    private void issueCredentials(String publicKey, Wallet userWallet,
-                                  CreateAndStoreMyDidResult governmentPseudonym,
-                                  KnownIdentity knownIdentity) {
+    void exchangeContacts(Identity userIdentity, KnownIdentity knownIdentity, Wallet governmentWallet,
+                          CreateAndStoreMyDidResult governmentPseudonym,
+                          CreateAndStoreMyDidResult userForGovernmentPseudonym) {
+        Contact trustAnchorContactForUser = Contact.builder()
+                .contactName("Government")
+                .photo(governmentPhoto)
+                .build();
+        String trustAnchorContactForUserJson = objectMapper.writeValueAsString(trustAnchorContactForUser);
+        Did.setDidMetadata(userIdentity.getWallet(), userForGovernmentPseudonym.getDid(), trustAnchorContactForUserJson).get();
 
-        String masterCardId = proverCreateMasterSecret(userWallet, publicKey).get();
+        String firstName = knownIdentity.getNationalPassport().getFirstName();
+        String lastName = knownIdentity.getNationalPassport().getLastName();
+        String fatherName = knownIdentity.getNationalPassport().getFatherName();
+        Contact userContactForTrustAnchor = Contact.builder()
+                .contactName(lastName + " " + firstName + " " + fatherName)
+                .photo(knownIdentity.getNationalPassport().getImage())
+                .build();
+        String stewardContactForTrustAnchorJson = objectMapper.writeValueAsString(userContactForTrustAnchor);
+        Did.setDidMetadata(governmentWallet, governmentPseudonym.getDid(), stewardContactForTrustAnchorJson).get();
+
+        userIdentity.addPseudonym(Pseudonym.builder()
+                .pseudonymDid(userForGovernmentPseudonym.getDid())
+                .contact(trustAnchorContactForUser)
+                .build());
+
+        government.addPseudonym(Pseudonym.builder()
+                .pseudonymDid(governmentPseudonym.getDid())
+                .contact(userContactForTrustAnchor)
+                .build());
+    }
+
+    @SneakyThrows
+    void issueCredentials(String publicKey, Wallet userWallet,
+                          CreateAndStoreMyDidResult governmentPseudonym,
+                          KnownIdentity knownIdentity) {
+
+        String masterSecretId = proverCreateMasterSecret(userWallet, publicKey).get();
 
         String nationalNumberSchemaDefinitionId = nationalNumberSchema.getSchemaDefinitionId();
         String nationalNumberSchemaDefinition = nationalNumberSchema.getSchemaDefinition();
         NationalNumber nationalNumber = knownIdentity.getNationalNumber();
 
-        issueCredential(userWallet, governmentPseudonym, nationalNumberSchemaDefinitionId,
-                nationalNumberSchemaDefinition, nationalNumber, masterCardId);
+        this.issueCredential(userWallet, governmentPseudonym, nationalNumberSchemaDefinitionId,
+                nationalNumberSchemaDefinition, nationalNumber, masterSecretId);
 
         String passportSchemaDefinitionId = passportSchema.getSchemaDefinitionId();
         String passportSchemaDefinition = passportSchema.getSchemaDefinition();
         NationalPassport nationalPassport = knownIdentity.getNationalPassport();
 
-        issueCredential(userWallet, governmentPseudonym, passportSchemaDefinitionId,
-                passportSchemaDefinition, nationalPassport, masterCardId);
+        this.issueCredential(userWallet, governmentPseudonym, passportSchemaDefinitionId,
+                passportSchemaDefinition, nationalPassport, masterSecretId);
     }
 
     @SneakyThrows
-    private void issueCredential(Wallet userWallet, CreateAndStoreMyDidResult governmentPseudonym,
-                                 String schemaDefinitionId, String schemaDefinition,
-                                 Document document, String masterCardId) {
+    void issueCredential(Wallet userWallet, CreateAndStoreMyDidResult governmentPseudonym,
+                         String schemaDefinitionId, String schemaDefinition,
+                         Document document, String masterSecretId) {
         String credentialOffer = issuerCreateCredentialOffer(
                 government.getWallet(),
                 schemaDefinitionId).get();
@@ -208,7 +202,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 governmentPseudonym.getDid(),
                 credentialOffer,
                 schemaDefinition,
-                masterCardId)
+                masterSecretId)
                 .get();
         log.info("'proverCreateCredentialRequestResult={}'", proverCreateCredentialRequestResult);
 

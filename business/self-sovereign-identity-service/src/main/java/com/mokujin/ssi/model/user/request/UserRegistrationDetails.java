@@ -1,10 +1,14 @@
 package com.mokujin.ssi.model.user.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserRegistrationDetails {
 
     private String nationalNumber;
@@ -15,6 +19,6 @@ public class UserRegistrationDetails {
 
     private String fatherName;
 
-    private Date dateOfBirth;
+    private Long dateOfBirth;
 
 }

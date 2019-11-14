@@ -19,7 +19,6 @@ class FileServiceImplTest {
 
     private final String RESOURCES_PATH = "src/test/resources/";
 
-
     @BeforeEach
     void setUp() {
         Whitebox.setInternalState(fileService, "fileFolderPath", RESOURCES_PATH);

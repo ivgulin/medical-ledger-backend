@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.concurrent.CompletableFuture;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -61,8 +63,8 @@ class DeletionServiceImplTest {
 
         new MockUp<Wallet>() {
             @mockit.Mock
-            public void deleteWallet(String config, String credentials) {
-                log.debug("In mock.");
+            public CompletableFuture<Void> deleteWallet(String config, String credentials) {
+                return CompletableFuture.runAsync(() -> log.debug("In mock."));
             }
         };
 

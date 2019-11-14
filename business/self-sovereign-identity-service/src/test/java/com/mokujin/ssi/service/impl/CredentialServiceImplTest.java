@@ -17,13 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CredentialServiceImplTest {
 
-    private CredentialService credentialService;
-
-    @BeforeEach
-    void setUp() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        credentialService = new CredentialServiceImpl(objectMapper);
-    }
+    private CredentialService credentialService = new CredentialServiceImpl(new ObjectMapper());
 
     @ParameterizedTest
     @MethodSource("provideDocumentsAndResultExpectations")
