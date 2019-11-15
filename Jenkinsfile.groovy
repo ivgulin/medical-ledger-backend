@@ -65,21 +65,21 @@ pipeline {
                         if (gitChanges.contains(serviceName)) {
 
                             int checkIfContainerExists = sh(
-                                    script: 'sudo docker ps -f name=' + serviceName + ' | grep -w ' + serviceName + ' | wc -l',
+                                    script: 'docker ps -f name=' + serviceName + ' | grep -w ' + serviceName + ' | wc -l',
                                     returnStdout: true
                             ).trim()
 
                             if (checkIfContainerExists != 0) {
-                                removeContainerCommand = 'sudo docker rm \$(sudo docker stop ' + serviceName + ')'
+                                removeContainerCommand = 'docker rm \$(docker stop ' + serviceName + ')'
                                 println removeContainerCommand
                                 sh removeContainerCommand
 
-                                removeImageCommand = 'sudo docker rmi medical-ledger/' + serviceName
+                                removeImageCommand = 'docker rmi medical-ledger/' + serviceName
                                 println removeImageCommand
                                 sh removeImageCommand
                             }
 
-                            buildCommand = 'sudo docker build -t medical-ledger/' + serviceName + ' -f ' + modules[i].dockerPath + ' .'
+                            buildCommand = 'docker build -t medical-ledger/' + serviceName + ' -f ' + modules[i].dockerPath + ' .'
                             println buildCommand
                             sh buildCommand
 
@@ -89,7 +89,7 @@ pipeline {
                             if (serviceName.equals("self-sovereign-identity-service"))
                                 volume = " -v /var/ledger:/var/ledger"
 
-                            runCommand = 'sudo docker run --name ' + serviceName + volume + ' --net=host medical-ledger/' + serviceName + ' &'
+                            runCommand = 'docker run -d --name ' + serviceName + volume + ' --net=host medical-ledger/' + serviceName
                             println runCommand
                             sh runCommand
                         }
