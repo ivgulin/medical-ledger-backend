@@ -1,11 +1,12 @@
 package com.mokujin.government.service.impl;
 
 import com.mokujin.government.model.dto.KnownIdentityDTO;
+import com.mokujin.government.model.dto.NationalNumberDTO;
 import com.mokujin.government.model.dto.NationalPassportDTO;
 import com.mokujin.government.model.dto.Person;
 import com.mokujin.government.model.entity.KnownIdentity;
 import com.mokujin.government.model.entity.NationalPassport;
-import com.mokujin.government.model.exception.extension.ResourceNotFoundException;
+import com.mokujin.government.model.exception.ResourceNotFoundException;
 import com.mokujin.government.repository.KnownIdentityRepository;
 import com.mokujin.government.service.FileService;
 import com.mokujin.government.service.KnownIdentityService;
@@ -17,8 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class KnownIdentityServiceImpl implements KnownIdentityService {
 
     private final KnownIdentityRepository knownIdentityRepository;
@@ -39,6 +40,7 @@ public class KnownIdentityServiceImpl implements KnownIdentityService {
 
         KnownIdentity knownIdentity = knownIdentityRepository.findById(identityId)
                 .orElseThrow(() -> new ResourceNotFoundException("Identity hasn't been found."));
+        log.info("knownIdentity has been found in uploadPhoto: '{}'", knownIdentity);
 
         String fileName = fileService.saveFile(multipartFile);
 
@@ -62,14 +64,15 @@ public class KnownIdentityServiceImpl implements KnownIdentityService {
                         && i.getNationalPassport().getFatherName().equals(person.getFatherName())
                         && i.getNationalPassport().getDateOfBirth().equals(person.getDateOfBirth()))
                 .orElseThrow(() -> new ResourceNotFoundException("Identity hasn't been found.")));
+        log.info("knownIdentity has been found in getWithImage: '{}'", knownIdentity);
 
         NationalPassportDTO nationalPassport = new NationalPassportDTO(knownIdentity.getNationalPassport());
-
         String base64EncodedImage = fileService.getBase64EncodedFile(nationalPassport.getImageName());
-
         nationalPassport.setImage(base64EncodedImage);
-
         knownIdentity.setNationalPassport(nationalPassport);
+
+        NationalNumberDTO nationalNumber = new NationalNumberDTO(knownIdentity.getNationalNumber());
+        knownIdentity.setNationalNumber(nationalNumber);
 
         return knownIdentity;
     }

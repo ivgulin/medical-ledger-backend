@@ -23,9 +23,9 @@ zuul:
     documentation-service:
       path: /docs/**
       serviceId: documentation-service
-    fake-government-service:
+    government-service:
       path: /gov/**
-      serviceId: fake-government-service
+      serviceId: government-service
 
 auth:
   server:
@@ -38,3 +38,6 @@ logging:
     org:
       springframework:
         web: TRACE
+
+ribbon:
+  ReadTimeout: 60000

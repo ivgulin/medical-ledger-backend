@@ -10,7 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 
 @Data
 @Entity
@@ -26,7 +25,7 @@ public class NationalNumber {
 
     @NotNull
     @Column(name = "registration_date")
-    private LocalDate registrationDate;
+    private Long registrationDate;
 
     @NotNull
     private String issuer;

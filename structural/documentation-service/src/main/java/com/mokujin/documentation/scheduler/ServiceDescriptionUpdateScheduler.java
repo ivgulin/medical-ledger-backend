@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokujin.documentation.config.ExcludedServicesNames;
 import com.mokujin.documentation.service.ServiceDefinitionsContext;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,25 +19,19 @@ import java.util.Optional;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ServiceDescriptionUpdateScheduler {
 
     private static final String DEFAULT_SWAGGER_URL = "/v2/api-docs";
     private static final String KEY_SWAGGER_URL = "swagger_url";
 
-    @Autowired
-    private DiscoveryClient discoveryClient;
+    private final DiscoveryClient discoveryClient;
 
-    @Autowired
-    private ExcludedServicesNames excludedServices;
+    private final ExcludedServicesNames excludedServices;
 
     private final RestTemplate template;
 
-    public ServiceDescriptionUpdateScheduler() {
-        this.template = new RestTemplate();
-    }
-
-    @Autowired
-    private ServiceDefinitionsContext definitionContext;
+    private final ServiceDefinitionsContext definitionContext;
 
     @Scheduled(fixedDelayString = "${swagger.config.refreshrate}")
     public void refreshSwaggerConfigurations() {

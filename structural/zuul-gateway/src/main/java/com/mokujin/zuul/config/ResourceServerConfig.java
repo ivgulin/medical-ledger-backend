@@ -28,7 +28,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/docs/**").permitAll()
-                .antMatchers(POST, "/auth/**").anonymous()
+                .antMatchers(POST, "/auth/**", "/user/registration/create-wallet").anonymous()
                 .anyRequest().authenticated();
     }
 

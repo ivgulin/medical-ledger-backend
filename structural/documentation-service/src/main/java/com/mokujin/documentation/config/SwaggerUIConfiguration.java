@@ -1,7 +1,7 @@
 package com.mokujin.documentation.config;
 
 import com.mokujin.documentation.service.ServiceDefinitionsContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
+@RequiredArgsConstructor
 public class SwaggerUIConfiguration {
 
-    @Autowired
-    private ServiceDefinitionsContext definitionContext;
+    private final ServiceDefinitionsContext definitionContext;
 
     @Bean
     public RestTemplate configureTempalte() {

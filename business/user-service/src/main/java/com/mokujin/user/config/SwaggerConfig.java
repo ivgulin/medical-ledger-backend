@@ -26,6 +26,7 @@ public class SwaggerConfig {
                 .build()
                 .apiInfo(metaData());
     }
+
     private ApiInfo metaData() {
         return new ApiInfoBuilder()
                 .title("User-service REST API")

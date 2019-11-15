@@ -4,7 +4,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,7 +35,7 @@ public class NationalPassport {
 
     @NotNull
     @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
+    private Long dateOfBirth;
 
     @NotNull
     @Column(name = "place_of_birth")
@@ -53,7 +52,7 @@ public class NationalPassport {
 
     @NotNull
     @Column(name = "date_of_issue")
-    private LocalDate dateOfIssue;
+    private Long dateOfIssue;
 
     @NotNull
     @Setter(AccessLevel.PRIVATE)

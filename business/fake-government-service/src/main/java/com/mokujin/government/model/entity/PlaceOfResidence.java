@@ -6,7 +6,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 
 @Data
 @Entity
@@ -22,10 +21,10 @@ public class PlaceOfResidence {
 
     @NotNull
     @Column(name = "start_date")
-    private LocalDate startDate;
+    private Long startDate;
 
     @Column(name = "end_date")
-    private LocalDate endDate;
+    private Long endDate;
 
     @NotNull
     @OneToOne(cascade = CascadeType.ALL)

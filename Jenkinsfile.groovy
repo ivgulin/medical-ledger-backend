@@ -13,9 +13,9 @@ def documentationService = new Structure(
 def userService = new Structure(
         "user-service",
         "business/user-service/build/Dockerfile")
-def testService = new Structure(
-        "test-service",
-        "business/test-service/build/Dockerfile")
+def selfSovereignIdentityService = new Structure(
+        "self-sovereign-identity-service",
+        "business/self-sovereign-identity-service/build/Dockerfile")
 def governmentService = new Structure(
         "government-service",
         "business/fake-government-service/build/Dockerfile")
@@ -25,7 +25,7 @@ def modules = [
         zuulGateway,
         authService,
         userService,
-        testService,
+        selfSovereignIdentityService,
         governmentService,
         documentationService
 ]
@@ -83,7 +83,13 @@ pipeline {
                             println buildCommand
                             sh buildCommand
 
-                            runCommand = 'sudo docker run --name ' + serviceName + ' --net=host medical-ledger/' + serviceName + ' &'
+                            String volume = ""
+                            if (serviceName.equals("government-service"))
+                                volume = " -v /var/government:/var/government"
+                            if (serviceName.equals("self-sovereign-identity-service"))
+                                volume = " -v /var/ledger:/var/ledger"
+
+                            runCommand = 'sudo docker run --name ' + serviceName + volume + ' --net=host medical-ledger/' + serviceName + ' &'
                             println runCommand
                             sh runCommand
                         }
