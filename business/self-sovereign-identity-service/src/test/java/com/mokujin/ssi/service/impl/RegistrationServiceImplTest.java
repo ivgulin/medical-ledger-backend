@@ -26,7 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +88,7 @@ class RegistrationServiceImplTest {
         registrationService = new RegistrationServiceImpl(new ObjectMapper(), validationService, walletService,
                 identityService, userService, credentialService, government, pool, passportSchema, nationalNumberSchema);
 
-        Whitebox.setInternalState(registrationService, "governmentPhoto", "photo");
+        ReflectionTestUtils.setField(registrationService, "governmentPhoto", "photo");
     }
 
     @Test

@@ -3,10 +3,8 @@ package com.mokujin.user.model.document.impl;
 import com.mokujin.user.model.document.NationalDocument;
 import lombok.Data;
 
-import java.time.LocalDate;
-
 @Data
-public class NationalPassport implements NationalDocument {
+public class NationalPassport extends NationalDocument {
 
     private String firstName;
 
@@ -14,7 +12,7 @@ public class NationalPassport implements NationalDocument {
 
     private String fatherName;
 
-    private LocalDate dateOfBirth;
+    private Long dateOfBirth;
 
     private String placeOfBirth;
 
@@ -24,6 +22,24 @@ public class NationalPassport implements NationalDocument {
 
     private String issuer;
 
-    private LocalDate dateOfIssue;
+    private Long dateOfIssue;
+
+    public NationalPassport(String firstName, String lastName, String fatherName, Long dateOfBirth,
+                            String placeOfBirth, String image, String sex, String issuer, Long dateOfIssue) {
+        super("passport");
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.fatherName = fatherName;
+        this.dateOfBirth = dateOfBirth;
+        this.placeOfBirth = placeOfBirth;
+        this.image = image;
+        this.sex = sex;
+        this.issuer = issuer;
+        this.dateOfIssue = dateOfIssue;
+    }
+
+    public NationalPassport() {
+        super("passport");
+    }
 
 }

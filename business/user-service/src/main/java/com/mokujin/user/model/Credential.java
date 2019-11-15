@@ -12,6 +12,6 @@ public class Credential {
 
     private String schemaId;
 
-    private String schemaCredentialId;
+    private String schemaDefinitionId;
 
 }

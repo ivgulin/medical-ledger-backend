@@ -2,7 +2,6 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mokujin.ssi.model.exception.LedgerException;
 import com.mokujin.ssi.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -10,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
 
-import static java.util.Optional.ofNullable;
 import static org.hyperledger.indy.sdk.wallet.Wallet.createWallet;
 import static org.hyperledger.indy.sdk.wallet.Wallet.openWallet;
 

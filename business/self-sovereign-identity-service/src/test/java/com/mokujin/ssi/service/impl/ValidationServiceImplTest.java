@@ -2,8 +2,6 @@ package com.mokujin.ssi.service.impl;
 
 import com.mokujin.ssi.model.government.KnownIdentity;
 import com.mokujin.ssi.model.user.request.UserRegistrationDetails;
-import com.mokujin.ssi.service.ValidationService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

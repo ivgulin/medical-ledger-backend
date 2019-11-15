@@ -10,7 +10,6 @@ import com.mokujin.ssi.service.IdentityService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.hyperledger.indy.sdk.anoncreds.Anoncreds;
 import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
+import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.proverGetCredentials;
 
 @Slf4j
 @Service
@@ -66,6 +65,7 @@ public class IdentityServiceImpl implements IdentityService {
                 : objectMapper.readValue(credentials, new TypeReference<List<Credential>>() {
         });
         identity.setCredentials(credentialList);
+        log.info("identity = '{}'", identity);
 
         return identity;
     }

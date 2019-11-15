@@ -6,11 +6,8 @@ import com.mokujin.ssi.model.user.request.UserRegistrationDetails;
 import com.mokujin.ssi.model.user.response.User;
 import com.mokujin.ssi.service.DeletionService;
 import com.mokujin.ssi.service.RegistrationService;
-import com.mokujin.ssi.service.WalletService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +26,7 @@ public class LedgerController {
     public ResponseEntity<User> register(@RequestBody UserRegistrationDetails details,
                                          @RequestParam("public") String publicKey,
                                          @RequestParam("private") String privateKey) {
-        log.info("'register' invoked with params '{}'", details);
+        log.info("'register' invoked with params '{}, {}, {}'", details, publicKey, privateKey);
 
         User user = registrationService.register(details, publicKey, privateKey);
 

@@ -6,7 +6,6 @@ import com.mokujin.ssi.model.government.document.Document;
 import com.mokujin.ssi.model.government.document.impl.NationalNumber;
 import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.service.CredentialService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,17 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CredentialServiceImplTest {
 
     private CredentialService credentialService = new CredentialServiceImpl(new ObjectMapper());
-
-    @ParameterizedTest
-    @MethodSource("provideDocumentsAndResultExpectations")
-    void getCredential_everyDocumentIsProvided_jsonStringIsReturned(Document document, String expected) {
-
-        String credential = credentialService.getCredential(document);
-        System.out.println("credential = " + credential);
-        String result = credential.replaceAll(",\"encoded\":\"[^\"]*\"", "");
-
-        assertEquals(expected, result);
-    }
 
     private static Stream<Arguments> provideDocumentsAndResultExpectations() {
 
@@ -124,6 +112,17 @@ class CredentialServiceImplTest {
         passportNode.set("dateOfIssue", attributeNine);
         passportNode.set("type", attributeTen);
         return passportNode;
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideDocumentsAndResultExpectations")
+    void getCredential_everyDocumentIsProvided_jsonStringIsReturned(Document document, String expected) {
+
+        String credential = credentialService.getCredential(document);
+        System.out.println("credential = " + credential);
+        String result = credential.replaceAll(",\"encoded\":\"[^\"]*\"", "");
+
+        assertEquals(expected, result);
     }
 
 }

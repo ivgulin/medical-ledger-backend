@@ -11,8 +11,4 @@ public class NationalDocument extends Document {
         super(type);
     }
 
-    @Override
-    public void setType(String type) {
-        super.setType(type);
-    }
 }

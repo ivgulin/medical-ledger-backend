@@ -38,3 +38,6 @@ logging:
     org:
       springframework:
         web: TRACE
+
+ribbon:
+  ReadTimeout: 60000

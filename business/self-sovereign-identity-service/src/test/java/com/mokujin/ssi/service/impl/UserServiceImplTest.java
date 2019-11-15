@@ -9,7 +9,6 @@ import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
 import com.mokujin.ssi.model.user.response.User;
 import com.mokujin.ssi.service.UserService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

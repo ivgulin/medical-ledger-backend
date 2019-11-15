@@ -3,15 +3,24 @@ package com.mokujin.user.model.document.impl;
 import com.mokujin.user.model.document.NationalDocument;
 import lombok.Data;
 
-import java.time.LocalDate;
-
 @Data
-public class NationalNumber implements NationalDocument {
+public class NationalNumber extends NationalDocument {
 
     private String number;
 
-    private LocalDate registrationDate;
+    private Long registrationDate;
 
     private String issuer;
+
+    public NationalNumber(String number, Long registrationDate, String issuer) {
+        super("number");
+        this.number = number;
+        this.registrationDate = registrationDate;
+        this.issuer = issuer;
+    }
+
+    public NationalNumber() {
+        super("number");
+    }
 
 }

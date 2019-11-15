@@ -1,4 +1,14 @@
 package com.mokujin.user.model.document;
 
-public interface NationalDocument extends Document {
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class NationalDocument extends Document {
+
+    public NationalDocument(String type) {
+        super(type);
+    }
+
 }

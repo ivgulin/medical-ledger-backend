@@ -21,7 +21,7 @@ public class RegistrationController {
     private final RegistrationService registrationService;
 
     @PostMapping("/create-wallet")
-    public ResponseEntity<ProcessedUserCredentials> createWallet(@RequestBody  @Valid UserCredentials userCredentials) {
+    public ResponseEntity<ProcessedUserCredentials> createWallet(@RequestBody @Valid UserCredentials userCredentials) {
         log.info("'createWallet' is invoked: '{}'", userCredentials);
 
         ProcessedUserCredentials processedUserCredentials = registrationService.createWallet(userCredentials);
@@ -34,7 +34,7 @@ public class RegistrationController {
     public ResponseEntity<User> createUser(@RequestBody @Valid UserRegistrationDetails userDetails,
                                            @RequestHeader("Public-Key") String publicKey,
                                            @RequestHeader("Private-Key") String privateKey) {
-        log.info("'createUser' is invoked: '{}'", userDetails);
+        log.info("'createUser' is invoked: '{}, {}, {}'", userDetails, publicKey, privateKey);
 
         User user = registrationService.registerUser(userDetails, publicKey, privateKey);
 

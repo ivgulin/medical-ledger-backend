@@ -4,8 +4,6 @@ import com.mokujin.user.model.ProcessedUserCredentials;
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.UserCredentials;
 import com.mokujin.user.model.UserRegistrationDetails;
-import com.mokujin.user.service.RegistrationService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

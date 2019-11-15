@@ -5,8 +5,8 @@ import com.mokujin.government.model.exception.FileUploadFailureException;
 import com.mokujin.government.service.FileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,7 +21,7 @@ class FileServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        Whitebox.setInternalState(fileService, "fileFolderPath", RESOURCES_PATH);
+        ReflectionTestUtils.setField(fileService, "fileFolderPath", RESOURCES_PATH);
     }
 
     @Test
