@@ -1,7 +1,8 @@
 package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mokujin.ssi.model.exception.LedgerException;
+import com.mokujin.ssi.model.exception.BusinessException;
+import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.government.KnownIdentity;
 import com.mokujin.ssi.model.government.document.Document;
 import com.mokujin.ssi.model.government.document.impl.NationalNumber;
@@ -30,6 +31,7 @@ import static org.hyperledger.indy.sdk.did.Did.createAndStoreMyDid;
 import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
 import static org.hyperledger.indy.sdk.ledger.Ledger.buildNymRequest;
 import static org.hyperledger.indy.sdk.ledger.Ledger.signAndSubmitRequest;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Service
@@ -68,10 +70,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             return userService.convert(userIdentity);
         }
 
-        KnownIdentity knownIdentity = validationService.validateNewbie(details);
         Wallet governmentWallet = government.getWallet();
 
         try {
+            KnownIdentity knownIdentity = validationService.validateNewbie(details);
+
             CreateAndStoreMyDidResult governmentPseudonym = createAndStoreMyDid(
                     governmentWallet,
                     "{}")
@@ -94,17 +97,18 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
-            throw new LedgerException("Smth went wrong :(");
+            if (e instanceof BusinessException)
+                throw new LedgerException(((BusinessException) e).getStatusCode(), e.getMessage());
+            else throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
         } finally {
             userWallet.close();
         }
         return user;
     }
 
-    @SneakyThrows
     void establishUserConnection(Identity trustAnchor,
                                  CreateAndStoreMyDidResult trustAnchorPseudonym,
-                                 CreateAndStoreMyDidResult userForTrustAnchorPseudonym) {
+                                 CreateAndStoreMyDidResult userForTrustAnchorPseudonym) throws Exception {
         String nymRegisterTrustAnchorPseudonym = buildNymRequest(
                 trustAnchor.getVerinymDid(),
                 userForTrustAnchorPseudonym.getDid(),
@@ -134,10 +138,9 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.info("'nymRegisterIdentityPseudonymResponse={}'", nymRegisterIdentityPseudonymResponse);
     }
 
-    @SneakyThrows
     void exchangeContacts(Identity userIdentity, KnownIdentity knownIdentity, Wallet governmentWallet,
                           CreateAndStoreMyDidResult governmentPseudonym,
-                          CreateAndStoreMyDidResult userForGovernmentPseudonym) {
+                          CreateAndStoreMyDidResult userForGovernmentPseudonym) throws Exception {
         Contact trustAnchorContactForUser = Contact.builder()
                 .contactName("Government")
                 .photo(governmentPhoto)
@@ -166,10 +169,9 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .build());
     }
 
-    @SneakyThrows
     void issueCredentials(String publicKey, Wallet userWallet,
                           CreateAndStoreMyDidResult governmentPseudonym,
-                          KnownIdentity knownIdentity) {
+                          KnownIdentity knownIdentity) throws Exception {
 
         String masterSecretId = proverCreateMasterSecret(userWallet, publicKey).get();
 
@@ -188,10 +190,9 @@ public class RegistrationServiceImpl implements RegistrationService {
                 passportSchemaDefinition, nationalPassport, masterSecretId);
     }
 
-    @SneakyThrows
     void issueCredential(Wallet userWallet, CreateAndStoreMyDidResult governmentPseudonym,
                          String schemaDefinitionId, String schemaDefinition,
-                         Document document, String masterSecretId) {
+                         Document document, String masterSecretId) throws Exception {
         String credentialOffer = issuerCreateCredentialOffer(
                 government.getWallet(),
                 schemaDefinitionId).get();

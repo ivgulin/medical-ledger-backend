@@ -1,7 +1,7 @@
 package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mokujin.ssi.model.exception.LedgerException;
+import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.government.KnownIdentity;
 import com.mokujin.ssi.model.government.document.Document;
 import com.mokujin.ssi.model.government.document.impl.NationalNumber;

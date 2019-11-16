@@ -43,7 +43,7 @@ public class CredentialServiceImpl implements CredentialService {
                 attribute.put("encoded", String.valueOf(Math.abs(new Random().nextLong())));
                 credentialNode.set(f.getName(), attribute);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                log.error("Exception was thrown: " + e);
             }
         });
 

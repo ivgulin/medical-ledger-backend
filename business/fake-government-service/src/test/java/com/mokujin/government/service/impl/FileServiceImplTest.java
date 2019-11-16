@@ -1,7 +1,7 @@
 package com.mokujin.government.service.impl;
 
-import com.mokujin.government.model.exception.FileDeletionFailureException;
-import com.mokujin.government.model.exception.FileUploadFailureException;
+import com.mokujin.government.model.exception.extention.FileDeletionFailureException;
+import com.mokujin.government.model.exception.extention.FileUploadFailureException;
 import com.mokujin.government.service.FileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

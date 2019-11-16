@@ -1,6 +1,7 @@
 package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.user.request.UserCredentials;
 import com.mokujin.ssi.service.DeletionService;
 import com.mokujin.ssi.service.WalletService;
@@ -12,11 +13,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.CompletableFuture;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -43,9 +44,9 @@ class DeletionServiceImplTest {
 
         when(walletService.doesWalletExist(anyString(), anyString())).thenReturn(false);
 
-        deletionService.delete(credentials);
+        assertThrows(ResourceNotFoundException.class, () -> deletionService.delete(credentials));
 
-        Mockito.verify(walletService, times(0)).getOrCreateWallet(anyString(), anyString());
+        verify(walletService, times(0)).getOrCreateWallet(anyString(), anyString());
     }
 
     @Test
@@ -69,8 +70,8 @@ class DeletionServiceImplTest {
         };
 
         deletionService.delete(credentials);
-        Mockito.verify(walletService, times(1)).getOrCreateWallet(anyString(), anyString());
-        Mockito.verify(wallet, times(1)).close();
+        verify(walletService, times(1)).getOrCreateWallet(anyString(), anyString());
+        verify(wallet, times(1)).close();
     }
 
 

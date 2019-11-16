@@ -1,6 +1,6 @@
 package com.mokujin.ssi.service.impl;
 
-import com.mokujin.ssi.model.exception.ResourceNotFoundException;
+import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.document.NationalDocument;
 import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.model.internal.Credential;
