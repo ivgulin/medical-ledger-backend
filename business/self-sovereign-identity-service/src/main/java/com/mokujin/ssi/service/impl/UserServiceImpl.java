@@ -7,10 +7,13 @@ import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
 import com.mokujin.ssi.model.user.response.User;
+import com.mokujin.ssi.service.IdentityService;
 import com.mokujin.ssi.service.UserService;
+import com.mokujin.ssi.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +23,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
+    private final WalletService walletService;
+    private final IdentityService identityService;
 
     @Override
     @SneakyThrows
@@ -48,5 +54,18 @@ public class UserServiceImpl implements UserService {
                 .credentials(credentials)
                 .nationalCredentials(nationalCredentials)
                 .build();
+    }
+
+    @Override
+    @SneakyThrows
+    public User get(String publicKey, String privateKey) {
+
+        Wallet userWallet = walletService.getOrCreateWallet(publicKey, privateKey);
+
+        Identity userIdentity = identityService.findByWallet(userWallet);
+
+        userWallet.close();
+
+        return this.convert(userIdentity);
     }
 }
