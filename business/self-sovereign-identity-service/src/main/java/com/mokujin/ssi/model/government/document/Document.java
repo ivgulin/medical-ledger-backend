@@ -18,7 +18,7 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = NationalPassport.class, name = "passport"),
         @JsonSubTypes.Type(value = NationalNumber.class, name = "number")
 })
-public class Document {
+public abstract class Document {
 
     private String type;
 

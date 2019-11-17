@@ -19,11 +19,12 @@ public class ChatController {
 
     @GetMapping("/get/{connectionNumber}")
     public ResponseEntity<Chat> get(@PathVariable String connectionNumber,
+                                    @RequestParam("token") String notificationToken,
                                     @RequestParam("public") String publicKey,
                                     @RequestParam("private") String privateKey) {
-        log.info("'get' invoked with params '{}, {}, {}'", connectionNumber, publicKey, privateKey);
+        log.info("'get' invoked with params '{}, {}, {}, {}'", connectionNumber, notificationToken, publicKey, privateKey);
 
-        Chat chat = chatService.get(publicKey, privateKey, connectionNumber);
+        Chat chat = chatService.get(publicKey, privateKey, connectionNumber, notificationToken);
 
         log.info("'get' returned '{}'", chat);
         return ResponseEntity.ok(chat);
@@ -32,11 +33,13 @@ public class ChatController {
     @PostMapping("/add/{connectionNumber}")
     public ResponseEntity<Chat> addMessage(@PathVariable String connectionNumber,
                                            @RequestBody Message message,
+                                           @RequestParam("token") String notificationToken,
                                            @RequestParam("public") String publicKey,
                                            @RequestParam("private") String privateKey) {
-        log.info("'addMessage' invoked with params '{}, {}, {},{}'", connectionNumber, message, publicKey, privateKey);
+        log.info("'addMessage' invoked with params '{}, {}, {}, {}, {}'", connectionNumber, notificationToken,
+                message, publicKey, privateKey);
 
-        Chat chat = chatService.addMessage(publicKey, privateKey, connectionNumber, message);
+        Chat chat = chatService.addMessage(publicKey, privateKey, connectionNumber, message, notificationToken);
 
         log.info("'addMessage' returned '{}'", chat);
         return ResponseEntity.ok(chat);

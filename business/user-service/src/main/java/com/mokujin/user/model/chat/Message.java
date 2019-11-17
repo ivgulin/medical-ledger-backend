@@ -1,11 +1,14 @@
 package com.mokujin.user.model.chat;
 
+import com.mokujin.user.model.Contact;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 
 @Data
 public class Message {
+
+    private Contact contact;
 
     @NotNull(message = "Message date is required")
     private Long date;

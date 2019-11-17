@@ -8,6 +8,8 @@ import java.util.List;
 @Data
 public class Chat {
 
+    private String notificationToken;
+
     private List<Message> messages = new ArrayList<>();
 
     public void addMessage(Message message) {

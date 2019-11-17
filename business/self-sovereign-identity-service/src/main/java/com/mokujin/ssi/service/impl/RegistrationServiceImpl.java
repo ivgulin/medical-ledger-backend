@@ -147,6 +147,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .isVisible(false)
                 .build();
         String trustAnchorContactForUserJson = objectMapper.writeValueAsString(trustAnchorContactForUser);
+        System.out.println("trustAnchorContactForUserJson = " + trustAnchorContactForUserJson);
         Did.setDidMetadata(userIdentity.getWallet(), userForGovernmentPseudonym.getDid(), trustAnchorContactForUserJson).get();
 
         String firstName = knownIdentity.getNationalPassport().getFirstName();
@@ -158,8 +159,9 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .nationalNumber(knownIdentity.getNationalNumber().getNumber())
                 .isVisible(false)
                 .build();
-        String stewardContactForTrustAnchorJson = objectMapper.writeValueAsString(userContactForTrustAnchor);
-        Did.setDidMetadata(governmentWallet, governmentPseudonym.getDid(), stewardContactForTrustAnchorJson).get();
+        String userContactForTrustAnchorJson = objectMapper.writeValueAsString(userContactForTrustAnchor);
+        System.out.println("userContactForTrustAnchorJson = " + userContactForTrustAnchorJson);
+        Did.setDidMetadata(governmentWallet, governmentPseudonym.getDid(), userContactForTrustAnchorJson).get();
 
         userIdentity.addPseudonym(Pseudonym.builder()
                 .pseudonymDid(userForGovernmentPseudonym.getDid())

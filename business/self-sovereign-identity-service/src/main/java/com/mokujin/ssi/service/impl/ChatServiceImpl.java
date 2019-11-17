@@ -24,7 +24,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @SneakyThrows
-    public Chat get(String publicKey, String privateKey, String connectionNumber) {
+    public Chat get(String publicKey, String privateKey, String connectionNumber, String notificationToken) {
 
         Wallet wallet = walletService.getOrCreateWallet(publicKey, privateKey);
 
@@ -38,6 +38,7 @@ public class ChatServiceImpl implements ChatService {
             chat = objectMapper.readValue(chatInString, LedgerChatResponse.class).getValue();
         } catch (Exception e) {
             chat = new Chat();
+            chat.setNotificationToken(notificationToken);
             String chatInString = objectMapper.writeValueAsString(chat);
             WalletRecord.add(wallet, "chat", connectionNumber, chatInString, "{}");
         }
@@ -46,11 +47,14 @@ public class ChatServiceImpl implements ChatService {
         return chat;
     }
 
+
+
     @Override
     @SneakyThrows
-    public Chat addMessage(String publicKey, String privateKey, String connectionNumber, Message message) {
+    public Chat addMessage(String publicKey, String privateKey, String connectionNumber,
+                           Message message, String notificationToken) {
 
-        Chat chat = this.get(publicKey, privateKey, connectionNumber);
+        Chat chat = this.get(publicKey, privateKey, connectionNumber, notificationToken);
         chat.addMessage(message);
         String chatInString = objectMapper.writeValueAsString(chat);
 

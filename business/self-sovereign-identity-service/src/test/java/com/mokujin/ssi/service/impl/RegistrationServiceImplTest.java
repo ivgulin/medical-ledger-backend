@@ -256,6 +256,7 @@ class RegistrationServiceImplTest {
         registrationService.establishUserConnection(identity, governmentPseudonym, userPseudonym);
     }
 
+    // TODO: 17.11.19 redo it
     @Test
     @SneakyThrows
     void exchangeContacts_validInputs_methodIsExecuted() {
@@ -284,7 +285,10 @@ class RegistrationServiceImplTest {
         nationalPassport.setFatherName(name);
         nationalPassport.setImage(image);
 
+        NationalNumber nationalNumber = new NationalNumber("12345", 123L, "gov");
+
         knownIdentity.setNationalPassport(nationalPassport);
+        knownIdentity.setNationalNumber(nationalNumber);
 
         new MockUp<Did>() {
             @mockit.Mock
@@ -292,8 +296,10 @@ class RegistrationServiceImplTest {
                 assertTrue(wallet.equals(government.getWallet()) || wallet.equals(identity.getWallet()));
                 assertTrue(did.equals(governmentPseudonymDid) || did.equals(userPseudonymDid));
 
-                String expectedGovJson = "{\"contactName\":\"Government\",\"photo\":\"photo\",\"verinym\":false}";
-                String expectedUserJson = "{\"contactName\":\"Doe John John\",\"photo\":\"image\",\"verinym\":false}";
+                String expectedGovJson = "{\"contactName\":\"Government\",\"photo\":\"photo\"" +
+                        ",\"nationalNumber\":null,\"visible\":false,\"verinym\":false}";
+                String expectedUserJson = "{\"contactName\":\"Doe John John\",\"photo\":\"image\"," +
+                        "\"nationalNumber\":\"12345\",\"visible\":false,\"verinym\":false}";
                 assertTrue(metadata.equals(expectedGovJson) || metadata.equals(expectedUserJson));
 
                 return CompletableFuture.runAsync(() -> log.debug("In mock."));

@@ -5,6 +5,12 @@ spring:
 server:
   port: 8010
 
+fcm:
+  service-account-file: /var/ledger/serviceAccountKey.json
+
+redis:
+  host: redis://localhost:6379
+
 eureka:
   client:
     serviceUrl:
