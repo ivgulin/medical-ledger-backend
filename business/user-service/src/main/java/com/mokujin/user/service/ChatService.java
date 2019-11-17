@@ -6,10 +6,9 @@ import com.mokujin.user.model.chat.Message;
 
 public interface ChatService {
 
-    Chat get(String publicKey, String privateKey, String connectionNumber,
-             String userNumber, String notificationToken);
+    Chat get(String publicKey, String privateKey, String connectionNumber);
 
     Chat addMessage(String publicKey, String privateKey, String connectionNumber, Message message);
 
-    Chat addMessageWithNotification(String publicKey, String privateKey, Contact contact, Message message);
+    Chat addMessageWithNotification(String publicKey, String privateKey, String connectionNumber, Message message);
 }

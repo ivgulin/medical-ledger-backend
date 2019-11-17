@@ -20,13 +20,11 @@ public class ChatController {
 
     @GetMapping("/get/{connectionNumber}")
     public ResponseEntity<Chat> get(@PathVariable String connectionNumber,
-                                    @PathVariable String userNumber,
-                                    @RequestParam String notificationToken,
                                     @RequestHeader("Public-Key") String publicKey,
                                     @RequestHeader("Private-Key") String privateKey) {
-        log.info("'get' invoked with params '{}, {}, {}, {}'", connectionNumber, notificationToken, publicKey, privateKey);
+        log.info("'get' invoked with params '{}, {}, {}'", connectionNumber, publicKey, privateKey);
 
-        Chat chat = chatService.get(publicKey, privateKey, connectionNumber, userNumber, notificationToken);
+        Chat chat = chatService.get(publicKey, privateKey, connectionNumber);
 
         log.info("'get' returned '{}'", chat);
         return ResponseEntity.ok(chat);
@@ -50,13 +48,12 @@ public class ChatController {
     @PostMapping("/add/{connectionNumber}/notification")
     public ResponseEntity<Chat> addMessageWithNotification(@PathVariable String connectionNumber,
                                                            @RequestBody @Valid Message message,
-                                                           @RequestParam String notificationToken,
                                                            @RequestHeader("Public-Key") String publicKey,
                                                            @RequestHeader("Private-Key") String privateKey) {
-        log.info("'addMessageWithNotification' invoked with params '{}, {}, {}, {}, {}'", connectionNumber,
-                notificationToken, message, publicKey, privateKey);
+        log.info("'addMessageWithNotification' invoked with params '{}, {}, {}, {}'", connectionNumber
+                , message, publicKey, privateKey);
 
-        Chat chat = chatService.addMessageWithNotification(publicKey, privateKey, message.getContact(), message);
+        Chat chat = chatService.addMessageWithNotification(publicKey, privateKey, connectionNumber, message);
 
         log.info("'addMessageWithNotification' returned '{}'", chat);
         return ResponseEntity.ok(chat);

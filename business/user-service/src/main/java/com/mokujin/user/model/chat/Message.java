@@ -4,9 +4,10 @@ import com.mokujin.user.model.Contact;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 @Data
-public class Message {
+public class Message implements Serializable {
 
     private Contact contact;
 

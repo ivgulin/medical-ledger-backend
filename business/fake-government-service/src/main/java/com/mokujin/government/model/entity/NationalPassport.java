@@ -22,6 +22,10 @@ public class NationalPassport {
     private Integer id;
 
     @NotNull
+    @Column(name = "number")
+    private String number;
+
+    @NotNull
     @Column(name = "first_name")
     private String firstName;
 
@@ -55,7 +59,6 @@ public class NationalPassport {
     private Long dateOfIssue;
 
     @NotNull
-    @Setter(AccessLevel.PRIVATE)
     @OneToMany(mappedBy = "nationalPassport", cascade = ALL)
     private Set<PlaceOfResidence> placesOfResidence = new HashSet<>();
 

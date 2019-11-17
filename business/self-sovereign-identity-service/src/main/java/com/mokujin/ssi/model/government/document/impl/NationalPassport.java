@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class NationalPassport extends NationalDocument {
 
+    private String number;
+
     private String firstName;
 
     private String lastName;

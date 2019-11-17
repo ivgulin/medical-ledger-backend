@@ -4,8 +4,10 @@ import com.mokujin.government.model.dto.KnownIdentityDTO;
 import com.mokujin.government.model.dto.NationalNumberDTO;
 import com.mokujin.government.model.dto.NationalPassportDTO;
 import com.mokujin.government.model.dto.Person;
+import com.mokujin.government.model.entity.Certificate;
 import com.mokujin.government.model.entity.KnownIdentity;
 import com.mokujin.government.model.entity.NationalPassport;
+import com.mokujin.government.model.entity.PlaceOfResidence;
 import com.mokujin.government.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.government.repository.KnownIdentityRepository;
 import com.mokujin.government.service.FileService;
@@ -15,6 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -30,7 +37,14 @@ public class KnownIdentityServiceImpl implements KnownIdentityService {
     public KnownIdentity save(KnownIdentity knownIdentity) {
 
         NationalPassport nationalPassport = knownIdentity.getNationalPassport();
-        nationalPassport.getPlacesOfResidence().forEach(nationalPassport::addPlaceOfResidence);
+        Set<PlaceOfResidence> placesOfResidence = nationalPassport.getPlacesOfResidence();
+        nationalPassport.setPlacesOfResidence(new HashSet<>());
+        placesOfResidence.forEach(nationalPassport::addPlaceOfResidence);
+
+
+        List<Certificate> certificates = knownIdentity.getCertificates();
+        knownIdentity.setCertificates(new ArrayList<>());
+        certificates.forEach(knownIdentity::addCertificate);
 
         return knownIdentityRepository.save(knownIdentity);
     }

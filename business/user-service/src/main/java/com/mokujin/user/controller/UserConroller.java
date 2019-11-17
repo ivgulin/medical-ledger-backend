@@ -3,20 +3,21 @@ package com.mokujin.user.controller;
 import com.mokujin.user.model.User;
 import com.mokujin.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/user")
+@RequestMapping
 @RequiredArgsConstructor
 public class UserConroller {
 
     private final UserService userService;
 
-    @SneakyThrows
     @GetMapping("/get")
     public ResponseEntity<User> get(@RequestHeader("Public-Key") String publicKey,
                                     @RequestHeader("Private-Key") String privateKey) {

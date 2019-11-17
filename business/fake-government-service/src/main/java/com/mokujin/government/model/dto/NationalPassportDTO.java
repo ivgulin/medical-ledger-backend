@@ -11,7 +11,7 @@ public class NationalPassportDTO extends NationalPassport {
     private String type;
 
     public NationalPassportDTO(NationalPassport nationalPassport, String image) {
-        super(nationalPassport.getId(), nationalPassport.getFirstName(), nationalPassport.getLastName(),
+        super(nationalPassport.getId(), nationalPassport.getNumber(), nationalPassport.getFirstName(), nationalPassport.getLastName(),
                 nationalPassport.getFatherName(), nationalPassport.getDateOfBirth(), nationalPassport.getPlaceOfBirth(),
                 nationalPassport.getImageName(), nationalPassport.getSex(), nationalPassport.getIssuer(),
                 nationalPassport.getDateOfIssue(), nationalPassport.getPlacesOfResidence());
@@ -20,7 +20,7 @@ public class NationalPassportDTO extends NationalPassport {
     }
 
     public NationalPassportDTO(NationalPassport nationalPassport) {
-        super(nationalPassport.getId(), nationalPassport.getFirstName(), nationalPassport.getLastName(),
+        super(nationalPassport.getId(), nationalPassport.getNumber(), nationalPassport.getFirstName(), nationalPassport.getLastName(),
                 nationalPassport.getFatherName(), nationalPassport.getDateOfBirth(), nationalPassport.getPlaceOfBirth(),
                 nationalPassport.getImageName(), nationalPassport.getSex(), nationalPassport.getIssuer(),
                 nationalPassport.getDateOfIssue(), nationalPassport.getPlacesOfResidence());

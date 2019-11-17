@@ -1,4 +1,4 @@
-package com.mokujin.user.config;
+package com.mokujin.user.config.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

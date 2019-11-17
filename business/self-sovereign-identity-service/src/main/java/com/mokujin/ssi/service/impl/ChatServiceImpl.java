@@ -4,15 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokujin.ssi.model.chat.Chat;
 import com.mokujin.ssi.model.chat.LedgerChatResponse;
 import com.mokujin.ssi.model.chat.Message;
+import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.service.ChatService;
 import com.mokujin.ssi.service.WalletService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.indy.sdk.non_secrets.WalletRecord;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
+
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Service
@@ -23,45 +24,45 @@ public class ChatServiceImpl implements ChatService {
     private final WalletService walletService;
 
     @Override
-    @SneakyThrows
-    public Chat get(String publicKey, String privateKey, String connectionNumber, String notificationToken) {
+    public Chat get(String publicKey, String privateKey, String connectionNumber) {
 
-        Wallet wallet = walletService.getOrCreateWallet(publicKey, privateKey);
-
-        Chat chat;
-        try {
-            String chatInString = WalletRecord.get(wallet, "chat", connectionNumber, "{}").get()
-                    .replace("\\", "")
-                    .replace("\"{", "{")
-                    .replace("}\"", "}");;
-            log.info("'chatInString={}'", chatInString);
-            chat = objectMapper.readValue(chatInString, LedgerChatResponse.class).getValue();
+        try (Wallet wallet = walletService.getOrCreateWallet(publicKey, privateKey);) {
+            Chat chat;
+            try {
+                String chatInString = WalletRecord.get(wallet, "chat", connectionNumber, "{}").get()
+                        .replace("\\", "")
+                        .replace("\"{", "{")
+                        .replace("}\"", "}");
+                ;
+                log.info("'chatInString={}'", chatInString);
+                chat = objectMapper.readValue(chatInString, LedgerChatResponse.class).getValue();
+            } catch (Exception e) {
+                chat = new Chat();
+                String chatInString = objectMapper.writeValueAsString(chat);
+                WalletRecord.add(wallet, "chat", connectionNumber, chatInString, "{}");
+            }
+            return chat;
         } catch (Exception e) {
-            chat = new Chat();
-            chat.setNotificationToken(notificationToken);
-            String chatInString = objectMapper.writeValueAsString(chat);
-            WalletRecord.add(wallet, "chat", connectionNumber, chatInString, "{}");
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
-
-        wallet.close();
-        return chat;
     }
 
 
-
     @Override
-    @SneakyThrows
-    public Chat addMessage(String publicKey, String privateKey, String connectionNumber,
-                           Message message, String notificationToken) {
+    public Chat addMessage(String publicKey, String privateKey, String connectionNumber, Message message) {
 
-        Chat chat = this.get(publicKey, privateKey, connectionNumber, notificationToken);
-        chat.addMessage(message);
-        String chatInString = objectMapper.writeValueAsString(chat);
+        try (Wallet wallet = walletService.getOrCreateWallet(publicKey, privateKey)) {
+            Chat chat = this.get(publicKey, privateKey, connectionNumber);
+            chat.addMessage(message);
+            String chatInString = objectMapper.writeValueAsString(chat);
 
-        Wallet wallet = walletService.getOrCreateWallet(publicKey, privateKey);
-        WalletRecord.updateValue(wallet, "chat", connectionNumber, chatInString);
-        wallet.close();
+            WalletRecord.updateValue(wallet, "chat", connectionNumber, chatInString);
+            return chat;
+        } catch (Exception e) {
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
+        }
 
-        return chat;
     }
 }

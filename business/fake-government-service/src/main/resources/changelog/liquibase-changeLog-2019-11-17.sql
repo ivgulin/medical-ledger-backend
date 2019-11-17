@@ -1,5 +1,7 @@
-DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
+--liquibase formatted sql
+--changeset gulini:2
+
+DROP TABLE known_identity CASCADE;
 
 CREATE TABLE IF NOT EXISTS diploma
 (

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
@@ -25,12 +26,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import javax.annotation.PreDestroy;
+
 import static java.util.Objects.isNull;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateAndStoreCredentialDef;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateSchema;
 import static org.hyperledger.indy.sdk.did.Did.createAndStoreMyDid;
 import static org.hyperledger.indy.sdk.ledger.Ledger.*;
 import static org.hyperledger.indy.sdk.pool.Pool.*;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Configuration
@@ -53,8 +57,6 @@ public class LedgerConfig {
     private final String GOVERNMENT_KEY;
 
     private final String GOVERNMENT_PHOTO;
-
-    private final String ROLE = "TRUST_ANCHOR";
 
     private final WalletService walletService;
 
@@ -104,14 +106,12 @@ public class LedgerConfig {
     }
 
     @Bean("stewardWallet")
-    @SneakyThrows
     @DependsOn("pool")
     public Wallet getStewardWallet() {
         return this.getWallet(STEWARD_ID, STEWARD_KEY);
     }
 
     @Bean("governmentWallet")
-    @SneakyThrows
     @DependsOn("pool")
     public Wallet getGovernmentWallet() {
         return this.getWallet(GOVERNMENT_ID, GOVERNMENT_KEY);
@@ -270,7 +270,7 @@ public class LedgerConfig {
                 trustAnchorIdentity.getVerinymDid(),
                 trustAnchorVerKey,
                 null,
-                ROLE).get();
+                "TRUST_ANCHOR").get();
 
         String nymRegisterTrustAnchorVerinymResponse = signAndSubmitRequest(
                 pool,
@@ -292,6 +292,7 @@ public class LedgerConfig {
         ArrayNode attributes = objectMapper.createArrayNode();
         attributes
                 .add("type")
+                .add("number")
                 .add("firstName")
                 .add("lastName")
                 .add("fatherName")
@@ -325,6 +326,61 @@ public class LedgerConfig {
 
         Schema schema = getSchema(pool, government, schemaName, tag, attributes);
         log.info("'national number schema={}'", schema);
+
+        return schema;
+    }
+
+    @SneakyThrows
+    @Bean("diplomaSchema")
+    @DependsOn("government")
+    public Schema getDiplomaSchema(Pool pool, @Qualifier("government") Identity government) {
+
+        String schemaName = "Diploma";
+        String tag = "diploma";
+
+        ArrayNode attributes = objectMapper.createArrayNode();
+        attributes
+                .add("type")
+                .add("number")
+                .add("firstName")
+                .add("lastName")
+                .add("fatherName")
+                .add("placeOfStudy")
+                .add("courseOfStudy")
+                .add("dateOfIssue")
+                .add("qualification")
+                .add("issuer");
+
+        Schema schema = getSchema(pool, government, schemaName, tag, attributes);
+        log.info("'diploma schema={}'", schema);
+
+        return schema;
+    }
+
+    @SneakyThrows
+    @Bean("certificateSchema")
+    @DependsOn("government")
+    public Schema getCertificateSchema(Pool pool, @Qualifier("government") Identity government) {
+
+        String schemaName = "Certificate";
+        String tag = "certificate";
+
+        ArrayNode attributes = objectMapper.createArrayNode();
+        attributes
+                .add("type")
+                .add("number")
+                .add("firstName")
+                .add("lastName")
+                .add("fatherName")
+                .add("dateOfExam")
+                .add("dateOfIssue")
+                .add("qualification")
+                .add("courseOfStudy")
+                .add("expiresIn")
+                .add("issuer");
+
+        Schema schema = getSchema(pool, government, schemaName, tag, attributes);
+        log.info("'certificate schema={}'", schema);
 
         return schema;
     }
@@ -418,5 +474,12 @@ public class LedgerConfig {
 
         return Cache.getCredDef(pool, government.getWallet(),
                 government.getVerinymDid(), schemaDefinition.getCredDefId(), "{}").get();
+    }
+
+    @PreDestroy
+    @SneakyThrows
+    private void closeWallets(@Qualifier("government") Identity government, @Qualifier("steward") Identity steward){
+        government.getWallet().close();
+        steward.getWallet().close();
     }
 }

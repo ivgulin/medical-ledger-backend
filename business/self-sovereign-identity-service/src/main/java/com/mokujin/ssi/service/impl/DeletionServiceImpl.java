@@ -9,7 +9,6 @@ import com.mokujin.ssi.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
 
 import static org.hyperledger.indy.sdk.wallet.Wallet.deleteWallet;
@@ -29,10 +28,6 @@ public class DeletionServiceImpl implements DeletionService {
         if (!walletService.doesWalletExist(userCredentials.getPublicKey(), userCredentials.getPrivateKey())) {
             throw new ResourceNotFoundException("No wallet was found for this user");
         }
-
-        Wallet userWallet = walletService
-                .getOrCreateWallet(userCredentials.getPublicKey(), userCredentials.getPrivateKey());
-        userWallet.close();
 
         ObjectNode config = objectMapper.createObjectNode();
         config.put("id", userCredentials.getPublicKey());

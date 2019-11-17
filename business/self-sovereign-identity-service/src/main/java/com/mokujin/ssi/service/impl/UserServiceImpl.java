@@ -1,5 +1,6 @@
 package com.mokujin.ssi.service.impl;
 
+import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.document.NationalDocument;
 import com.mokujin.ssi.model.government.document.impl.NationalNumber;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Service
@@ -47,7 +50,7 @@ public class UserServiceImpl implements UserService {
         NationalNumber nationalNumber = (NationalNumber) nationalCredentials.stream()
                 .filter(c -> NationalNumber.class.equals(c.getDocument().getClass()))
                 .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("No passport has been found."))
+                .orElseThrow(() -> new ResourceNotFoundException("No national number has been found."))
                 .getDocument();
 
         credentials.removeAll(nationalCredentials);
@@ -65,15 +68,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @SneakyThrows
     public User get(String publicKey, String privateKey) {
 
-        Wallet userWallet = walletService.getOrCreateWallet(publicKey, privateKey);
-
-        Identity userIdentity = identityService.findByWallet(userWallet);
-
-        userWallet.close();
-
-        return this.convert(userIdentity);
+        try (Wallet userWallet = walletService.getOrCreateWallet(publicKey, privateKey);){
+            Identity userIdentity = identityService.findByWallet(userWallet);
+            return this.convert(userIdentity);
+        }catch (Exception e) {
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 }

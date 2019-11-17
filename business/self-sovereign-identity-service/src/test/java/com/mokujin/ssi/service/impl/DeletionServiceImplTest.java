@@ -36,6 +36,7 @@ class DeletionServiceImplTest {
     }
 
     @Test
+    @SneakyThrows
     void deleteWallet_walletDoesNotExist_exceptionIsThrown() {
 
         String email = "test@test.com";

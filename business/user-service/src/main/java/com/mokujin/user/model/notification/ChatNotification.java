@@ -1,6 +1,6 @@
 package com.mokujin.user.model.notification;
 
-import com.mokujin.user.model.Contact;
+import com.mokujin.user.model.chat.Message;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -8,10 +8,10 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class ChatNotification extends Notification {
 
-    private String message;
+    private Message message;
 
-    public ChatNotification(Long date, Contact contact, String message) {
-        super(date, contact, Type.MESSAGE);
+    public ChatNotification(Long date, Message message) {
+        super(date, Type.MESSAGE);
         this.message = message;
     }
 }

@@ -5,6 +5,8 @@ import com.mokujin.ssi.model.exception.BusinessException;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.government.KnownIdentity;
 import com.mokujin.ssi.model.government.document.Document;
+import com.mokujin.ssi.model.government.document.impl.Certificate;
+import com.mokujin.ssi.model.government.document.impl.Diploma;
 import com.mokujin.ssi.model.government.document.impl.NationalNumber;
 import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.model.internal.Contact;
@@ -24,6 +26,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+import static com.mokujin.ssi.model.government.KnownIdentity.Role.DOCTOR;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
 import static org.hyperledger.indy.sdk.anoncreds.AnoncredsResults.IssuerCreateCredentialResult;
 import static org.hyperledger.indy.sdk.anoncreds.AnoncredsResults.ProverCreateCredentialRequestResult;
@@ -49,93 +54,96 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final Identity government;
 
     private final Pool pool;
+
     @Qualifier("passportSchema")
     private final Schema passportSchema;
     @Qualifier("nationalNumberSchema")
     private final Schema nationalNumberSchema;
+    @Qualifier("certificateSchema")
+    private final Schema certificateSchema;
+    @Qualifier("diplomaSchema")
+
+    private final Schema diplomaSchema;
     @Value(value = "${ledger.government.photo}")
     private String governmentPhoto;
 
     @Override
-    @SneakyThrows
     public User register(UserRegistrationDetails details, String publicKey, String privateKey) {
 
-        Wallet userWallet = walletService.getOrCreateWallet(publicKey, privateKey);
-
-        Identity userIdentity = identityService.findByWallet(userWallet);
-
-        User user;
-        if (!userIdentity.getCredentials().isEmpty()) {
-            userWallet.close();
-            return userService.convert(userIdentity);
-        }
-
         Wallet governmentWallet = government.getWallet();
+        try (Wallet userWallet = walletService.getOrCreateWallet(publicKey, privateKey)) {
 
-        try {
-            KnownIdentity knownIdentity = validationService.validateNewbie(details);
+            Identity userIdentity = identityService.findByWallet(userWallet);
 
-            CreateAndStoreMyDidResult governmentPseudonym = createAndStoreMyDid(
-                    governmentWallet,
-                    "{}")
-                    .get();
-            CreateAndStoreMyDidResult userForGovernmentPseudonym = createAndStoreMyDid(
-                    userIdentity.getWallet(),
-                    "{}")
-                    .get();
-            this.establishUserConnection(government, governmentPseudonym, userForGovernmentPseudonym);
+            if (userIdentity.getCredentials().isEmpty()) {
 
-            this.exchangeContacts(userIdentity, knownIdentity, governmentWallet,
-                    governmentPseudonym, userForGovernmentPseudonym);
+                KnownIdentity knownIdentity = validationService.validateNewbie(details);
 
-            this.issueCredentials(publicKey, userWallet, governmentPseudonym, knownIdentity);
+                CreateAndStoreMyDidResult governmentPseudonym = createAndStoreMyDid(
+                        governmentWallet,
+                        "{}")
+                        .get();
+                CreateAndStoreMyDidResult userForGovernmentPseudonym = createAndStoreMyDid(
+                        userIdentity.getWallet(),
+                        "{}")
+                        .get();
+                identityService.establishUserConnection(government, governmentPseudonym, userForGovernmentPseudonym);
 
-            userIdentity = identityService.findByWallet(userWallet);
+                if (knownIdentity.getRole().equals(DOCTOR)) {
+                    this.grandVerinym(userIdentity, governmentWallet, knownIdentity);
+                }
 
-            user = userService.convert(userIdentity);
+                this.exchangeContacts(userIdentity, knownIdentity, governmentWallet,
+                        governmentPseudonym, userForGovernmentPseudonym);
+
+                this.issueCredentials(publicKey, userWallet, governmentPseudonym, knownIdentity);
+
+                userIdentity = identityService.findByWallet(userWallet);
+            }
+
+            User user = userService.convert(userIdentity);
             log.info("'user={}'", user);
+            return user;
 
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
-            if (e instanceof BusinessException)
+            if (e instanceof BusinessException) {
                 throw new LedgerException(((BusinessException) e).getStatusCode(), e.getMessage());
-            else throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
-        } finally {
-            userWallet.close();
+            } else throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
-        return user;
     }
 
-    void establishUserConnection(Identity trustAnchor,
-                                 CreateAndStoreMyDidResult trustAnchorPseudonym,
-                                 CreateAndStoreMyDidResult userForTrustAnchorPseudonym) throws Exception {
-        String nymRegisterTrustAnchorPseudonym = buildNymRequest(
-                trustAnchor.getVerinymDid(),
-                userForTrustAnchorPseudonym.getDid(),
-                userForTrustAnchorPseudonym.getVerkey(),
+    private void grandVerinym(Identity userIdentity, Wallet governmentWallet, KnownIdentity knownIdentity) throws Exception {
+        CreateAndStoreMyDidResult verinym = createAndStoreMyDid(userIdentity.getWallet(), "{}").get();
+        log.info("'verinym={}'", verinym);
+
+        String firstName = knownIdentity.getNationalPassport().getFirstName();
+        String lastName = knownIdentity.getNationalPassport().getLastName();
+        String fatherName = knownIdentity.getNationalPassport().getFatherName();
+        Contact selfContact = Contact.builder()
+                .contactName(lastName + " " + firstName + " " + fatherName)
+                .photo(knownIdentity.getNationalPassport().getImage())
+                .nationalNumber(knownIdentity.getNationalNumber().getNumber())
+                .isVisible(false)
+                .build();
+        String selfContactJson = objectMapper.writeValueAsString(selfContact);
+        Did.setDidMetadata(userIdentity.getWallet(), verinym.getDid(), selfContactJson).get();
+
+        userIdentity.setVerinymDid(verinym.getDid());
+
+        String nymRegisterTrustAnchorVerinym = buildNymRequest(
+                government.getVerinymDid(),
+                userIdentity.getVerinymDid(),
+                verinym.getVerkey(),
                 null,
-                null).get();
+                "TRUST_ANCHOR").get();
 
-        String nymRegisterTrustAnchorPseudonymResponse = signAndSubmitRequest(
+        String nymRegisterTrustAnchorVerinymResponse = signAndSubmitRequest(
                 pool,
-                trustAnchor.getWallet(),
-                trustAnchor.getVerinymDid(),
-                nymRegisterTrustAnchorPseudonym).get();
-        log.info("'nymRegisterTrustAnchorPseudonymResponse={}'", nymRegisterTrustAnchorPseudonymResponse);
-
-        String nymRegisterIdentityPseudonym = buildNymRequest(
-                trustAnchor.getVerinymDid(),
-                trustAnchorPseudonym.getDid(),
-                trustAnchorPseudonym.getVerkey(),
-                null,
-                null).get();
-
-        String nymRegisterIdentityPseudonymResponse = signAndSubmitRequest(
-                pool,
-                trustAnchor.getWallet(),
-                trustAnchor.getVerinymDid(),
-                nymRegisterIdentityPseudonym).get();
-        log.info("'nymRegisterIdentityPseudonymResponse={}'", nymRegisterIdentityPseudonymResponse);
+                governmentWallet,
+                government.getVerinymDid(),
+                nymRegisterTrustAnchorVerinym).get();
+        log.info("'nymRegisterDoctorVerinymResponse={}'", nymRegisterTrustAnchorVerinymResponse);
     }
 
     void exchangeContacts(Identity userIdentity, KnownIdentity knownIdentity, Wallet governmentWallet,
@@ -193,6 +201,25 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         this.issueCredential(userWallet, governmentPseudonym, passportSchemaDefinitionId,
                 passportSchemaDefinition, nationalPassport, masterSecretId);
+
+        if (knownIdentity.getRole().equals(DOCTOR)) {
+            String diplomaSchemaDefinitionId = diplomaSchema.getSchemaDefinitionId();
+            String diplomaSchemaDefinition = diplomaSchema.getSchemaDefinition();
+            Diploma diploma = knownIdentity.getDiploma();
+
+            this.issueCredential(userWallet, governmentPseudonym, diplomaSchemaDefinitionId,
+                    diplomaSchemaDefinition, diploma, masterSecretId);
+
+            String certificateSchemaDefinitionId = certificateSchema.getSchemaDefinitionId();
+            String certificationSchemaDefinition = certificateSchema.getSchemaDefinition();
+            List<Certificate> certificates = knownIdentity.getCertificates();
+
+            for (Certificate certificate : certificates) {
+                this.issueCredential(userWallet, governmentPseudonym, certificateSchemaDefinitionId,
+                        certificationSchemaDefinition, certificate, masterSecretId);
+            }
+        }
+
     }
 
     void issueCredential(Wallet userWallet, CreateAndStoreMyDidResult governmentPseudonym,
