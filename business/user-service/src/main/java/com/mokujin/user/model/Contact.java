@@ -10,4 +10,8 @@ public class Contact {
 
     private String photo;
 
+    private String nationalNumber;
+
+    private boolean isVisible;
+
 }

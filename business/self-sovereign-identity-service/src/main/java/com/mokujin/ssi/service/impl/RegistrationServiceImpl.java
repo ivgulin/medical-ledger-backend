@@ -144,6 +144,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         Contact trustAnchorContactForUser = Contact.builder()
                 .contactName("Government")
                 .photo(governmentPhoto)
+                .isVisible(false)
                 .build();
         String trustAnchorContactForUserJson = objectMapper.writeValueAsString(trustAnchorContactForUser);
         Did.setDidMetadata(userIdentity.getWallet(), userForGovernmentPseudonym.getDid(), trustAnchorContactForUserJson).get();
@@ -154,6 +155,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         Contact userContactForTrustAnchor = Contact.builder()
                 .contactName(lastName + " " + firstName + " " + fatherName)
                 .photo(knownIdentity.getNationalPassport().getImage())
+                .nationalNumber(knownIdentity.getNationalNumber().getNumber())
+                .isVisible(false)
                 .build();
         String stewardContactForTrustAnchorJson = objectMapper.writeValueAsString(userContactForTrustAnchor);
         Did.setDidMetadata(governmentWallet, governmentPseudonym.getDid(), stewardContactForTrustAnchorJson).get();

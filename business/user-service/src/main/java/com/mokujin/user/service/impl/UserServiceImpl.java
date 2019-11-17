@@ -20,4 +20,9 @@ public class UserServiceImpl implements UserService {
                 + publicKey + "&private=" + privateKey;
         return restTemplate.getForObject(url, User.class);
     }
+
+    @Override
+    public User inviteBack(String publicKey, String privateKey, String invitorNumber) {
+        return null;
+    }
 }

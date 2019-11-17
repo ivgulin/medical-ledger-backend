@@ -139,6 +139,7 @@ public class LedgerConfig {
             Contact selfContact = Contact.builder()
                     .contactName("Steward")
                     .isVerinym(true)
+                    .isVisible(false)
                     .build();
             String selfContactJson = objectMapper.writeValueAsString(selfContact);
             Did.setDidMetadata(wallet, verinym.getDid(), selfContactJson).get();
@@ -172,6 +173,7 @@ public class LedgerConfig {
             Contact selfContact = Contact.builder()
                     .contactName(trustAnchorName)
                     .isVerinym(true)
+                    .isVisible(false)
                     .build();
             String selfContactJson = objectMapper.writeValueAsString(selfContact);
             Did.setDidMetadata(trustAnchorWallet, verinym.getDid(), selfContactJson).get();
@@ -200,12 +202,14 @@ public class LedgerConfig {
             Contact trustAnchorContactForSteward = Contact.builder()
                     .contactName(trustAnchorName)
                     .photo(trustAnchorPhoto)
+                    .isVisible(false)
                     .build();
             String trustAnchorContactForStewardJson = objectMapper.writeValueAsString(trustAnchorContactForSteward);
             Did.setDidMetadata(stewardWallet, stewardPseudonym.getDid(), trustAnchorContactForStewardJson).get();
 
             Contact stewardContactForTrustAnchor = Contact.builder()
                     .contactName("Steward")
+                    .isVisible(false)
                     .build();
             String stewardContactForTrustAnchorJson = objectMapper.writeValueAsString(stewardContactForTrustAnchor);
             Did.setDidMetadata(trustAnchorWallet, trustAnchorPseudonym.getDid(), stewardContactForTrustAnchorJson).get();

@@ -14,6 +14,8 @@ public class User {
 
     private String fatherName;
 
+    private String nationalNumber;
+
     private String photo;
 
     private List<Credential> nationalCredentials = new ArrayList<>();

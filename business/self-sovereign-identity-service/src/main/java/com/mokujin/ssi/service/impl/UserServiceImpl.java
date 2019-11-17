@@ -2,6 +2,7 @@ package com.mokujin.ssi.service.impl;
 
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.document.NationalDocument;
+import com.mokujin.ssi.model.government.document.impl.NationalNumber;
 import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Identity;
@@ -43,12 +44,19 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("No passport has been found."))
                 .getDocument();
 
+        NationalNumber nationalNumber = (NationalNumber) nationalCredentials.stream()
+                .filter(c -> NationalNumber.class.equals(c.getDocument().getClass()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("No passport has been found."))
+                .getDocument();
+
         credentials.removeAll(nationalCredentials);
 
         return User.builder()
                 .lastName(passport.getLastName())
                 .firstName(passport.getFirstName())
                 .fatherName(passport.getFatherName())
+                .nationalNumber(nationalNumber.getNumber())
                 .photo(passport.getImage())
                 .contacts(identity.getPseudonyms().stream().map(Pseudonym::getContact).collect(Collectors.toList()))
                 .credentials(credentials)

@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class UserServiceImplTest {
 
-    private UserService userService = new UserServiceImpl();
+    private UserService userService = new UserServiceImpl(null, null);
 
     @Test
     void convert_identityIsOk_userIsReturned() {
