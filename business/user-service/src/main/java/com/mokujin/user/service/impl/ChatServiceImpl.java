@@ -2,7 +2,9 @@ package com.mokujin.user.service.impl;
 
 import com.mokujin.user.model.chat.Chat;
 import com.mokujin.user.model.chat.Message;
+import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.service.ChatService;
+import com.mokujin.user.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 public class ChatServiceImpl implements ChatService {
 
     private final RestTemplate restTemplate;
-    private final RedissonClient redissonClient;
+    private final NotificationService notificationService;
 
     @Override
     @SneakyThrows
@@ -30,15 +32,16 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat addMessage(String publicKey, String privateKey, String connectionNumber, Message message) {
+    public Chat addMessage(String publicKey, String privateKey, String connectionNumber,
+                           String nationalNumber, Message message) {
 
         String url = "http://self-sovereign-identity-service/chat/add/" + connectionNumber +
                 "?public=" + publicKey +
                 "&private=" + privateKey;
         Chat chat = restTemplate.postForObject(url, message, Chat.class);
 
-        RList<Message> messages = redissonClient.getList("messages_" + connectionNumber);
-        messages.remove(message);
+        notificationService.removeMessage(nationalNumber, message);
+
         return chat;
     }
 
@@ -50,8 +53,9 @@ public class ChatServiceImpl implements ChatService {
                 "&private=" + privateKey;
         Chat chat = restTemplate.postForObject(url, message, Chat.class);
 
-        RList<Message> messages = redissonClient.getList("messages_" + connectionNumber);
-        messages.add(message);
+        message.setMine(false);
+        Notification notification = notificationService.addMessage(connectionNumber, message);
+        log.info("'notification = '{}'", notification);
 
         return chat;
     }

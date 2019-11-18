@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
-import com.mokujin.ssi.model.internal.Contact;
-import com.mokujin.ssi.model.internal.Identity;
-import com.mokujin.ssi.model.internal.Pseudonym;
-import com.mokujin.ssi.model.internal.Schema;
+import com.mokujin.ssi.model.internal.*;
 import com.mokujin.ssi.service.IdentityService;
 import com.mokujin.ssi.service.WalletService;
 import lombok.SneakyThrows;
@@ -28,6 +25,7 @@ import org.springframework.context.annotation.DependsOn;
 
 import javax.annotation.PreDestroy;
 
+import static com.mokujin.ssi.model.internal.Role.*;
 import static java.util.Objects.isNull;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateAndStoreCredentialDef;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateSchema;
@@ -130,6 +128,7 @@ public class LedgerConfig {
         seedConfig.put("seed", STEWARD_SEED);
 
         Identity identity = identityService.findByWallet(wallet);
+        identity.setRole(STEWARD);
         log.info("'stewardIdentity={}'", identity);
 
         if (isNull(identity.getVerinymDid())) {
@@ -164,6 +163,7 @@ public class LedgerConfig {
         Wallet stewardWallet = stewardIdentity.getWallet();
 
         Identity trustAnchorIdentity = identityService.findByWallet(trustAnchorWallet);
+        trustAnchorIdentity.setRole(TRUST_ANCHOR);
         log.info("'trustAnchorIdentity={}'", trustAnchorIdentity);
 
         if (isNull(trustAnchorIdentity.getVerinymDid())) {
@@ -478,7 +478,7 @@ public class LedgerConfig {
 
     @PreDestroy
     @SneakyThrows
-    private void closeWallets(@Qualifier("government") Identity government, @Qualifier("steward") Identity steward){
+    private void closeWallets(@Qualifier("government") Identity government, @Qualifier("steward") Identity steward) {
         government.getWallet().close();
         steward.getWallet().close();
     }

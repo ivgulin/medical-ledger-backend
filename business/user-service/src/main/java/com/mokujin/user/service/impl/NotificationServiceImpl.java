@@ -20,9 +20,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.mokujin.user.model.notification.Notification.Type.CONNECTION;
 import static com.mokujin.user.model.notification.Notification.Type.INVITATION;
-import static com.mokujin.user.model.notification.NotificationContants.INVITATION_CONTENT_EN;
-import static com.mokujin.user.model.notification.NotificationContants.INVITATION_CONTENT_UKR;
+import static com.mokujin.user.model.notification.NotificationContants.*;
 
 @Slf4j
 @Service
@@ -36,10 +36,10 @@ public class NotificationServiceImpl implements NotificationService {
 
         RList<Message> messages = redissonClient.getList("messages_" + nationalNumber);
         List<ChatNotification> messageNotifications = messages.stream()
-                .map(m -> new ChatNotification(new Date().getTime(), m))
+                .map(ChatNotification::new)
                 .collect(Collectors.toList());
 
-        List<Notification> notifications = redissonClient.getList("notifications_" + nationalNumber).readAll()
+        List<Notification> notifications = redissonClient.getMap("notifications_" + nationalNumber).values()
                 .stream()
                 .filter(n -> n instanceof Notification)
                 .map(n -> (SystemNotification) n)
@@ -52,36 +52,61 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Notification addInviteNotification(String publicKey, String privateKey, String invitorNumber, User user) {
-        ProcessedUserCredentials userCredentials = ProcessedUserCredentials.builder()
+    public Notification addInviteNotification(String publicKey, String privateKey, Contact doctor, User patient) {
+        String patientNumber = patient.getNationalNumber();
+        String doctorNumber = doctor.getNationalNumber();
+
+        ProcessedUserCredentials patientCredentials = ProcessedUserCredentials.builder()
                 .publicKey(publicKey)
                 .privateKey(privateKey)
                 .build();
-        RMap<String, ProcessedUserCredentials> invitations = redissonClient.getMap("invitations");
-        invitations.put(invitorNumber, userCredentials);
+        RMap<String, ProcessedUserCredentials> invitations = redissonClient.getMap("credentials");
+        invitations.put(doctorNumber + patientNumber, patientCredentials);
 
-        RMap<String, Notification> notifications = redissonClient.getMap("notifications_" + invitorNumber);
-        Notification notification = new SystemNotification(new Date().getTime(), INVITATION,
+        RMap<String, SystemNotification> doctorNotifications = redissonClient.getMap("connections_" + doctorNumber);
+        SystemNotification connectionNotification = new SystemNotification(new Date().getTime(), CONNECTION,
                 Contact.builder()
-                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
-                        .photo(user.getPhoto())
-                        .nationalNumber(user.getNationalNumber())
+                        .contactName(patient.getFirstName() + " " + patient.getFirstName() + " " + patient.getFatherName())
+                        .photo(patient.getPhoto())
+                        .nationalNumber(patientNumber)
                         .isVisible(true)
-                        .build(), "", "", INVITATION_CONTENT_EN, INVITATION_CONTENT_UKR);
-        notifications.put(publicKey, notification);
+                        .build(), "", "", CONNECTION_CONTENT_EN, CONNECTION_CONTENT_UKR);
+        doctorNotifications.put(publicKey, connectionNotification);
 
-        return notification;
+        RMap<String, SystemNotification> patientNotifications = redissonClient.getMap("invitations_" + patientNumber);
+        SystemNotification invitationNotification = new SystemNotification(new Date().getTime(), INVITATION,
+                doctor, "", "", INVITATION_CONTENT_EN, INVITATION_CONTENT_UKR);
+        patientNotifications.put(doctorNumber, invitationNotification);
+
+        return invitationNotification;
     }
 
     @Override
-    public ProcessedUserCredentials removeInviteNotification(String invitorNumber) {
-        RMap<String, ProcessedUserCredentials> invitations = redissonClient.getMap("invitations");
-        ProcessedUserCredentials userCredentials = invitations.get(invitorNumber);
-        invitations.remove(invitorNumber);
+    public ProcessedUserCredentials removeInviteNotification(String doctorNumber, String patientNumber) {
+        RMap<String, ProcessedUserCredentials> invitations = redissonClient.getMap("credentials");
+        ProcessedUserCredentials patientCredentials = invitations.get(doctorNumber + patientNumber);
+        invitations.remove(doctorNumber + patientNumber);
 
-        RMap<String, Notification> notifications = redissonClient.getMap("notifications_" + invitorNumber);
-        notifications.remove(userCredentials.getPublicKey());
+        RMap<String, SystemNotification> doctorNotifications = redissonClient.getMap("connections_" + doctorNumber);
+        doctorNotifications.remove(patientCredentials.getPublicKey());
 
-        return userCredentials;
+        RMap<String, SystemNotification> patientNotifications = redissonClient.getMap("invitations_" + patientNumber);
+        patientNotifications.remove(doctorNumber);
+
+        return patientCredentials;
+    }
+
+    @Override
+    public Notification addMessage(String connectionNumber, Message message) {
+        RList<Message> messages = redissonClient.getList("messages_" + connectionNumber);
+        messages.add(message);
+
+        return new ChatNotification(message);
+    }
+
+    @Override
+    public void removeMessage(String nationalNumber, Message message) {
+        RList<Message> messages = redissonClient.getList("messages_" + nationalNumber);
+        messages.remove(message);
     }
 }

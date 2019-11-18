@@ -10,8 +10,8 @@ public class ChatNotification extends Notification {
 
     private Message message;
 
-    public ChatNotification(Long date, Message message) {
-        super(date, Type.MESSAGE);
+    public ChatNotification(Message message) {
+        super(message.getDate(), Type.MESSAGE);
         this.message = message;
     }
 }

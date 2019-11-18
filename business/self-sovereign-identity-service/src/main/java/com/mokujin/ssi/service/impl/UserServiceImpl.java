@@ -56,6 +56,7 @@ public class UserServiceImpl implements UserService {
         credentials.removeAll(nationalCredentials);
 
         return User.builder()
+                .role(identity.getRole())
                 .lastName(passport.getLastName())
                 .firstName(passport.getFirstName())
                 .fatherName(passport.getFatherName())

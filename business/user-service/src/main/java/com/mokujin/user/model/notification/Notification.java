@@ -13,6 +13,7 @@ public abstract class Notification {
 
     public enum Type {
         MESSAGE,
+        CONNECTION,
         INVITATION
     }
 

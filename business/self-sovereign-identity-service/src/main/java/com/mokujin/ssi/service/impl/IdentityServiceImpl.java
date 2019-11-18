@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.mokujin.ssi.model.internal.Role.*;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.proverGetCredentials;
 import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
 import static org.hyperledger.indy.sdk.ledger.Ledger.buildNymRequest;
@@ -52,7 +53,9 @@ public class IdentityServiceImpl implements IdentityService {
         didsWithMetadata.stream()
                 .filter(d -> d.getMetadata().isVerinym())
                 .findAny()
-                .ifPresent(didWithMetadata -> identity.setVerinymDid(didWithMetadata.getDid()));
+                .ifPresent(didWithMetadata -> identity.toBuilder()
+                        .verinymDid(didWithMetadata.getDid())
+                        .role(DOCTOR));
 
         List<Pseudonym> pseudonyms = didsWithMetadata.stream()
                 .filter(d -> !d.getMetadata().isVerinym())

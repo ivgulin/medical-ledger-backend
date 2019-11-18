@@ -2,6 +2,7 @@ package com.mokujin.ssi.model.user.response;
 
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Credential;
+import com.mokujin.ssi.model.internal.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,12 +12,16 @@ import lombok.experimental.Accessors;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mokujin.ssi.model.internal.Role.PATIENT;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
 @Builder(toBuilder = true)
 public class User {
+
+    private Role role;
 
     private String firstName;
 

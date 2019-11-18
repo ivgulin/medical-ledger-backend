@@ -1,5 +1,6 @@
 package com.mokujin.user.controller;
 
+import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.User;
 import com.mokujin.user.service.InvitationService;
 import lombok.RequiredArgsConstructor;
@@ -17,35 +18,36 @@ public class InvitationController {
 
     private final InvitationService invitationService;
 
-    @GetMapping("/invite-back")
-    public ResponseEntity inviteBack(@RequestParam String invitorNumber,
+    @PostMapping("/invite-back")
+    public ResponseEntity inviteBack(@RequestBody Contact doctor,
                                      @RequestHeader("Public-Key") String publicKey,
                                      @RequestHeader("Private-Key") String privateKey) {
-        log.info("'inviteBack' invoked with params '{}, {}, {}'", publicKey, privateKey, invitorNumber);
+        log.info("'inviteBack' invoked with params '{}, {}, {}'", publicKey, privateKey, doctor);
 
-        User user = invitationService.inviteBack(publicKey, privateKey, invitorNumber);
+        User user = invitationService.inviteBack(publicKey, privateKey, doctor);
 
         log.info("'inviteBack' returned '{}'", user);
         return ResponseEntity.ok(user);
     }
 
     @GetMapping("/accept")
-    public ResponseEntity<User> accept(@RequestParam String nationalNumber,
+    public ResponseEntity<User> accept(@RequestParam String doctorNumber,
+                                       @RequestParam String patientNumber,
                                        @RequestHeader("Public-Key") String publicKey,
                                        @RequestHeader("Private-Key") String privateKey) {
-        log.info("'accept' invoked with params '{}, {}, {}'", publicKey, privateKey, nationalNumber);
+        log.info("'accept' invoked with params '{}, {}, {}, {}'", publicKey, privateKey, doctorNumber, patientNumber);
 
-        User user = invitationService.accept(publicKey, privateKey, nationalNumber);
+        User user = invitationService.accept(publicKey, privateKey, doctorNumber, patientNumber);
 
         log.info("'accept' returned '{}'", user);
         return ResponseEntity.ok(user);
     }
 
     @GetMapping("/decline")
-    public ResponseEntity decline(@RequestParam String nationalNumber) {
-        log.info("'decline' invoked with params '{}'", nationalNumber);
+    public ResponseEntity decline(@RequestParam String doctorNumber, @RequestParam String patientNumber) {
+        log.info("'decline' invoked with params '{}, {}'", doctorNumber, patientNumber);
 
-        invitationService.decline(nationalNumber);
+        invitationService.decline(doctorNumber, patientNumber);
 
         log.info("'decline' has executed successfully.");
         return new ResponseEntity(OK);

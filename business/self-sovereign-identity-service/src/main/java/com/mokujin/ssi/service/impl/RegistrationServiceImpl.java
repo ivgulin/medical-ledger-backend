@@ -17,7 +17,6 @@ import com.mokujin.ssi.model.user.request.UserRegistrationDetails;
 import com.mokujin.ssi.model.user.response.User;
 import com.mokujin.ssi.service.*;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.pool.Pool;
@@ -28,7 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.mokujin.ssi.model.government.KnownIdentity.Role.DOCTOR;
+import static com.mokujin.ssi.model.internal.Role.DOCTOR;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
 import static org.hyperledger.indy.sdk.anoncreds.AnoncredsResults.IssuerCreateCredentialResult;
 import static org.hyperledger.indy.sdk.anoncreds.AnoncredsResults.ProverCreateCredentialRequestResult;

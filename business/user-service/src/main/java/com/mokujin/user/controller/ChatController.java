@@ -33,13 +33,13 @@ public class ChatController {
     @PostMapping("/add/{connectionNumber}")
     public ResponseEntity<Chat> addMessage(@PathVariable String connectionNumber,
                                            @RequestBody @Valid Message message,
-                                           @RequestParam String notificationToken,
+                                           @RequestParam String nationalNumber,
                                            @RequestHeader("Public-Key") String publicKey,
                                            @RequestHeader("Private-Key") String privateKey) {
-        log.info("'addMessage' invoked with params '{}, {}, {}, {}, {}'", connectionNumber, notificationToken,
+        log.info("'addMessage' invoked with params '{}, {}, {}, {}, {}'", connectionNumber, nationalNumber,
                 message, publicKey, privateKey);
 
-        Chat chat = chatService.addMessage(publicKey, privateKey, connectionNumber, message);
+        Chat chat = chatService.addMessage(publicKey, privateKey, connectionNumber, nationalNumber, message);
 
         log.info("'addMessage' returned '{}'", chat);
         return ResponseEntity.ok(chat);
@@ -50,8 +50,8 @@ public class ChatController {
                                                            @RequestBody @Valid Message message,
                                                            @RequestHeader("Public-Key") String publicKey,
                                                            @RequestHeader("Private-Key") String privateKey) {
-        log.info("'addMessageWithNotification' invoked with params '{}, {}, {}, {}'", connectionNumber
-                , message, publicKey, privateKey);
+        log.info("'addMessageWithNotification' invoked with params '{}, {}, {}, {}'", connectionNumber, message,
+                publicKey, privateKey);
 
         Chat chat = chatService.addMessageWithNotification(publicKey, privateKey, connectionNumber, message);
 
