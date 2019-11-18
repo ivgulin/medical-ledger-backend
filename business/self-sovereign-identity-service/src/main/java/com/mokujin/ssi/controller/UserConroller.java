@@ -1,13 +1,15 @@
 package com.mokujin.ssi.controller;
 
-import com.mokujin.ssi.model.user.request.UserCredentials;
 import com.mokujin.ssi.model.user.response.User;
 import com.mokujin.ssi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController

@@ -71,10 +71,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User get(String publicKey, String privateKey) {
 
-        try (Wallet userWallet = walletService.getOrCreateWallet(publicKey, privateKey);){
+        try (Wallet userWallet = walletService.getOrCreateWallet(publicKey, privateKey);) {
             Identity userIdentity = identityService.findByWallet(userWallet);
             return this.convert(userIdentity);
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Exception was thrown: " + e);
             throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
         }

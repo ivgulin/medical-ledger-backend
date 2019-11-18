@@ -1,9 +1,6 @@
 package com.mokujin.government.service.impl;
 
-import com.mokujin.government.model.dto.KnownIdentityDTO;
-import com.mokujin.government.model.dto.NationalNumberDTO;
-import com.mokujin.government.model.dto.NationalPassportDTO;
-import com.mokujin.government.model.dto.Person;
+import com.mokujin.government.model.dto.*;
 import com.mokujin.government.model.entity.Certificate;
 import com.mokujin.government.model.entity.KnownIdentity;
 import com.mokujin.government.model.entity.NationalPassport;
@@ -22,6 +19,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -40,7 +40,6 @@ public class KnownIdentityServiceImpl implements KnownIdentityService {
         Set<PlaceOfResidence> placesOfResidence = nationalPassport.getPlacesOfResidence();
         nationalPassport.setPlacesOfResidence(new HashSet<>());
         placesOfResidence.forEach(nationalPassport::addPlaceOfResidence);
-
 
         List<Certificate> certificates = knownIdentity.getCertificates();
         knownIdentity.setCertificates(new ArrayList<>());
@@ -87,6 +86,17 @@ public class KnownIdentityServiceImpl implements KnownIdentityService {
 
         NationalNumberDTO nationalNumber = new NationalNumberDTO(knownIdentity.getNationalNumber());
         knownIdentity.setNationalNumber(nationalNumber);
+
+        if (nonNull(knownIdentity.getDiploma())) {
+            DiplomaDTO diplomaDTO = new DiplomaDTO(knownIdentity.getDiploma());
+            knownIdentity.setDiploma(diplomaDTO);
+        }
+        if (nonNull(knownIdentity.getCertificates())) {
+            List<Certificate> certificates = knownIdentity.getCertificates().stream()
+                    .map(CertificateDTO::new)
+                    .collect(Collectors.toList());
+            knownIdentity.setCertificates(certificates);
+        }
 
         return knownIdentity;
     }

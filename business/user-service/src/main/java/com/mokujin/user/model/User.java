@@ -26,7 +26,7 @@ public class User {
 
     private List<Credential> credentials = new ArrayList<>();
 
-    public enum Role{
+    public enum Role {
         PATIENT,
         DOCTOR
     }

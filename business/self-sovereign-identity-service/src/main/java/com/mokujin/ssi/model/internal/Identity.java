@@ -11,7 +11,7 @@ import org.hyperledger.indy.sdk.wallet.Wallet;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mokujin.ssi.model.internal.Role.*;
+import static com.mokujin.ssi.model.internal.Role.PATIENT;
 
 @Data
 @NoArgsConstructor

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.service.WalletService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.hyperledger.indy.sdk.IndyException;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +35,6 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    @SneakyThrows
     public boolean doesWalletExist(String publicKey, String privateKey) {
 
         ObjectNode config = objectMapper.createObjectNode();

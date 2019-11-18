@@ -2,6 +2,7 @@ package com.mokujin.ssi.service.impl;
 
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.document.Document;
+import com.mokujin.ssi.model.government.document.impl.NationalNumber;
 import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Credential;
@@ -32,9 +33,14 @@ class UserServiceImplTest {
         String image = "image";
         String sex = "male";
         String issuer = "gov";
+        String number = "number";
 
         Credential passportCredential = Credential.builder()
-                .document(new NationalPassport(name, lastName, name, date, place, image, sex, issuer, date))
+                .document(new NationalPassport(number, name, lastName, name, date, place, image, sex, issuer, date))
+                .build();
+
+        Credential nationalNumberCredential = Credential.builder()
+                .document(new NationalNumber(number, date, issuer))
                 .build();
 
         Credential testCredential = Credential.builder()
@@ -49,7 +55,7 @@ class UserServiceImplTest {
                 .build();
 
         Identity identity = Identity.builder()
-                .credentials(new ArrayList<>(Arrays.asList(passportCredential, testCredential)))
+                .credentials(new ArrayList<>(Arrays.asList(passportCredential, testCredential, nationalNumberCredential)))
                 .pseudonyms(Collections.singletonList(pseudonym))
                 .build();
 
@@ -58,9 +64,10 @@ class UserServiceImplTest {
                 .firstName(name)
                 .fatherName(name)
                 .photo(image)
+                .nationalNumber(number)
                 .contacts(Collections.singletonList(pseudonym.getContact()))
                 .credentials(Collections.singletonList(testCredential))
-                .nationalCredentials(Collections.singletonList(passportCredential))
+                .nationalCredentials(Arrays.asList(passportCredential, nationalNumberCredential))
                 .build();
 
         User result = userService.convert(identity);

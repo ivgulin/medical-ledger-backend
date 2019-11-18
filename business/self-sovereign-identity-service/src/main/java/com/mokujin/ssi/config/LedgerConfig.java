@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mokujin.ssi.model.exception.extention.LedgerException;
-import com.mokujin.ssi.model.internal.*;
+import com.mokujin.ssi.model.internal.Contact;
+import com.mokujin.ssi.model.internal.Identity;
+import com.mokujin.ssi.model.internal.Pseudonym;
+import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.service.IdentityService;
 import com.mokujin.ssi.service.WalletService;
 import lombok.SneakyThrows;
@@ -25,14 +27,14 @@ import org.springframework.context.annotation.DependsOn;
 
 import javax.annotation.PreDestroy;
 
-import static com.mokujin.ssi.model.internal.Role.*;
+import static com.mokujin.ssi.model.internal.Role.STEWARD;
+import static com.mokujin.ssi.model.internal.Role.TRUST_ANCHOR;
 import static java.util.Objects.isNull;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateAndStoreCredentialDef;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateSchema;
 import static org.hyperledger.indy.sdk.did.Did.createAndStoreMyDid;
 import static org.hyperledger.indy.sdk.ledger.Ledger.*;
 import static org.hyperledger.indy.sdk.pool.Pool.*;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Configuration

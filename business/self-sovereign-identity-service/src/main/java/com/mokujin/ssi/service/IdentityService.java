@@ -1,14 +1,12 @@
 package com.mokujin.ssi.service;
 
-import com.mokujin.ssi.model.government.document.impl.NationalNumber;
-import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.model.internal.Identity;
 import org.hyperledger.indy.sdk.did.DidResults;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 
 public interface IdentityService {
 
-    Identity findByWallet(Wallet wallet);
+    Identity findByWallet(Wallet wallet) throws Exception;
 
     void establishUserConnection(Identity trustAnchor,
                                  DidResults.CreateAndStoreMyDidResult trustAnchorPseudonym,

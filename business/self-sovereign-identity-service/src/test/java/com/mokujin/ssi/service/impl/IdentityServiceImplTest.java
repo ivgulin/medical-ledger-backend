@@ -9,26 +9,44 @@ import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
 import com.mokujin.ssi.service.IdentityService;
-import mockit.Mock;
+import lombok.SneakyThrows;
 import mockit.MockUp;
 import org.hyperledger.indy.sdk.anoncreds.Anoncreds;
 import org.hyperledger.indy.sdk.did.Did;
+import org.hyperledger.indy.sdk.did.DidResults;
+import org.hyperledger.indy.sdk.ledger.Ledger;
+import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
+import static com.mokujin.ssi.model.internal.Role.DOCTOR;
+import static com.mokujin.ssi.model.internal.Role.PATIENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class IdentityServiceImplTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private IdentityService identityService = new IdentityServiceImpl(objectMapper);
+    @Mock
+    private Pool pool;
+
+    private IdentityService identityService;
+
+    @BeforeEach
+    void setUp() {
+        identityService = new IdentityServiceImpl(objectMapper, pool);
+    }
 
     @Test
+    @SneakyThrows
     void findByWallet_didsAndCredentialsExistInLedger_identityWithDidsAndCredentialsIsReturned() {
 
         Wallet wallet = mock(Wallet.class);
@@ -46,7 +64,7 @@ class IdentityServiceImplTest {
         String pseudonymDid = "pseudonym did";
 
         new MockUp<Did>() {
-            @Mock
+            @mockit.Mock
             public CompletableFuture<String> getListMyDidsWithMeta(Wallet wallet1) {
                 ArrayNode contacts = objectMapper.createArrayNode();
 
@@ -85,7 +103,7 @@ class IdentityServiceImplTest {
         };
 
         new MockUp<Anoncreds>() {
-            @Mock
+            @mockit.Mock
             public CompletableFuture<String> proverGetCredentials(Wallet wallet1, String filter) {
                 ObjectNode document = objectMapper.createObjectNode();
                 document.put("number", nationalNumber);
@@ -112,6 +130,7 @@ class IdentityServiceImplTest {
         Identity expected = Identity.builder()
                 .verinymDid(verinymDid)
                 .wallet(wallet)
+                .role(DOCTOR)
                 .credentials(Collections.singletonList(Credential.builder()
                         .id(credentialId)
                         .document(new NationalNumber(nationalNumber, registrationDate, issuer))
@@ -136,13 +155,14 @@ class IdentityServiceImplTest {
 
 
     @Test
+    @SneakyThrows
     void findByWallet_didsAndCredentialsDoNotExistInLedger_identityWithoutDidsAndCredentialsIsReturned() {
 
         Wallet wallet = mock(Wallet.class);
 
         new MockUp<Did>() {
-            @Mock
-            public CompletableFuture<String> getListMyDidsWithMeta(Wallet wallet1) {
+            @mockit.Mock
+            CompletableFuture<String> getListMyDidsWithMeta(Wallet wallet1) {
                 ArrayNode contacts = objectMapper.createArrayNode();
                 CompletableFuture<String> future = new CompletableFuture<>();
                 future.complete(contacts.toString());
@@ -151,7 +171,7 @@ class IdentityServiceImplTest {
         };
 
         new MockUp<Anoncreds>() {
-            @Mock
+            @mockit.Mock
             public CompletableFuture<String> proverGetCredentials(Wallet wallet1, String filter) {
                 ArrayNode credentials = objectMapper.createArrayNode();
                 CompletableFuture<String> future = new CompletableFuture<>();
@@ -162,6 +182,7 @@ class IdentityServiceImplTest {
 
         Identity expected = Identity.builder()
                 .wallet(wallet)
+                .role(PATIENT)
                 .credentials(Collections.emptyList())
                 .pseudonyms(Collections.emptyList())
                 .build();
@@ -169,5 +190,63 @@ class IdentityServiceImplTest {
         Identity result = identityService.findByWallet(wallet);
 
         assertEquals(expected, result);
+    }
+
+    @Test
+    @SneakyThrows
+    void establishUserConnection_validInputs_methodIsExecuted() {
+
+        Wallet wallet = mock(Wallet.class);
+        DidResults.CreateAndStoreMyDidResult trustAnchorPseudonym = mock(DidResults.CreateAndStoreMyDidResult.class);
+        DidResults.CreateAndStoreMyDidResult userPseudonym = mock(DidResults.CreateAndStoreMyDidResult.class);
+        String governmentPseudonymDid = "gov did";
+        String governmentPseudonymVerkey = "gov verkey";
+        String userPseudonymDid = "user did";
+        String userPseudonymVerkey = "user verkey";
+        when(trustAnchorPseudonym.getDid()).thenReturn(governmentPseudonymDid);
+        when(trustAnchorPseudonym.getVerkey()).thenReturn(governmentPseudonymVerkey);
+        when(userPseudonym.getDid()).thenReturn(userPseudonymDid);
+        when(userPseudonym.getVerkey()).thenReturn(userPseudonymVerkey);
+
+        String verinymDid = "did";
+        Identity identity = Identity.builder()
+                .wallet(wallet)
+                .verinymDid(verinymDid)
+                .build();
+
+        String responseUsingGovCreds = "response for gov";
+        String responseUsingUserCreds = "response for user";
+        new MockUp<Ledger>() {
+            @mockit.Mock
+            public CompletableFuture<String> buildNymRequest(String submitterDid, String targetDid, String verkey,
+                                                             String alias, String role) {
+                assertEquals(verinymDid, submitterDid);
+                assertTrue(targetDid.equals(governmentPseudonymDid) || targetDid.equals(userPseudonymDid));
+                assertTrue(verkey.equals(governmentPseudonymVerkey) || verkey.equals(userPseudonymVerkey));
+
+                CompletableFuture<String> future = new CompletableFuture<>();
+                if (targetDid.equals(governmentPseudonymDid) && verkey.equals(governmentPseudonymVerkey)) {
+                    future.complete(responseUsingGovCreds);
+                }
+                if (targetDid.equals(userPseudonymDid) && verkey.equals(userPseudonymVerkey)) {
+                    future.complete(responseUsingUserCreds);
+                }
+                return future;
+            }
+
+            @mockit.Mock
+            public CompletableFuture<String> signAndSubmitRequest(Pool pool, Wallet wallet, String submitterDid,
+                                                                  String requestJson) {
+                assertEquals(identity.getWallet(), wallet);
+                assertEquals(verinymDid, submitterDid);
+                assertTrue(requestJson.equals(responseUsingGovCreds) || requestJson.equals(responseUsingUserCreds));
+
+                CompletableFuture<String> future = new CompletableFuture<>();
+                future.complete("response");
+                return future;
+            }
+        };
+
+        identityService.establishUserConnection(identity, trustAnchorPseudonym, userPseudonym);
     }
 }

@@ -2,10 +2,12 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.government.document.Document;
 import com.mokujin.ssi.model.government.document.impl.NationalNumber;
 import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.service.CredentialService;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,6 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CredentialServiceImplTest {
 
@@ -28,16 +31,17 @@ class CredentialServiceImplTest {
         String placeOfBirth = "place";
         String image = "encrypted";
         String sex = "male";
+        String number = "number";
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         ObjectNode passportNode = getPassportNode(someDate, issuer, name, lastName, placeOfBirth,
-                image, sex, objectMapper);
+                image, sex, objectMapper, number);
 
         ObjectNode nationalNumberNode = getNationalNumber(nationalNumber, someDate, issuer, objectMapper);
 
         return Stream.of(
-                Arguments.of(new NationalPassport(name, lastName, name, someDate, placeOfBirth,
+                Arguments.of(new NationalPassport(number, name, lastName, name, someDate, placeOfBirth,
                         image, sex, issuer, someDate), passportNode.toString()),
                 Arguments.of(new NationalNumber(nationalNumber, someDate, issuer), nationalNumberNode.toString())
         );
@@ -68,49 +72,53 @@ class CredentialServiceImplTest {
 
     private static ObjectNode getPassportNode(long someDate, String issuer, String name, String lastName,
                                               String placeOfBirth, String image, String sex,
-                                              ObjectMapper objectMapper) {
+                                              ObjectMapper objectMapper, String number) {
         ObjectNode passportNode = objectMapper.createObjectNode();
 
         ObjectNode attributeOne = objectMapper.createObjectNode();
-        attributeOne.put("raw", name);
+        attributeOne.put("raw", number);
 
         ObjectNode attributeTwo = objectMapper.createObjectNode();
-        attributeTwo.put("raw", lastName);
+        attributeTwo.put("raw", name);
 
         ObjectNode attributeThree = objectMapper.createObjectNode();
-        attributeThree.put("raw", name);
+        attributeThree.put("raw", lastName);
 
         ObjectNode attributeFour = objectMapper.createObjectNode();
-        attributeFour.put("raw", String.valueOf(someDate));
+        attributeFour.put("raw", name);
 
         ObjectNode attributeFive = objectMapper.createObjectNode();
-        attributeFive.put("raw", placeOfBirth);
+        attributeFive.put("raw", String.valueOf(someDate));
 
         ObjectNode attributeSix = objectMapper.createObjectNode();
-        attributeSix.put("raw", image);
+        attributeSix.put("raw", placeOfBirth);
 
         ObjectNode attributeSeven = objectMapper.createObjectNode();
-        attributeSeven.put("raw", sex);
+        attributeSeven.put("raw", image);
 
         ObjectNode attributeEight = objectMapper.createObjectNode();
-        attributeEight.put("raw", issuer);
+        attributeEight.put("raw", sex);
 
         ObjectNode attributeNine = objectMapper.createObjectNode();
-        attributeNine.put("raw", String.valueOf(someDate));
+        attributeNine.put("raw", issuer);
 
         ObjectNode attributeTen = objectMapper.createObjectNode();
-        attributeTen.put("raw", "passport");
+        attributeTen.put("raw", String.valueOf(someDate));
 
-        passportNode.set("firstName", attributeOne);
-        passportNode.set("lastName", attributeTwo);
-        passportNode.set("fatherName", attributeThree);
-        passportNode.set("dateOfBirth", attributeFour);
-        passportNode.set("placeOfBirth", attributeFive);
-        passportNode.set("image", attributeSix);
-        passportNode.set("sex", attributeSeven);
-        passportNode.set("issuer", attributeEight);
-        passportNode.set("dateOfIssue", attributeNine);
-        passportNode.set("type", attributeTen);
+        ObjectNode attributeEleven = objectMapper.createObjectNode();
+        attributeEleven.put("raw", "passport");
+
+        passportNode.set("number", attributeOne);
+        passportNode.set("firstName", attributeTwo);
+        passportNode.set("lastName", attributeThree);
+        passportNode.set("fatherName", attributeFour);
+        passportNode.set("dateOfBirth", attributeFive);
+        passportNode.set("placeOfBirth", attributeSix);
+        passportNode.set("image", attributeSeven);
+        passportNode.set("sex", attributeEight);
+        passportNode.set("issuer", attributeNine);
+        passportNode.set("dateOfIssue", attributeTen);
+        passportNode.set("type", attributeEleven);
         return passportNode;
     }
 
@@ -125,4 +133,9 @@ class CredentialServiceImplTest {
         assertEquals(expected, result);
     }
 
+    @Test
+    void getCredential_documentHasNullField_skipTheField() {
+        NationalNumber nationalNumber = new NationalNumber(null, null, null);
+        assertThrows(LedgerException.class, () -> credentialService.getCredential(nationalNumber));
+    }
 }

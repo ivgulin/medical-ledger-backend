@@ -8,7 +8,6 @@ import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.model.internal.*;
 import com.mokujin.ssi.service.IdentityService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.pool.Pool;
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.mokujin.ssi.model.internal.Role.*;
+import static com.mokujin.ssi.model.internal.Role.DOCTOR;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.proverGetCredentials;
 import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
 import static org.hyperledger.indy.sdk.ledger.Ledger.buildNymRequest;
@@ -34,8 +33,7 @@ public class IdentityServiceImpl implements IdentityService {
     private final Pool pool;
 
     @Override
-    @SneakyThrows
-    public Identity findByWallet(Wallet wallet) {
+    public Identity findByWallet(Wallet wallet) throws Exception {
 
         Identity identity = new Identity();
         identity.setWallet(wallet);
@@ -53,9 +51,10 @@ public class IdentityServiceImpl implements IdentityService {
         didsWithMetadata.stream()
                 .filter(d -> d.getMetadata().isVerinym())
                 .findAny()
-                .ifPresent(didWithMetadata -> identity.toBuilder()
-                        .verinymDid(didWithMetadata.getDid())
-                        .role(DOCTOR));
+                .ifPresent(didWithMetadata -> {
+                    identity.setVerinymDid(didWithMetadata.getDid());
+                    identity.setRole(DOCTOR);
+                });
 
         List<Pseudonym> pseudonyms = didsWithMetadata.stream()
                 .filter(d -> !d.getMetadata().isVerinym())
@@ -109,7 +108,6 @@ public class IdentityServiceImpl implements IdentityService {
                 trustAnchor.getVerinymDid(),
                 nymRegisterIdentityPseudonym).get();
         log.info("'nymRegisterIdentityPseudonymResponse={}'", nymRegisterIdentityPseudonymResponse);
-
     }
 
     @Override

@@ -32,7 +32,7 @@ public class WalletController {
         try (Wallet wallet = walletService.getOrCreateWallet(credentials.getPublicKey(), credentials.getPrivateKey());) {
             log.info("'createWallet' is executed successfully.");
             return new ResponseEntity(OK);
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Exception was thrown: " + e);
             throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
