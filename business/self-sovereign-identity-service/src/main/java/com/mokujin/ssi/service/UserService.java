@@ -7,4 +7,6 @@ public interface UserService {
 
     User convert(Identity identity);
 
+    User get(String publicKey, String privateKey);
+
 }

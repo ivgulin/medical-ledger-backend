@@ -1,12 +1,7 @@
 package com.mokujin.government.service.impl;
 
-import com.mokujin.government.model.dto.KnownIdentityDTO;
-import com.mokujin.government.model.dto.NationalNumberDTO;
-import com.mokujin.government.model.dto.NationalPassportDTO;
-import com.mokujin.government.model.dto.Person;
-import com.mokujin.government.model.entity.KnownIdentity;
-import com.mokujin.government.model.entity.NationalNumber;
-import com.mokujin.government.model.entity.NationalPassport;
+import com.mokujin.government.model.dto.*;
+import com.mokujin.government.model.entity.*;
 import com.mokujin.government.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.government.repository.KnownIdentityRepository;
 import com.mokujin.government.service.FileService;
@@ -20,8 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -116,11 +111,45 @@ class KnownIdentityServiceImplTest {
 
     @Test
     void save_knownIdentityIsOk_savedKnownIdentityIsReturned() {
+
+        Set<PlaceOfResidence> placesOfResidence = new HashSet<>();
+        PlaceOfResidence placeOfResidenceOne = PlaceOfResidence.builder()
+                .startDate(123L)
+                .endDate(234L)
+                .build();
+        PlaceOfResidence placeOfResidenceTwo = PlaceOfResidence.builder()
+                .startDate(345L)
+                .endDate(456L)
+                .build();
+        placesOfResidence.add(placeOfResidenceOne);
+        placesOfResidence.add(placeOfResidenceTwo);
+
+        List<Certificate> certificates = new ArrayList<>();
+        Certificate dentistCertificate = Certificate.builder()
+                .qualification("dentist")
+                .build();
+        Certificate surgeonCertificate = Certificate.builder()
+                .qualification("surgeon")
+                .build();
+        certificates.add(dentistCertificate);
+        certificates.add(surgeonCertificate);
+
+        NationalPassport passport = NationalPassport.builder()
+                .placesOfResidence(placesOfResidence)
+                .build();
+
         KnownIdentity knownIdentity = KnownIdentity.builder()
-                .nationalPassport(NationalPassport.builder().placesOfResidence(Collections.emptySet()).build())
+                .nationalPassport(passport)
+                .certificates(certificates)
                 .build();
         when(knownIdentityRepository.save(knownIdentity)).thenReturn(knownIdentity);
         KnownIdentity savedKnownIdentity = knownIdentityService.save(knownIdentity);
+
+        placeOfResidenceOne.setNationalPassport(passport);
+        placeOfResidenceTwo.setNationalPassport(passport);
+        dentistCertificate.setKnownIdentity(knownIdentity);
+        surgeonCertificate.setKnownIdentity(knownIdentity);
+
         assertEquals(knownIdentity, savedKnownIdentity);
     }
 
@@ -154,7 +183,89 @@ class KnownIdentityServiceImplTest {
     }
 
     @Test
-    void getWithImage_personIsOk_knownIdentityIsReturned() {
+    void getWithImage_everyDocumentInThePlace_knownIdentityIsReturned() {
+        String nationalNumberValue = "number";
+        String fatherName = "fathername";
+        String firstName = "first";
+        String lastName = "last";
+        long dateOfBirth = 1234567L;
+        String imageName = "test";
+        String qualification = "surgeon";
+
+        Person person = Person.builder()
+                .nationalNumber(nationalNumberValue)
+                .fatherName(fatherName)
+                .firstName(firstName)
+                .lastName(lastName)
+                .dateOfBirth(dateOfBirth)
+                .build();
+
+        NationalPassport nationalPassport = NationalPassport.builder()
+                .fatherName(fatherName)
+                .firstName(firstName)
+                .lastName(lastName)
+                .dateOfBirth(dateOfBirth)
+                .imageName(imageName)
+                .build();
+
+        NationalNumber nationalNumber = NationalNumber.builder()
+                .number(nationalNumberValue)
+                .build();
+
+        Diploma diploma = Diploma.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .fatherName(fatherName)
+                .qualification(qualification)
+                .build();
+
+        List<Certificate> certificates = new ArrayList<>();
+        Certificate certificateOne = Certificate.builder()
+                .qualification(qualification)
+                .build();
+
+        Certificate certificateTwo = Certificate.builder()
+                .lastName(lastName)
+                .build();
+        certificates.add(certificateOne);
+        certificates.add(certificateTwo);
+
+        KnownIdentity knownIdentity = KnownIdentity.builder()
+                .nationalPassport(nationalPassport)
+                .nationalNumber(nationalNumber)
+                .diploma(diploma)
+                .certificates(certificates)
+                .build();
+
+        when(knownIdentityRepository.findByNationalNumber_Number(person.getNationalNumber()))
+                .thenReturn(Optional.of(knownIdentity));
+        String encodedImageValue = "test";
+        when(fileService.getBase64EncodedFile(imageName)).thenReturn(encodedImageValue);
+
+        KnownIdentityDTO expected = new KnownIdentityDTO(knownIdentity);
+
+        NationalPassportDTO expectedPassport = new NationalPassportDTO(nationalPassport);
+        expectedPassport.setImage(encodedImageValue);
+        expected.setNationalPassport(expectedPassport);
+
+        NationalNumberDTO expectedNationalNumber = new NationalNumberDTO(nationalNumber);
+        expected.setNationalNumber(expectedNationalNumber);
+
+        DiplomaDTO expectedDiploma = new DiplomaDTO(diploma);
+        expected.setDiploma(expectedDiploma);
+
+        List<Certificate> expectedCertificates = certificates.stream()
+                .map(CertificateDTO::new)
+                .collect(Collectors.toList());
+        expected.setCertificates(expectedCertificates);
+
+        KnownIdentityDTO result = knownIdentityService.getWithImage(person);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getWithImage_noDiplomaOrCertificateExists_knownIdentityIsReturned() {
         String nationalNumberValue = "number";
         String fatherName = "fathername";
         String firstName = "first";

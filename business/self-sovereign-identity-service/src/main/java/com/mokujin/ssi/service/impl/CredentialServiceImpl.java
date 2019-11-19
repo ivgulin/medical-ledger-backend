@@ -2,6 +2,7 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.government.document.Document;
 import com.mokujin.ssi.model.government.document.NationalDocument;
 import com.mokujin.ssi.service.CredentialService;
@@ -14,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Service
@@ -42,8 +45,9 @@ public class CredentialServiceImpl implements CredentialService {
                 attribute.put("raw", value.toString());
                 attribute.put("encoded", String.valueOf(Math.abs(new Random().nextLong())));
                 credentialNode.set(f.getName(), attribute);
-            } catch (IllegalAccessException e) {
+            } catch (Exception e) {
                 log.error("Exception was thrown: " + e);
+                throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
             }
         });
 

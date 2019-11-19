@@ -19,6 +19,10 @@ public class Contact {
 
     private String photo;
 
+    private String nationalNumber;
+
+    private boolean isVisible;
+
     @JsonIgnore
     private boolean isVerinym;
 

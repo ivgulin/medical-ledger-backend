@@ -7,7 +7,8 @@ import lombok.Data;
 public class KnownIdentityDTO extends KnownIdentity {
 
     public KnownIdentityDTO(KnownIdentity knownIdentity) {
-        super(knownIdentity.getId(), knownIdentity.getNationalPassport(), knownIdentity.getNationalNumber());
+        super(knownIdentity.getId(), knownIdentity.getRole(), knownIdentity.getNationalPassport(),
+                knownIdentity.getNationalNumber(), knownIdentity.getDiploma(), knownIdentity.getCertificates());
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.mokujin.ssi.model.user.response;
 
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Credential;
+import com.mokujin.ssi.model.internal.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,11 +19,15 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class User {
 
+    private Role role;
+
     private String firstName;
 
     private String lastName;
 
     private String fatherName;
+
+    private String nationalNumber;
 
     private String photo;
 

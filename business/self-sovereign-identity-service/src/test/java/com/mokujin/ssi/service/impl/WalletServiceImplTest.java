@@ -2,6 +2,7 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokujin.ssi.service.WalletService;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import mockit.Mock;
 import mockit.MockUp;
@@ -14,7 +15,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 @Slf4j
@@ -23,6 +23,7 @@ class WalletServiceImplTest {
     private WalletService walletService = new WalletServiceImpl(new ObjectMapper());
 
     @Test
+    @SneakyThrows
     void getOrCreateWallet_validInputs_walletIsReturned() {
 
         Wallet wallet = mock(Wallet.class);
@@ -41,14 +42,24 @@ class WalletServiceImplTest {
     }
 
     @Test
+    @SneakyThrows
     void getOrCreateWallet_walletDoesNotExist_newWalletIsReturned() {
 
         IndyException indyException = mock(IndyException.class);
+        Wallet wallet = mock(Wallet.class);
 
         new MockUp<Wallet>() {
+            boolean doesThrow = true;
+
             @Mock
             public CompletableFuture<Wallet> openWallet(String config, String credentials) throws IndyException {
-                throw indyException;
+                if (doesThrow) {
+                    doesThrow = false;
+                    throw indyException;
+                }
+                CompletableFuture<Wallet> future = new CompletableFuture<>();
+                future.complete(wallet);
+                return future;
             }
 
             @Mock
@@ -57,7 +68,8 @@ class WalletServiceImplTest {
             }
         };
 
-        assertThrows(IndyException.class, () -> walletService.getOrCreateWallet("test", "test"));
+        Wallet result = walletService.getOrCreateWallet("test", "test");
+        assertEquals(wallet, result);
     }
 
     @ParameterizedTest

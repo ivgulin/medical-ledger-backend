@@ -25,6 +25,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import javax.annotation.PreDestroy;
+
+import static com.mokujin.ssi.model.internal.Role.STEWARD;
+import static com.mokujin.ssi.model.internal.Role.TRUST_ANCHOR;
 import static java.util.Objects.isNull;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateAndStoreCredentialDef;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.issuerCreateSchema;
@@ -53,8 +57,6 @@ public class LedgerConfig {
     private final String GOVERNMENT_KEY;
 
     private final String GOVERNMENT_PHOTO;
-
-    private final String ROLE = "TRUST_ANCHOR";
 
     private final WalletService walletService;
 
@@ -104,14 +106,12 @@ public class LedgerConfig {
     }
 
     @Bean("stewardWallet")
-    @SneakyThrows
     @DependsOn("pool")
     public Wallet getStewardWallet() {
         return this.getWallet(STEWARD_ID, STEWARD_KEY);
     }
 
     @Bean("governmentWallet")
-    @SneakyThrows
     @DependsOn("pool")
     public Wallet getGovernmentWallet() {
         return this.getWallet(GOVERNMENT_ID, GOVERNMENT_KEY);
@@ -130,6 +130,7 @@ public class LedgerConfig {
         seedConfig.put("seed", STEWARD_SEED);
 
         Identity identity = identityService.findByWallet(wallet);
+        identity.setRole(STEWARD);
         log.info("'stewardIdentity={}'", identity);
 
         if (isNull(identity.getVerinymDid())) {
@@ -139,6 +140,7 @@ public class LedgerConfig {
             Contact selfContact = Contact.builder()
                     .contactName("Steward")
                     .isVerinym(true)
+                    .isVisible(false)
                     .build();
             String selfContactJson = objectMapper.writeValueAsString(selfContact);
             Did.setDidMetadata(wallet, verinym.getDid(), selfContactJson).get();
@@ -163,6 +165,7 @@ public class LedgerConfig {
         Wallet stewardWallet = stewardIdentity.getWallet();
 
         Identity trustAnchorIdentity = identityService.findByWallet(trustAnchorWallet);
+        trustAnchorIdentity.setRole(TRUST_ANCHOR);
         log.info("'trustAnchorIdentity={}'", trustAnchorIdentity);
 
         if (isNull(trustAnchorIdentity.getVerinymDid())) {
@@ -172,6 +175,7 @@ public class LedgerConfig {
             Contact selfContact = Contact.builder()
                     .contactName(trustAnchorName)
                     .isVerinym(true)
+                    .isVisible(false)
                     .build();
             String selfContactJson = objectMapper.writeValueAsString(selfContact);
             Did.setDidMetadata(trustAnchorWallet, verinym.getDid(), selfContactJson).get();
@@ -200,12 +204,14 @@ public class LedgerConfig {
             Contact trustAnchorContactForSteward = Contact.builder()
                     .contactName(trustAnchorName)
                     .photo(trustAnchorPhoto)
+                    .isVisible(false)
                     .build();
             String trustAnchorContactForStewardJson = objectMapper.writeValueAsString(trustAnchorContactForSteward);
             Did.setDidMetadata(stewardWallet, stewardPseudonym.getDid(), trustAnchorContactForStewardJson).get();
 
             Contact stewardContactForTrustAnchor = Contact.builder()
                     .contactName("Steward")
+                    .isVisible(false)
                     .build();
             String stewardContactForTrustAnchorJson = objectMapper.writeValueAsString(stewardContactForTrustAnchor);
             Did.setDidMetadata(trustAnchorWallet, trustAnchorPseudonym.getDid(), stewardContactForTrustAnchorJson).get();
@@ -266,7 +272,7 @@ public class LedgerConfig {
                 trustAnchorIdentity.getVerinymDid(),
                 trustAnchorVerKey,
                 null,
-                ROLE).get();
+                "ENDORSER").get();
 
         String nymRegisterTrustAnchorVerinymResponse = signAndSubmitRequest(
                 pool,
@@ -288,6 +294,7 @@ public class LedgerConfig {
         ArrayNode attributes = objectMapper.createArrayNode();
         attributes
                 .add("type")
+                .add("number")
                 .add("firstName")
                 .add("lastName")
                 .add("fatherName")
@@ -321,6 +328,62 @@ public class LedgerConfig {
 
         Schema schema = getSchema(pool, government, schemaName, tag, attributes);
         log.info("'national number schema={}'", schema);
+
+        return schema;
+    }
+
+    @SneakyThrows
+    @Bean("diplomaSchema")
+    @DependsOn("government")
+    public Schema getDiplomaSchema(Pool pool, @Qualifier("government") Identity government) {
+
+        String schemaName = "Diploma";
+        String tag = "diploma";
+
+        ArrayNode attributes = objectMapper.createArrayNode();
+        attributes
+                .add("type")
+                .add("number")
+                .add("firstName")
+                .add("lastName")
+                .add("fatherName")
+                .add("placeOfStudy")
+                .add("courseOfStudy")
+                .add("dateOfIssue")
+                .add("qualification")
+                .add("issuer");
+
+        Schema schema = getSchema(pool, government, schemaName, tag, attributes);
+        log.info("'diploma schema={}'", schema);
+
+        return schema;
+    }
+
+    @SneakyThrows
+    @Bean("certificateSchema")
+    @DependsOn("government")
+    public Schema getCertificateSchema(Pool pool, @Qualifier("government") Identity government) {
+
+        String schemaName = "Certificate";
+        String tag = "certificate";
+
+        ArrayNode attributes = objectMapper.createArrayNode();
+        attributes
+                .add("type")
+                .add("number")
+                .add("firstName")
+                .add("lastName")
+                .add("fatherName")
+                .add("dateOfExam")
+                .add("dateOfIssue")
+                .add("qualification")
+                .add("courseOfStudy")
+                .add("category")
+                .add("expiresIn")
+                .add("issuer");
+
+        Schema schema = getSchema(pool, government, schemaName, tag, attributes);
+        log.info("'certificate schema={}'", schema);
 
         return schema;
     }

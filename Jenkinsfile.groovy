@@ -83,11 +83,9 @@ pipeline {
                             println buildCommand
                             sh buildCommand
 
-                            String volume = ""
+                            String volume = " -v /var/ledger:/var/ledger"
                             if (serviceName.equals("government-service"))
                                 volume = " -v /var/government:/var/government"
-                            if (serviceName.equals("self-sovereign-identity-service"))
-                                volume = " -v /var/ledger:/var/ledger"
 
                             runCommand = 'docker run -d --name ' + serviceName + volume + ' --net=host medical-ledger/' + serviceName
                             println runCommand

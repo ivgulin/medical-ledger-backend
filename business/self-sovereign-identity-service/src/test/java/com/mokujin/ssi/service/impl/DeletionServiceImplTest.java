@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -36,6 +37,7 @@ class DeletionServiceImplTest {
     }
 
     @Test
+    @SneakyThrows
     void deleteWallet_walletDoesNotExist_exceptionIsThrown() {
 
         String email = "test@test.com";
@@ -57,21 +59,20 @@ class DeletionServiceImplTest {
         String password = "test";
         UserCredentials credentials = new UserCredentials(email, password);
 
-        Wallet wallet = mock(Wallet.class);
-
         when(walletService.doesWalletExist(anyString(), anyString())).thenReturn(true);
-        when(walletService.getOrCreateWallet(anyString(), anyString())).thenReturn(wallet);
 
         new MockUp<Wallet>() {
             @mockit.Mock
             public CompletableFuture<Void> deleteWallet(String config, String credentials) {
+
+
+                assertTrue(config.contains(email));
+                assertTrue(credentials.contains(password));
                 return CompletableFuture.runAsync(() -> log.debug("In mock."));
             }
         };
 
         deletionService.delete(credentials);
-        verify(walletService, times(1)).getOrCreateWallet(anyString(), anyString());
-        verify(wallet, times(1)).close();
     }
 
 

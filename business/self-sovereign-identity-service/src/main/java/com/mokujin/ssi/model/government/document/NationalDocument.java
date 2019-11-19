@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class NationalDocument extends Document {
+public abstract class NationalDocument extends Document {
 
     public NationalDocument(String type) {
         super(type);

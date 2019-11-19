@@ -30,8 +30,8 @@ public class KnownIdentityController {
         return ResponseEntity.ok(savedKnownIdentity);
     }
 
-    @PostMapping("/upload-photo")
-    public ResponseEntity<KnownIdentity> uploadPhoto(@RequestParam("identityId") Integer identityId,
+    @PostMapping("/upload-photo/{identityId}")
+    public ResponseEntity<KnownIdentity> uploadPhoto(@PathVariable Integer identityId,
                                                      @RequestParam("file") MultipartFile file) {
         log.info("'uploadPhoto' is invoked: '{}'", identityId);
 

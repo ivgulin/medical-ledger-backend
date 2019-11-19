@@ -1,6 +1,9 @@
 package com.mokujin.government.model.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -20,6 +23,10 @@ public class NationalPassport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @NotNull
+    @Column(name = "number")
+    private String number;
 
     @NotNull
     @Column(name = "first_name")
@@ -55,7 +62,6 @@ public class NationalPassport {
     private Long dateOfIssue;
 
     @NotNull
-    @Setter(AccessLevel.PRIVATE)
     @OneToMany(mappedBy = "nationalPassport", cascade = ALL)
     private Set<PlaceOfResidence> placesOfResidence = new HashSet<>();
 

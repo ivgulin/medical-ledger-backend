@@ -4,14 +4,12 @@ package com.mokujin.ssi.controller;
 import com.mokujin.ssi.model.user.request.UserCredentials;
 import com.mokujin.ssi.model.user.request.UserRegistrationDetails;
 import com.mokujin.ssi.model.user.response.User;
-import com.mokujin.ssi.service.DeletionService;
+import com.mokujin.ssi.service.InvitationService;
 import com.mokujin.ssi.service.RegistrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
 @RestController
@@ -20,7 +18,7 @@ import static org.springframework.http.HttpStatus.OK;
 public class LedgerController {
 
     private final RegistrationService registrationService;
-    private final DeletionService deletionService;
+    private final InvitationService invitationService;
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody UserRegistrationDetails details,
@@ -30,17 +28,19 @@ public class LedgerController {
 
         User user = registrationService.register(details, publicKey, privateKey);
 
-        log.info("register is executed successfully.");
+        log.info("'register' returned '{}'", user);
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/delete")
-    public ResponseEntity delete(@RequestBody UserCredentials credentials) {
-        log.info("'delete' invoked with params '{}'", credentials);
+    @PostMapping("/connect")
+    public ResponseEntity<User> connect(@RequestBody UserCredentials userCredentials,
+                                        @RequestParam("public") String publicKey,
+                                        @RequestParam("private") String privateKey) {
+        log.info("'connect' invoked with params '{}, {}, {}'", userCredentials, publicKey, privateKey);
 
-        deletionService.delete(credentials);
+        User user = invitationService.connect(publicKey, privateKey, userCredentials);
 
-        log.info("delete is executed successfully.");
-        return new ResponseEntity(OK);
+        log.info("'register' returned '{}'", user);
+        return ResponseEntity.ok(user);
     }
 }

@@ -11,12 +11,16 @@ import org.hyperledger.indy.sdk.wallet.Wallet;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mokujin.ssi.model.internal.Role.PATIENT;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
 @Builder(toBuilder = true)
 public class Identity {
+
+    private Role role = PATIENT;
 
     private String verinymDid;
 
