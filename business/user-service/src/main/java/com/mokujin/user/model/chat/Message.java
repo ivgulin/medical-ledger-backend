@@ -9,6 +9,7 @@ import java.io.Serializable;
 @Data
 public class Message implements Serializable {
 
+    //@NotNull(message = "Contact is required")
     private Contact contact;
 
     @NotNull(message = "Message date is required")

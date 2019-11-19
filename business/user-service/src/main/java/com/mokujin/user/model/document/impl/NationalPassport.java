@@ -6,6 +6,8 @@ import lombok.Data;
 @Data
 public class NationalPassport extends NationalDocument {
 
+    private String number;
+
     private String firstName;
 
     private String lastName;
@@ -24,9 +26,10 @@ public class NationalPassport extends NationalDocument {
 
     private Long dateOfIssue;
 
-    public NationalPassport(String firstName, String lastName, String fatherName, Long dateOfBirth,
-                            String placeOfBirth, String image, String sex, String issuer, Long dateOfIssue) {
+    public NationalPassport(String number, String firstName, String lastName, String fatherName,
+                            Long dateOfBirth, String placeOfBirth, String image, String sex, String issuer, Long dateOfIssue) {
         super("passport");
+        this.number = number;
         this.firstName = firstName;
         this.lastName = lastName;
         this.fatherName = fatherName;
@@ -37,6 +40,7 @@ public class NationalPassport extends NationalDocument {
         this.issuer = issuer;
         this.dateOfIssue = dateOfIssue;
     }
+
 
     public NationalPassport() {
         super("passport");

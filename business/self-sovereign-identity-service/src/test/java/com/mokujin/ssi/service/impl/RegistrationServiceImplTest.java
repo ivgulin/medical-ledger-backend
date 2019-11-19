@@ -166,8 +166,7 @@ class RegistrationServiceImplTest {
         };
 
         registrationService = spy(registrationService);
-        doNothing().when(registrationService)
-                .exchangeContacts(identity, knownIdentity, government.getWallet(), pseudonym, pseudonym);
+        doNothing().when(registrationService).exchangeContacts(identity, knownIdentity, pseudonym, pseudonym);
         doNothing().when(registrationService).issueCredentials(key, wallet, pseudonym, knownIdentity);
 
         User user = User.builder().build();
@@ -261,8 +260,9 @@ class RegistrationServiceImplTest {
             }
         };
 
-        registrationService.exchangeContacts(identity, knownIdentity, government.getWallet(),
-                governmentPseudonym, userPseudonym);
+        when(government.getWallet()).thenReturn(wallet);
+
+        registrationService.exchangeContacts(identity, knownIdentity, governmentPseudonym, userPseudonym);
     }
 
     @Test

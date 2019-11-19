@@ -82,19 +82,18 @@ public class RegistrationServiceImpl implements RegistrationService {
                         governmentWallet,
                         "{}")
                         .get();
-                CreateAndStoreMyDidResult userForGovernmentPseudonym = createAndStoreMyDid(
+                CreateAndStoreMyDidResult userPseudonym = createAndStoreMyDid(
                         userIdentity.getWallet(),
                         "{}")
                         .get();
-                identityService.establishUserConnection(pool, government, governmentPseudonym, userForGovernmentPseudonym);
+                identityService.establishUserConnection(pool, government, governmentPseudonym, userPseudonym);
 
                 // TODO: 18.11.19 questionable
                 if (knownIdentity.getRole().equals(DOCTOR)) {
-                    this.grandVerinym(userIdentity, governmentWallet, knownIdentity);
+                    this.grandVerinym(userIdentity, knownIdentity);
                 }
 
-                this.exchangeContacts(userIdentity, knownIdentity, governmentWallet,
-                        governmentPseudonym, userForGovernmentPseudonym);
+                this.exchangeContacts(userIdentity, knownIdentity, governmentPseudonym, userPseudonym);
 
                 this.issueCredentials(publicKey, userWallet, governmentPseudonym, knownIdentity);
 
@@ -113,7 +112,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
     }
 
-    private void grandVerinym(Identity userIdentity, Wallet governmentWallet, KnownIdentity knownIdentity) throws Exception {
+    private void grandVerinym(Identity userIdentity, KnownIdentity knownIdentity) throws Exception {
         CreateAndStoreMyDidResult verinym = createAndStoreMyDid(userIdentity.getWallet(), "{}").get();
         log.info("'verinym={}'", verinym);
 
@@ -138,17 +137,17 @@ public class RegistrationServiceImpl implements RegistrationService {
                 verinym.getVerkey(),
                 null,
                 "ENDORSER").get();
-        log.info("'nymRegisterTrustAnchorVerinym={}'", nymRegisterTrustAnchorVerinym);
+        log.info("'nymRegisterDoctorVerinym={}'", nymRegisterTrustAnchorVerinym);
 
         String nymRegisterTrustAnchorVerinymResponse = signAndSubmitRequest(
                 pool,
-                governmentWallet,
+                government.getWallet(),
                 government.getVerinymDid(),
                 nymRegisterTrustAnchorVerinym).get();
         log.info("'nymRegisterDoctorVerinymResponse={}'", nymRegisterTrustAnchorVerinymResponse);
     }
 
-    void exchangeContacts(Identity userIdentity, KnownIdentity knownIdentity, Wallet governmentWallet,
+    void exchangeContacts(Identity userIdentity, KnownIdentity knownIdentity,
                           CreateAndStoreMyDidResult governmentPseudonym,
                           CreateAndStoreMyDidResult userForGovernmentPseudonym) throws Exception {
         Contact trustAnchorContactForUser = Contact.builder()
@@ -171,7 +170,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .build();
         String userContactForTrustAnchorJson = objectMapper.writeValueAsString(userContactForTrustAnchor);
         System.out.println("userContactForTrustAnchorJson = " + userContactForTrustAnchorJson);
-        Did.setDidMetadata(governmentWallet, governmentPseudonym.getDid(), userContactForTrustAnchorJson).get();
+        Did.setDidMetadata(government.getWallet(), governmentPseudonym.getDid(), userContactForTrustAnchorJson).get();
 
         userIdentity.addPseudonym(Pseudonym.builder()
                 .pseudonymDid(userForGovernmentPseudonym.getDid())
