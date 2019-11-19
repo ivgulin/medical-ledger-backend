@@ -272,7 +272,7 @@ public class LedgerConfig {
                 trustAnchorIdentity.getVerinymDid(),
                 trustAnchorVerKey,
                 null,
-                "TRUST_ANCHOR").get();
+                "ENDORSER").get();
 
         String nymRegisterTrustAnchorVerinymResponse = signAndSubmitRequest(
                 pool,
@@ -378,6 +378,7 @@ public class LedgerConfig {
                 .add("dateOfIssue")
                 .add("qualification")
                 .add("courseOfStudy")
+                .add("category")
                 .add("expiresIn")
                 .add("issuer");
 
@@ -476,12 +477,5 @@ public class LedgerConfig {
 
         return Cache.getCredDef(pool, government.getWallet(),
                 government.getVerinymDid(), schemaDefinition.getCredDefId(), "{}").get();
-    }
-
-    @PreDestroy
-    @SneakyThrows
-    private void closeWallets(@Qualifier("government") Identity government, @Qualifier("steward") Identity steward) {
-        government.getWallet().close();
-        steward.getWallet().close();
     }
 }

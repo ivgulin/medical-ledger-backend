@@ -4,15 +4,12 @@ package com.mokujin.ssi.controller;
 import com.mokujin.ssi.model.user.request.UserCredentials;
 import com.mokujin.ssi.model.user.request.UserRegistrationDetails;
 import com.mokujin.ssi.model.user.response.User;
-import com.mokujin.ssi.service.DeletionService;
 import com.mokujin.ssi.service.InvitationService;
 import com.mokujin.ssi.service.RegistrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
 @RestController
@@ -21,7 +18,6 @@ import static org.springframework.http.HttpStatus.OK;
 public class LedgerController {
 
     private final RegistrationService registrationService;
-    private final DeletionService deletionService;
     private final InvitationService invitationService;
 
     @PostMapping("/register")
@@ -34,16 +30,6 @@ public class LedgerController {
 
         log.info("'register' returned '{}'", user);
         return ResponseEntity.ok(user);
-    }
-
-    @PostMapping("/delete")
-    public ResponseEntity delete(@RequestBody UserCredentials credentials) {
-        log.info("'delete' invoked with params '{}'", credentials);
-
-        deletionService.delete(credentials);
-
-        log.info("delete is executed successfully.");
-        return new ResponseEntity(OK);
     }
 
     @PostMapping("/connect")

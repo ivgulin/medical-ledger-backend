@@ -12,7 +12,6 @@ import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.model.user.request.UserRegistrationDetails;
 import com.mokujin.ssi.model.user.response.User;
 import com.mokujin.ssi.service.*;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import mockit.MockUp;
@@ -21,6 +20,7 @@ import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -213,7 +213,7 @@ class RegistrationServiceImplTest {
     // TODO: 17.11.19 redo it
     @Test
     @SneakyThrows
-    @Ignore
+    @Disabled
     void exchangeContacts_validInputs_methodIsExecuted() {
 
         Wallet wallet = mock(Wallet.class);

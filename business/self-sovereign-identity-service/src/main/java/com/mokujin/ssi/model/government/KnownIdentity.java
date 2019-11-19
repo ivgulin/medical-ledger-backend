@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -24,6 +25,6 @@ public class KnownIdentity {
 
     private Diploma diploma;
 
-    private List<Certificate> certificates;
+    private List<Certificate> certificates = new ArrayList<>();
 
 }

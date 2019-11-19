@@ -2,6 +2,7 @@ package com.mokujin.ssi.controller;
 
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.user.request.UserCredentials;
+import com.mokujin.ssi.service.DeletionService;
 import com.mokujin.ssi.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -23,6 +24,7 @@ import static org.springframework.http.HttpStatus.OK;
 public class WalletController {
 
     private final WalletService walletService;
+    private final DeletionService deletionService;
 
     @SneakyThrows
     @PostMapping("/create")
@@ -48,6 +50,16 @@ public class WalletController {
 
         log.info("'checkWallet' returns = '{}'", doesWalletExist);
         return ResponseEntity.ok(doesWalletExist);
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity delete(@RequestBody UserCredentials credentials) {
+        log.info("'delete' invoked with params '{}'", credentials);
+
+        deletionService.delete(credentials);
+
+        log.info("delete is executed successfully.");
+        return new ResponseEntity(OK);
     }
 
 }

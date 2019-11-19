@@ -51,6 +51,11 @@ public class Certificate {
     private String courseOfStudy;
 
     @NotNull
+    @Column(name = "category")
+    @Enumerated(EnumType.STRING)
+    private Category category;
+
+    @NotNull
     @Column(name = "expires_in")
     private Long expiresIn;
 
@@ -64,4 +69,9 @@ public class Certificate {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "known_identity_id")
     private KnownIdentity knownIdentity;
+
+    public enum Category{
+        I, II, HIGHER
+    }
+
 }

@@ -4,6 +4,8 @@ import com.mokujin.ssi.model.government.document.NationalDocument;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.NotNull;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Certificate extends NationalDocument {
@@ -24,6 +26,8 @@ public class Certificate extends NationalDocument {
 
     private String courseOfStudy;
 
+    private Category category;
+
     private Long expiresIn;
 
     private String issuer;
@@ -43,7 +47,11 @@ public class Certificate extends NationalDocument {
         this.issuer = issuer;
     }
 
-    public Certificate(String type) {
+    public Certificate() {
         super("certificate");
+    }
+
+    public enum Category{
+        I, II, HIGHER
     }
 }

@@ -11,8 +11,8 @@ public class CertificateDTO extends Certificate {
     public CertificateDTO(Certificate certificate) {
         super(certificate.getId(), certificate.getNumber(), certificate.getFirstName(), certificate.getLastName(),
                 certificate.getFatherName(), certificate.getDateOfExam(), certificate.getDateOfIssue(),
-                certificate.getQualification(), certificate.getCourseOfStudy(), certificate.getExpiresIn(),
-                certificate.getIssuer(), certificate.getKnownIdentity());
+                certificate.getQualification(), certificate.getCourseOfStudy(), certificate.getCategory(),
+                certificate.getExpiresIn(), certificate.getIssuer(), certificate.getKnownIdentity());
         this.type = "certificate";
     }
 }

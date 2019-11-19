@@ -86,8 +86,9 @@ public class RegistrationServiceImpl implements RegistrationService {
                         userIdentity.getWallet(),
                         "{}")
                         .get();
-                identityService.establishUserConnection(government, governmentPseudonym, userForGovernmentPseudonym);
+                identityService.establishUserConnection(pool, government, governmentPseudonym, userForGovernmentPseudonym);
 
+                // TODO: 18.11.19 questionable
                 if (knownIdentity.getRole().equals(DOCTOR)) {
                     this.grandVerinym(userIdentity, governmentWallet, knownIdentity);
                 }
@@ -124,6 +125,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .photo(knownIdentity.getNationalPassport().getImage())
                 .nationalNumber(knownIdentity.getNationalNumber().getNumber())
                 .isVisible(false)
+                .isVerinym(true)
                 .build();
         String selfContactJson = objectMapper.writeValueAsString(selfContact);
         Did.setDidMetadata(userIdentity.getWallet(), verinym.getDid(), selfContactJson).get();
@@ -132,10 +134,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         String nymRegisterTrustAnchorVerinym = buildNymRequest(
                 government.getVerinymDid(),
-                userIdentity.getVerinymDid(),
+                verinym.getDid(),
                 verinym.getVerkey(),
                 null,
-                "TRUST_ANCHOR").get();
+                "ENDORSER").get();
+        log.info("'nymRegisterTrustAnchorVerinym={}'", nymRegisterTrustAnchorVerinym);
 
         String nymRegisterTrustAnchorVerinymResponse = signAndSubmitRequest(
                 pool,

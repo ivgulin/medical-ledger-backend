@@ -11,6 +11,7 @@ import com.mokujin.ssi.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.indy.sdk.did.DidResults;
+import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class InvitationServiceImpl implements InvitationService {
     private final WalletService walletService;
     private final IdentityService identityService;
     private final UserService userService;
+    private final Pool pool;
 
     @Override
     public User connect(String publicKey, String privateKey, UserCredentials userCredentials) {
@@ -45,7 +47,7 @@ public class InvitationServiceImpl implements InvitationService {
                     "{}")
                     .get();
 
-            identityService.establishUserConnection(doctorIdentity, patientPseudonym, doctorPseudonym);
+            identityService.establishUserConnection(pool, doctorIdentity, patientPseudonym, doctorPseudonym);
 
             identityService.exchangeContacts(doctorIdentity, patientIdentity, patientPseudonym, doctorPseudonym);
 

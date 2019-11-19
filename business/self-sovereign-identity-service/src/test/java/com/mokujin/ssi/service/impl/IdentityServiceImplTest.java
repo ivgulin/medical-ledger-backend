@@ -19,7 +19,6 @@ import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
@@ -35,14 +34,11 @@ class IdentityServiceImplTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @Mock
-    private Pool pool;
-
     private IdentityService identityService;
 
     @BeforeEach
     void setUp() {
-        identityService = new IdentityServiceImpl(objectMapper, pool);
+        identityService = new IdentityServiceImpl(objectMapper);
     }
 
     @Test
@@ -197,6 +193,8 @@ class IdentityServiceImplTest {
     void establishUserConnection_validInputs_methodIsExecuted() {
 
         Wallet wallet = mock(Wallet.class);
+        Pool pool = mock(Pool.class);
+
         DidResults.CreateAndStoreMyDidResult trustAnchorPseudonym = mock(DidResults.CreateAndStoreMyDidResult.class);
         DidResults.CreateAndStoreMyDidResult userPseudonym = mock(DidResults.CreateAndStoreMyDidResult.class);
         String governmentPseudonymDid = "gov did";
@@ -247,6 +245,6 @@ class IdentityServiceImplTest {
             }
         };
 
-        identityService.establishUserConnection(identity, trustAnchorPseudonym, userPseudonym);
+        identityService.establishUserConnection(pool, identity, trustAnchorPseudonym, userPseudonym);
     }
 }

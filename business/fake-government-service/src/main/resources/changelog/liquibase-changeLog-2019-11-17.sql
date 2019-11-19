@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS known_identity
     national_number      VARCHAR(255) NOT NULL
         CONSTRAINT fk_ki_national_number
             REFERENCES national_number,
-    diploma_id           INTEGER      NOT NULL
+    diploma_id           INTEGER
         CONSTRAINT fk_ki_diploma
             REFERENCES diploma
 );
@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS certificate
     last_name         VARCHAR(255) NOT NULL,
     father_name       VARCHAR(255) NOT NULL,
     course_of_study   VARCHAR(255) NOT NULL,
+    category          VARCHAR(255) NOT NULL,
     qualification     VARCHAR(255) NOT NULL,
     date_of_exam      BIGINT       NOT NULL,
     date_of_issue     BIGINT       NOT NULL,

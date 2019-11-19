@@ -30,7 +30,6 @@ import static org.hyperledger.indy.sdk.ledger.Ledger.signAndSubmitRequest;
 public class IdentityServiceImpl implements IdentityService {
 
     private final ObjectMapper objectMapper;
-    private final Pool pool;
 
     @Override
     public Identity findByWallet(Wallet wallet) throws Exception {
@@ -78,7 +77,7 @@ public class IdentityServiceImpl implements IdentityService {
     }
 
     @Override
-    public void establishUserConnection(Identity trustAnchor,
+    public void establishUserConnection(Pool pool, Identity trustAnchor,
                                         CreateAndStoreMyDidResult trustAnchorPseudonym,
                                         CreateAndStoreMyDidResult userPseudonym) throws Exception {
         String nymRegisterTrustAnchorPseudonym = buildNymRequest(
