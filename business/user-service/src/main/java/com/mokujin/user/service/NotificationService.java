@@ -7,6 +7,8 @@ import com.mokujin.user.model.chat.Message;
 import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.model.notification.NotificationCollector;
 
+import java.util.List;
+
 public interface NotificationService {
 
     NotificationCollector getNotifications(String nationalNumber);
@@ -19,4 +21,6 @@ public interface NotificationService {
 
     void removeMessage(String nationalNumber, Message message);
 
+    Notification addPresentationNotification(User user, List<String> presentationAttributes,
+                                             String documentType, String connectionNumber);
 }

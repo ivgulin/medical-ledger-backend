@@ -61,10 +61,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Qualifier("certificateSchema")
     private final Schema certificateSchema;
     @Qualifier("diplomaSchema")
-
     private final Schema diplomaSchema;
-    @Value(value = "${ledger.government.photo}")
-    private String governmentPhoto;
 
     @Override
     public User register(UserRegistrationDetails details, String publicKey, String privateKey) {
@@ -152,7 +149,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                           CreateAndStoreMyDidResult userForGovernmentPseudonym) throws Exception {
         Contact trustAnchorContactForUser = Contact.builder()
                 .contactName("Government")
-                .photo(governmentPhoto)
+                .photo(government.getImage())
                 .isVisible(false)
                 .build();
         String trustAnchorContactForUserJson = objectMapper.writeValueAsString(trustAnchorContactForUser);

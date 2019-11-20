@@ -19,7 +19,7 @@ public class InvitationController {
     private final InvitationService invitationService;
 
     @PostMapping("/invite-back")
-    public ResponseEntity inviteBack(@RequestBody Contact doctor,
+    public ResponseEntity<User> inviteBack(@RequestBody Contact doctor,
                                      @RequestHeader("Public-Key") String publicKey,
                                      @RequestHeader("Private-Key") String privateKey) {
         log.info("'inviteBack' invoked with params '{}, {}, {}'", publicKey, privateKey, doctor);

@@ -53,6 +53,7 @@ public class IdentityServiceImpl implements IdentityService {
                 .ifPresent(didWithMetadata -> {
                     identity.setVerinymDid(didWithMetadata.getDid());
                     identity.setRole(DOCTOR);
+                    identity.setImage(didWithMetadata.getMetadata().getPhoto());
                 });
 
         List<Pseudonym> pseudonyms = didsWithMetadata.stream()

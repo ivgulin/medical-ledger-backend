@@ -31,7 +31,7 @@ public class Certificate extends NationalDocument {
 
     public Certificate(String number, String firstName, String lastName, String fatherName, Long dateOfExam,
                        Long dateOfIssue, String qualification, String courseOfStudy, Long expiresIn, String issuer) {
-        super("certificate");
+        super(Type.certificate.name());
         this.number = number;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -45,7 +45,7 @@ public class Certificate extends NationalDocument {
     }
 
     public Certificate() {
-        super("certificate");
+        super(Type.certificate.name());
     }
 
     public enum Category{

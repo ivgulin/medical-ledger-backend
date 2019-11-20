@@ -4,10 +4,7 @@ import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.ProcessedUserCredentials;
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.chat.Message;
-import com.mokujin.user.model.notification.ChatNotification;
-import com.mokujin.user.model.notification.Notification;
-import com.mokujin.user.model.notification.NotificationCollector;
-import com.mokujin.user.model.notification.SystemNotification;
+import com.mokujin.user.model.notification.*;
 import com.mokujin.user.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +17,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.mokujin.user.model.notification.Notification.Type.CONNECTION;
-import static com.mokujin.user.model.notification.Notification.Type.INVITATION;
-import static com.mokujin.user.model.notification.NotificationContants.*;
+import static com.mokujin.user.model.notification.Notification.Type.*;
+import static com.mokujin.user.model.notification.NotificationConstants.*;
 
 @Slf4j
 @Service
@@ -108,5 +104,25 @@ public class NotificationServiceImpl implements NotificationService {
     public void removeMessage(String nationalNumber, Message message) {
         RList<Message> messages = redissonClient.getList("messages_" + nationalNumber);
         messages.remove(message);
+    }
+
+    @Override
+    public Notification addPresentationNotification(User user, List<String> presentationAttributes,
+                                                    String documentType, String connectionNumber) {
+
+        RMap<String, SystemNotification> presentationNotifications = redissonClient.getMap("presentation_" + connectionNumber);
+        String nationalNumber = user.getNationalNumber();
+        PresentationNotification presentationNotification = new PresentationNotification(new Date().getTime(),
+                PRESENTATION,
+                Contact.builder()
+                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .photo(user.getPhoto())
+                        .nationalNumber(nationalNumber)
+                        .isVisible(true)
+                        .build(), PRESENTATION_TITLE_EN, PRESENTATION_TITLE_UKR, PRESENTATION_CONTENT_EN,
+                PRESENTATION_CONTENT_UKR, documentType, presentationAttributes);
+        presentationNotifications.put(nationalNumber, presentationNotification);
+
+        return presentationNotification;
     }
 }

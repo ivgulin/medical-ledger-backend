@@ -175,6 +175,7 @@ public class LedgerConfig {
             Contact selfContact = Contact.builder()
                     .contactName(trustAnchorName)
                     .isVerinym(true)
+                    .photo(trustAnchorPhoto)
                     .isVisible(false)
                     .build();
             String selfContactJson = objectMapper.writeValueAsString(selfContact);
