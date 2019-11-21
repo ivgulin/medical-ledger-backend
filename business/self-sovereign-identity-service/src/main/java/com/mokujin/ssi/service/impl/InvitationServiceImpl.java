@@ -10,12 +10,12 @@ import com.mokujin.ssi.service.UserService;
 import com.mokujin.ssi.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hyperledger.indy.sdk.did.DidResults;
 import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
 
 import static org.hyperledger.indy.sdk.did.Did.createAndStoreMyDid;
+import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
@@ -38,14 +38,8 @@ public class InvitationServiceImpl implements InvitationService {
             Identity doctorIdentity = identityService.findByWallet(doctorWallet);
             Identity patientIdentity = identityService.findByWallet(patientWallet);
 
-            DidResults.CreateAndStoreMyDidResult patientPseudonym = createAndStoreMyDid(
-                    doctorWallet,
-                    "{}")
-                    .get();
-            DidResults.CreateAndStoreMyDidResult doctorPseudonym = createAndStoreMyDid(
-                    patientWallet,
-                    "{}")
-                    .get();
+            CreateAndStoreMyDidResult patientPseudonym = createAndStoreMyDid(doctorWallet, "{}").get();
+            CreateAndStoreMyDidResult doctorPseudonym = createAndStoreMyDid(patientWallet, "{}").get();
 
             identityService.establishUserConnection(pool, doctorIdentity, patientPseudonym, doctorPseudonym);
 

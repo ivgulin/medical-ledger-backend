@@ -22,7 +22,6 @@ import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,7 +42,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 public class RegistrationServiceImpl implements RegistrationService {
 
     private final ObjectMapper objectMapper;
-    private final ValidationService validationService;
+    private final VerificationService verificationService;
     private final WalletService walletService;
     private final IdentityService identityService;
     private final UserService userService;
@@ -51,6 +50,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Qualifier("government")
     private final Identity government;
+    @Qualifier("steward")
+    private final Identity steward;
 
     private final Pool pool;
 
@@ -61,10 +62,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Qualifier("certificateSchema")
     private final Schema certificateSchema;
     @Qualifier("diplomaSchema")
-
     private final Schema diplomaSchema;
-    @Value(value = "${ledger.government.photo}")
-    private String governmentPhoto;
 
     @Override
     public User register(UserRegistrationDetails details, String publicKey, String privateKey) {
@@ -76,7 +74,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             if (userIdentity.getCredentials().isEmpty()) {
 
-                KnownIdentity knownIdentity = validationService.validateNewbie(details);
+                KnownIdentity knownIdentity = verificationService.verifyNewbie(details);
 
                 CreateAndStoreMyDidResult governmentPseudonym = createAndStoreMyDid(
                         governmentWallet,
@@ -88,7 +86,6 @@ public class RegistrationServiceImpl implements RegistrationService {
                         .get();
                 identityService.establishUserConnection(pool, government, governmentPseudonym, userPseudonym);
 
-                // TODO: 18.11.19 questionable
                 if (knownIdentity.getRole().equals(DOCTOR)) {
                     this.grandVerinym(userIdentity, knownIdentity);
                 }
@@ -132,7 +129,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         userIdentity.setVerinymDid(verinym.getDid());
 
         String nymRegisterTrustAnchorVerinym = buildNymRequest(
-                government.getVerinymDid(),
+                steward.getVerinymDid(),
                 verinym.getDid(),
                 verinym.getVerkey(),
                 null,
@@ -141,8 +138,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         String nymRegisterTrustAnchorVerinymResponse = signAndSubmitRequest(
                 pool,
-                government.getWallet(),
-                government.getVerinymDid(),
+                steward.getWallet(),
+                steward.getVerinymDid(),
                 nymRegisterTrustAnchorVerinym).get();
         log.info("'nymRegisterDoctorVerinymResponse={}'", nymRegisterTrustAnchorVerinymResponse);
     }
@@ -152,7 +149,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                           CreateAndStoreMyDidResult userForGovernmentPseudonym) throws Exception {
         Contact trustAnchorContactForUser = Contact.builder()
                 .contactName("Government")
-                .photo(governmentPhoto)
+                .photo(government.getImage())
                 .isVisible(false)
                 .build();
         String trustAnchorContactForUserJson = objectMapper.writeValueAsString(trustAnchorContactForUser);

@@ -34,7 +34,7 @@ public class BasicAuthorizationSecurityConfig extends WebSecurityConfigurerAdapt
         httpSecurity.csrf().disable()
                 .requestMatcher(new BasicRequestMatcher())
                 .authorizeRequests()
-                .antMatchers("/auth/**", "/gov/**").authenticated()
+                    .antMatchers("/auth/**", "/gov/**").authenticated()
                 .antMatchers(POST,"/user/registration/create-wallet").authenticated()
                 .anyRequest().denyAll()
                 .and().httpBasic()

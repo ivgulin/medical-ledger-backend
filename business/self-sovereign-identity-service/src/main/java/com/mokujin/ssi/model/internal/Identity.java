@@ -24,6 +24,8 @@ public class Identity {
 
     private String verinymDid;
 
+    private String image;
+
     private Wallet wallet;
 
     private List<Pseudonym> pseudonyms = new ArrayList<>();

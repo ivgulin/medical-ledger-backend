@@ -25,4 +25,11 @@ public class Document {
 
     private String type;
 
+    public enum Type{
+        passport,
+        diploma,
+        certificate,
+        number
+    }
+
 }

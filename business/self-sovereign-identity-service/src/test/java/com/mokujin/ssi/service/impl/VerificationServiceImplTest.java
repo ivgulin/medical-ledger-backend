@@ -15,13 +15,13 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ValidationServiceImplTest {
+class VerificationServiceImplTest {
 
     @Mock
     private RestTemplate restTemplate;
 
     @InjectMocks
-    private ValidationServiceImpl validationService;
+    private VerificationServiceImpl validationService;
 
     @Test
     void validateNewbie_detailsAreOk_identityIsReturned() {
@@ -30,7 +30,7 @@ class ValidationServiceImplTest {
 
         when(restTemplate.postForObject(anyString(), any(), any())).thenReturn(knownIdentity);
 
-        KnownIdentity result = validationService.validateNewbie(new UserRegistrationDetails());
+        KnownIdentity result = validationService.verifyNewbie(new UserRegistrationDetails());
 
         assertEquals(knownIdentity, result);
     }

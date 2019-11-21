@@ -28,7 +28,7 @@ public class NationalPassport extends NationalDocument {
 
     public NationalPassport(String number, String firstName, String lastName, String fatherName,
                             Long dateOfBirth, String placeOfBirth, String image, String sex, String issuer, Long dateOfIssue) {
-        super("passport");
+        super(Type.passport.name());
         this.number = number;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -43,7 +43,7 @@ public class NationalPassport extends NationalDocument {
 
 
     public NationalPassport() {
-        super("passport");
+        super(Type.passport.name());
     }
 
 }

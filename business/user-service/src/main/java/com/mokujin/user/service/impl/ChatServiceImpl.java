@@ -20,7 +20,6 @@ public class ChatServiceImpl implements ChatService {
     private final NotificationService notificationService;
 
     @Override
-    @SneakyThrows
     public Chat get(String publicKey, String privateKey, String connectionNumber) {
 
         String url = "http://self-sovereign-identity-service/chat/get/" + connectionNumber +

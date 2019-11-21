@@ -1,5 +1,6 @@
 package com.mokujin.ssi.service.impl;
 
+import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.document.Document;
 import com.mokujin.ssi.model.government.document.impl.NationalNumber;
@@ -9,8 +10,16 @@ import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
 import com.mokujin.ssi.model.user.response.User;
-import com.mokujin.ssi.service.UserService;
+import com.mokujin.ssi.service.IdentityService;
+import com.mokujin.ssi.service.WalletService;
+import lombok.SneakyThrows;
+import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,10 +27,20 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+@ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
-    private UserService userService = new UserServiceImpl(null, null);
+    @Mock
+    private WalletService walletService;
+
+    @Mock
+    private IdentityService identityService;
+
+    @InjectMocks
+    private UserServiceImpl userService;
 
     @Test
     void convert_identityIsOk_userIsReturned() {
@@ -83,6 +102,44 @@ class UserServiceImplTest {
                 .build();
 
         assertThrows(ResourceNotFoundException.class, () -> userService.convert(identity));
+    }
+
+    @Test
+    @SneakyThrows
+    void get_exceptionOccursInsideTryBlock_walletIsClosedAndExceptionIsThrown() {
+
+        String publicKey = "public";
+        String privateKey = "private";
+
+        Wallet wallet = Mockito.mock(Wallet.class);
+        when(walletService.getOrCreateWallet(publicKey, privateKey)).thenReturn(wallet);
+
+        when(identityService.findByWallet(wallet)).thenThrow(new LedgerException(INTERNAL_SERVER_ERROR, "test"));
+
+        assertThrows(LedgerException.class, () -> userService.get(publicKey, privateKey));
+        verify(wallet, times(1)).close();
+    }
+
+    @Test
+    @SneakyThrows
+    void get_validInputs_userIsReturned() {
+
+        String publicKey = "public";
+        String privateKey = "private";
+
+        Wallet wallet = Mockito.mock(Wallet.class);
+        when(walletService.getOrCreateWallet(publicKey, privateKey)).thenReturn(wallet);
+        Identity identity = Identity.builder().build();
+        when(identityService.findByWallet(wallet)).thenReturn(identity);
+
+        User user = new User();
+        userService = spy(userService);
+        doReturn(user).when(userService).convert(identity);
+
+        User result = userService.get(publicKey, privateKey);
+
+        assertEquals(user, result);
+        verify(wallet, times(1)).close();
     }
 
     class TestDocument extends Document {

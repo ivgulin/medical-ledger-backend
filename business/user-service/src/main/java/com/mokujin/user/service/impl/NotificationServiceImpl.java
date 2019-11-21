@@ -4,10 +4,13 @@ import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.ProcessedUserCredentials;
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.chat.Message;
-import com.mokujin.user.model.notification.ChatNotification;
 import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.model.notification.NotificationCollector;
 import com.mokujin.user.model.notification.SystemNotification;
+import com.mokujin.user.model.notification.extention.ChatNotification;
+import com.mokujin.user.model.notification.extention.PresentationNotification;
+import com.mokujin.user.model.notification.extention.ProofNotification;
+import com.mokujin.user.model.presentation.Proof;
 import com.mokujin.user.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.mokujin.user.model.notification.Notification.Type.CONNECTION;
-import static com.mokujin.user.model.notification.Notification.Type.INVITATION;
-import static com.mokujin.user.model.notification.NotificationContants.*;
+import static com.mokujin.user.model.notification.Notification.Type.*;
+import static com.mokujin.user.model.notification.NotificationConstants.*;
 
 @Slf4j
 @Service
@@ -39,15 +41,36 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(ChatNotification::new)
                 .collect(Collectors.toList());
 
-        List<Notification> notifications = redissonClient.getMap("notifications_" + nationalNumber).values()
+        List<SystemNotification> connectionNotifications = redissonClient.getMap("connections_" + nationalNumber)
+                .values()
                 .stream()
-                .filter(n -> n instanceof Notification)
                 .map(n -> (SystemNotification) n)
+                .collect(Collectors.toList());
+
+        List<SystemNotification> invitationNotifications = redissonClient.getMap("invitations_" + nationalNumber)
+                .values()
+                .stream()
+                .map(n -> (SystemNotification) n)
+                .collect(Collectors.toList());
+
+        List<PresentationNotification> presentationNotifications = redissonClient.getMap("presentations_" + nationalNumber)
+                .values()
+                .stream()
+                .map(n -> (PresentationNotification) n)
+                .collect(Collectors.toList());
+
+        List<ProofNotification> proofNotifications = redissonClient.getMap("proofs_" + nationalNumber)
+                .values()
+                .stream()
+                .map(n -> (ProofNotification) n)
                 .collect(Collectors.toList());
 
         return NotificationCollector.builder()
                 .messages(messageNotifications)
-                .notifications(notifications)
+                .connections(connectionNotifications)
+                .invitations(invitationNotifications)
+                .presentations(presentationNotifications)
+                .proofs(proofNotifications)
                 .build();
     }
 
@@ -60,8 +83,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .publicKey(publicKey)
                 .privateKey(privateKey)
                 .build();
-        RMap<String, ProcessedUserCredentials> invitations = redissonClient.getMap("credentials");
-        invitations.put(doctorNumber + patientNumber, patientCredentials);
+        RMap<String, ProcessedUserCredentials> credentials = redissonClient.getMap("credentials");
+        credentials.put(doctorNumber + patientNumber, patientCredentials);
 
         RMap<String, SystemNotification> doctorNotifications = redissonClient.getMap("connections_" + doctorNumber);
         SystemNotification connectionNotification = new SystemNotification(new Date().getTime(), CONNECTION,
@@ -83,9 +106,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public ProcessedUserCredentials removeInviteNotification(String doctorNumber, String patientNumber) {
-        RMap<String, ProcessedUserCredentials> invitations = redissonClient.getMap("credentials");
-        ProcessedUserCredentials patientCredentials = invitations.get(doctorNumber + patientNumber);
-        invitations.remove(doctorNumber + patientNumber);
+        RMap<String, ProcessedUserCredentials> credentials = redissonClient.getMap("credentials");
+        ProcessedUserCredentials patientCredentials = credentials.get(doctorNumber + patientNumber);
+        credentials.remove(doctorNumber + patientNumber);
 
         RMap<String, SystemNotification> doctorNotifications = redissonClient.getMap("connections_" + doctorNumber);
         doctorNotifications.remove(patientCredentials.getPublicKey());
@@ -108,5 +131,55 @@ public class NotificationServiceImpl implements NotificationService {
     public void removeMessage(String nationalNumber, Message message) {
         RList<Message> messages = redissonClient.getList("messages_" + nationalNumber);
         messages.remove(message);
+    }
+
+    @Override
+    public Notification addPresentationNotification(User user, List<String> presentationAttributes,
+                                                    String documentType, String connectionNumber) {
+
+        RMap<String, PresentationNotification> presentationNotifications = redissonClient.getMap("presentations_" + connectionNumber);
+        String nationalNumber = user.getNationalNumber();
+        PresentationNotification presentationNotification = new PresentationNotification(new Date().getTime(),
+                PRESENTATION,
+                Contact.builder()
+                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .photo(user.getPhoto())
+                        .nationalNumber(nationalNumber)
+                        .isVisible(true)
+                        .build(), PRESENTATION_TITLE_EN, PRESENTATION_TITLE_UKR, PRESENTATION_CONTENT_EN,
+                PRESENTATION_CONTENT_UKR, documentType, presentationAttributes);
+        presentationNotifications.put(nationalNumber, presentationNotification);
+
+        return presentationNotification;
+    }
+
+    @Override
+    public void removePresentationNotification(User user, String connectionNumber) {
+        String nationalNumber = user.getNationalNumber();
+        RMap<String, PresentationNotification> presentationNotifications = redissonClient.getMap("presentations_" + nationalNumber);
+        presentationNotifications.remove(connectionNumber);
+    }
+
+    @Override
+    public Notification addProofNotification(User user, Proof proof, String connectionNumber) {
+        RMap<String, ProofNotification> proofNotifications = redissonClient.getMap("proofs_" + connectionNumber);
+        String nationalNumber = user.getNationalNumber();
+        ProofNotification proofNotification = new ProofNotification(new Date().getTime(),
+                PROOF,
+                Contact.builder()
+                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .photo(user.getPhoto())
+                        .nationalNumber(nationalNumber)
+                        .isVisible(true)
+                        .build(), PROOF_TITLE_EN, PROOF_TITLE_UKR, PROOF_CONTENT_EN, PROOF_CONTENT_UKR, proof);
+        proofNotifications.put(nationalNumber, proofNotification);
+
+        return proofNotification;
+    }
+
+    @Override
+    public void removeProofNotification(String nationalNumber, String connectionNumber) {
+        RMap<String, ProofNotification> proofNotifications = redissonClient.getMap("proofs_" + nationalNumber);
+        proofNotifications.remove(connectionNumber);
     }
 }

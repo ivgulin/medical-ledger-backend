@@ -13,14 +13,14 @@ public class NationalNumber extends NationalDocument {
     private String issuer;
 
     public NationalNumber(String number, Long registrationDate, String issuer) {
-        super("number");
+        super(Type.number.name());
         this.number = number;
         this.registrationDate = registrationDate;
         this.issuer = issuer;
     }
 
     public NationalNumber() {
-        super("number");
+        super(Type.number.name());
     }
 
 }

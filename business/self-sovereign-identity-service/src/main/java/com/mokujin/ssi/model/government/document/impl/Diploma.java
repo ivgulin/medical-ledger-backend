@@ -28,7 +28,7 @@ public class Diploma extends NationalDocument {
 
     public Diploma(String number, String firstName, String lastName, String fatherName, String placeOfStudy,
                    String courseOfStudy, Long dateOfIssue, String qualification, String issuer) {
-        super("diploma");
+        super(Type.diploma.name());
         this.number = number;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -41,6 +41,6 @@ public class Diploma extends NationalDocument {
     }
 
     public Diploma() {
-        super("diploma");
+        super(Type.diploma.name());
     }
 }
