@@ -59,7 +59,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(n -> (PresentationNotification) n)
                 .collect(Collectors.toList());
 
-        List<ProofNotification> proofNotifications = redissonClient.getMap("proofs" + nationalNumber)
+        List<ProofNotification> proofNotifications = redissonClient.getMap("proofs_" + nationalNumber)
                 .values()
                 .stream()
                 .map(n -> (ProofNotification) n)
@@ -83,8 +83,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .publicKey(publicKey)
                 .privateKey(privateKey)
                 .build();
-        RMap<String, ProcessedUserCredentials> invitations = redissonClient.getMap("credentials");
-        invitations.put(doctorNumber + patientNumber, patientCredentials);
+        RMap<String, ProcessedUserCredentials> credentials = redissonClient.getMap("credentials");
+        credentials.put(doctorNumber + patientNumber, patientCredentials);
 
         RMap<String, SystemNotification> doctorNotifications = redissonClient.getMap("connections_" + doctorNumber);
         SystemNotification connectionNotification = new SystemNotification(new Date().getTime(), CONNECTION,
@@ -106,9 +106,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public ProcessedUserCredentials removeInviteNotification(String doctorNumber, String patientNumber) {
-        RMap<String, ProcessedUserCredentials> invitations = redissonClient.getMap("credentials");
-        ProcessedUserCredentials patientCredentials = invitations.get(doctorNumber + patientNumber);
-        invitations.remove(doctorNumber + patientNumber);
+        RMap<String, ProcessedUserCredentials> credentials = redissonClient.getMap("credentials");
+        ProcessedUserCredentials patientCredentials = credentials.get(doctorNumber + patientNumber);
+        credentials.remove(doctorNumber + patientNumber);
 
         RMap<String, SystemNotification> doctorNotifications = redissonClient.getMap("connections_" + doctorNumber);
         doctorNotifications.remove(patientCredentials.getPublicKey());

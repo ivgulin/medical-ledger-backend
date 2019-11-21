@@ -21,6 +21,23 @@ class CredentialServiceImplTest {
 
     private CredentialService credentialService = new CredentialServiceImpl(new ObjectMapper());
 
+    @ParameterizedTest
+    @MethodSource("provideDocumentsAndResultExpectations")
+    void getCredential_everyDocumentIsProvided_jsonStringIsReturned(Document document, String expected) {
+
+        String credential = credentialService.getCredential(document);
+        System.out.println("credential = " + credential);
+        String result = credential.replaceAll(",\"encoded\":\"[^\"]*\"", "");
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getCredential_documentHasNullField_skipTheField() {
+        NationalNumber nationalNumber = new NationalNumber(null, null, null);
+        assertThrows(LedgerException.class, () -> credentialService.getCredential(nationalNumber));
+    }
+
     private static Stream<Arguments> provideDocumentsAndResultExpectations() {
 
         String nationalNumber = "1234567890";
@@ -120,22 +137,5 @@ class CredentialServiceImplTest {
         passportNode.set("dateOfIssue", attributeTen);
         passportNode.set("type", attributeEleven);
         return passportNode;
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideDocumentsAndResultExpectations")
-    void getCredential_everyDocumentIsProvided_jsonStringIsReturned(Document document, String expected) {
-
-        String credential = credentialService.getCredential(document);
-        System.out.println("credential = " + credential);
-        String result = credential.replaceAll(",\"encoded\":\"[^\"]*\"", "");
-
-        assertEquals(expected, result);
-    }
-
-    @Test
-    void getCredential_documentHasNullField_skipTheField() {
-        NationalNumber nationalNumber = new NationalNumber(null, null, null);
-        assertThrows(LedgerException.class, () -> credentialService.getCredential(nationalNumber));
     }
 }
