@@ -6,6 +6,7 @@ import com.mokujin.user.model.User;
 import com.mokujin.user.model.chat.Message;
 import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.model.notification.NotificationCollector;
+import com.mokujin.user.model.presentation.Proof;
 
 import java.util.List;
 
@@ -23,4 +24,11 @@ public interface NotificationService {
 
     Notification addPresentationNotification(User user, List<String> presentationAttributes,
                                              String documentType, String connectionNumber);
+
+    void removePresentationNotification(User user, String connectionNumber);
+
+    Notification addProofNotification(User user, Proof proof, String connectionNumber);
+
+    void removeProofNotification(String nationalNumber, String connectionNumber);
+
 }

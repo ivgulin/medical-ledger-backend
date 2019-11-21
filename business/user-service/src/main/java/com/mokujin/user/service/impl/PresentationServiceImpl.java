@@ -1,20 +1,23 @@
 package com.mokujin.user.service.impl;
 
 import com.mokujin.user.model.User;
-import com.mokujin.user.model.document.NationalDocument;
+import com.mokujin.user.model.document.Document;
 import com.mokujin.user.model.document.impl.Certificate;
 import com.mokujin.user.model.document.impl.Diploma;
 import com.mokujin.user.model.document.impl.NationalNumber;
 import com.mokujin.user.model.document.impl.NationalPassport;
 import com.mokujin.user.model.notification.Notification;
+import com.mokujin.user.model.presentation.Affirmation;
 import com.mokujin.user.model.presentation.PresentationAttributes;
 import com.mokujin.user.model.presentation.PresentationRequest;
+import com.mokujin.user.model.presentation.Proof;
 import com.mokujin.user.service.NotificationService;
 import com.mokujin.user.service.PresentationService;
 import com.mokujin.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -30,6 +33,7 @@ public class PresentationServiceImpl implements PresentationService {
 
     private final NotificationService notificationService;
     private final UserService userService;
+    private final RestTemplate restTemplate;
 
     @Override
     public PresentationAttributes getPresentationAttributes(Role role) {
@@ -94,7 +98,29 @@ public class PresentationServiceImpl implements PresentationService {
     }
 
     @Override
-    public void presentProof(String publicKey, String privateKey, NationalDocument nationalDocument) {
+    public void presentProof(String publicKey, String privateKey, Document document, String connectionNumber) {
 
+        String url = "http://self-sovereign-identity-service/verification/present?public="
+                + publicKey + "&private=" + privateKey;
+        Proof proof = restTemplate.postForObject(url, document, Proof.class);
+        log.info("proof =  '{}'", proof);
+
+        User user = userService.get(publicKey, privateKey);
+
+        notificationService.removePresentationNotification(user, connectionNumber);
+
+        Notification notification = notificationService.addProofNotification(user, proof, connectionNumber);
+        log.info("proof notification =  '{}'", notification);
+    }
+
+    @Override
+    public Affirmation verifyProof(Proof proof, String nationalNumber, String connectionNumber) {
+
+        String url = "http://self-sovereign-identity-service/verification/verify";
+        Affirmation affirmation = restTemplate.postForObject(url, proof, Affirmation.class);
+
+        notificationService.removeProofNotification(nationalNumber, connectionNumber);
+
+        return affirmation;
     }
 }

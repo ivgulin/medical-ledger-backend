@@ -26,7 +26,6 @@ public class WalletController {
     private final WalletService walletService;
     private final DeletionService deletionService;
 
-    @SneakyThrows
     @PostMapping("/create")
     public ResponseEntity createWallet(@RequestBody UserCredentials credentials) {
         log.info("'createWallet' invoked with params '{}'", credentials);
@@ -38,10 +37,8 @@ public class WalletController {
             log.error("Exception was thrown: " + e);
             throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
-
     }
 
-    @SneakyThrows
     @PostMapping("/check")
     public ResponseEntity<Boolean> checkWallet(@RequestBody UserCredentials credentials) {
         log.info("'checkWallet' invoked with params '{}'", credentials);

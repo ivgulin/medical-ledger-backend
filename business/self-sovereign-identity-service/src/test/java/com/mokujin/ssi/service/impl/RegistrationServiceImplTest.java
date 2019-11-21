@@ -45,7 +45,7 @@ import static org.mockito.Mockito.*;
 class RegistrationServiceImplTest {
 
     @Mock
-    private ValidationService validationService;
+    private VerificationService verificationService;
 
     @Mock
     private WalletService walletService;
@@ -63,6 +63,7 @@ class RegistrationServiceImplTest {
     private Pool pool;
 
     private Identity government;
+    private Identity steward;
     private Schema passportSchema;
     private Schema nationalNumberSchema;
     private Schema diplomaSchema;
@@ -75,6 +76,12 @@ class RegistrationServiceImplTest {
         Wallet wallet = mock(Wallet.class);
 
         government = Identity.builder()
+                .wallet(wallet)
+                .image("test")
+                .pseudonyms(new ArrayList<>())
+                .build();
+
+        steward = Identity.builder()
                 .wallet(wallet)
                 .pseudonyms(new ArrayList<>())
                 .build();
@@ -97,11 +104,10 @@ class RegistrationServiceImplTest {
                 .build();
 
 
-        registrationService = new RegistrationServiceImpl(new ObjectMapper(), validationService, walletService,
-                identityService, userService, credentialService, government, pool, passportSchema, nationalNumberSchema,
-                certificateSchema, diplomaSchema);
+        registrationService = new RegistrationServiceImpl(new ObjectMapper(), verificationService, walletService,
+                identityService, userService, credentialService, government, steward, pool, passportSchema,
+                nationalNumberSchema, certificateSchema, diplomaSchema);
 
-        ReflectionTestUtils.setField(registrationService, "governmentPhoto", "photo");
     }
 
     @Test
@@ -152,7 +158,7 @@ class RegistrationServiceImplTest {
                 "place", "image", "male", issuer, date);
         NationalNumber nationalNumber = new NationalNumber(nationalNumberValue, date, issuer);
         KnownIdentity knownIdentity = new KnownIdentity(PATIENT, nationalPassport, nationalNumber, null, null);
-        when(validationService.validateNewbie(details)).thenReturn(knownIdentity);
+        when(verificationService.verifyNewbie(details)).thenReturn(knownIdentity);
 
         CreateAndStoreMyDidResult pseudonym = mock(CreateAndStoreMyDidResult.class);
         new MockUp<Did>() {
@@ -194,7 +200,7 @@ class RegistrationServiceImplTest {
         when(identityService.findByWallet(wallet)).thenReturn(identity);
 
         KnownIdentity knownIdentity = new KnownIdentity();
-        when(validationService.validateNewbie(details)).thenReturn(knownIdentity);
+        when(verificationService.verifyNewbie(details)).thenReturn(knownIdentity);
 
         new MockUp<Did>() {
             @mockit.Mock

@@ -127,6 +127,7 @@ class IdentityServiceImplTest {
                 .verinymDid(verinymDid)
                 .wallet(wallet)
                 .role(DOCTOR)
+                .image(photo)
                 .credentials(Collections.singletonList(Credential.builder()
                         .id(credentialId)
                         .document(new NationalNumber(nationalNumber, registrationDate, issuer))

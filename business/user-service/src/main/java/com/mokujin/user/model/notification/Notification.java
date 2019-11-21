@@ -15,7 +15,8 @@ public abstract class Notification {
         MESSAGE,
         CONNECTION,
         INVITATION,
-        PRESENTATION
+        PRESENTATION,
+        PROOF
     }
 
 }

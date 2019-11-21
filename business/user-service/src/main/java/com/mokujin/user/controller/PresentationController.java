@@ -1,8 +1,10 @@
 package com.mokujin.user.controller;
 
-import com.mokujin.user.model.document.NationalDocument;
+import com.mokujin.user.model.document.Document;
+import com.mokujin.user.model.presentation.Affirmation;
 import com.mokujin.user.model.presentation.PresentationAttributes;
 import com.mokujin.user.model.presentation.PresentationRequest;
+import com.mokujin.user.model.presentation.Proof;
 import com.mokujin.user.service.PresentationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,14 +46,27 @@ public class PresentationController {
     }
 
     @PostMapping("/present")
-    public ResponseEntity<PresentationAttributes> present(@RequestBody NationalDocument nationalDocument,
-                                                          @RequestHeader("Public-Key") String publicKey,
-                                                          @RequestHeader("Private-Key") String privateKey) {
-        log.info("'present' is invoked: '{}, {}, {}'", publicKey, privateKey, nationalDocument);
+    public ResponseEntity present(@RequestBody Document document,
+                                  @PathVariable String connectionNumber,
+                                  @RequestHeader("Public-Key") String publicKey,
+                                  @RequestHeader("Private-Key") String privateKey) {
+        log.info("'present' is invoked: '{}, {}, {}'", publicKey, privateKey, document);
 
-        presentationService.presentProof(publicKey, privateKey, nationalDocument);
+        presentationService.presentProof(publicKey, privateKey, document, connectionNumber);
 
         log.info("'present' has executed successfully.");
         return new ResponseEntity<>(OK);
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<Affirmation> verify(@RequestBody Proof proof,
+                                              @PathVariable String nationalNumber,
+                                              @PathVariable String connectionNumber) {
+        log.info("'present' is invoked: '{}, {}, {}'", proof, nationalNumber, connectionNumber);
+
+        Affirmation affirmation = presentationService.verifyProof(proof, nationalNumber, connectionNumber);
+
+        log.info("'verify' returned value '{}'", affirmation);
+        return ResponseEntity.ok(affirmation);
     }
 }

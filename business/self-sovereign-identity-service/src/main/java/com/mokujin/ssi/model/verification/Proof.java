@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Verification {
+public class Proof {
 
     private String proofRequest;
     private String proofApplication;

@@ -1,6 +1,7 @@
-package com.mokujin.user.model.notification;
+package com.mokujin.user.model.notification.extention;
 
 import com.mokujin.user.model.Contact;
+import com.mokujin.user.model.notification.SystemNotification;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

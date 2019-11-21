@@ -10,10 +10,15 @@ public class NotificationConstants {
 
     public static final String PRESENTATION_TITLE_EN = "Presentation Request";
     public static final String PRESENTATION_TITLE_UKR = "Презентація даних";
-    public static final String PRESENTATION_CONTENT_EN = "Your received a request for presentation of credentials. " +
+    public static final String PRESENTATION_CONTENT_EN = "You received a request for presentation of credentials. " +
             "You can choose which credentials to use to satisfy the requirements in this request";
     public static final String PRESENTATION_CONTENT_UKR = "Ви отримали запит презентації даних. " +
             "Ви можете вибрати які документи можна використати, щоб задовольнити запит.";
+
+    public static final String PROOF_TITLE_EN = "Proof received!";
+    public static final String PROOF_TITLE_UKR = " Підтвердження даних";
+    public static final String PROOF_CONTENT_EN = "You received a proof for your request for presentation of credentials.";
+    public static final String PROOF_CONTENT_UKR = "Ви отримали підтвердження даних на ваш запит презентації.";
 
 
 }

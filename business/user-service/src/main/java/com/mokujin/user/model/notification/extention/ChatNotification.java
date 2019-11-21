@@ -1,6 +1,7 @@
-package com.mokujin.user.model.notification;
+package com.mokujin.user.model.notification.extention;
 
 import com.mokujin.user.model.chat.Message;
+import com.mokujin.user.model.notification.Notification;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
