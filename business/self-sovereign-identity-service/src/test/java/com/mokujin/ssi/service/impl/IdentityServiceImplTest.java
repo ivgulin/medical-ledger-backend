@@ -3,38 +3,45 @@ package com.mokujin.ssi.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.document.impl.NationalNumber;
+import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
-import com.mokujin.ssi.service.IdentityService;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import mockit.MockUp;
 import org.hyperledger.indy.sdk.anoncreds.Anoncreds;
 import org.hyperledger.indy.sdk.did.Did;
-import org.hyperledger.indy.sdk.did.DidResults;
 import org.hyperledger.indy.sdk.ledger.Ledger;
 import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 import static com.mokujin.ssi.model.internal.Role.DOCTOR;
 import static com.mokujin.ssi.model.internal.Role.PATIENT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@Slf4j
 class IdentityServiceImplTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private IdentityService identityService;
+    private IdentityServiceImpl identityService;
 
     @BeforeEach
     void setUp() {
@@ -196,8 +203,8 @@ class IdentityServiceImplTest {
         Wallet wallet = mock(Wallet.class);
         Pool pool = mock(Pool.class);
 
-        DidResults.CreateAndStoreMyDidResult trustAnchorPseudonym = mock(DidResults.CreateAndStoreMyDidResult.class);
-        DidResults.CreateAndStoreMyDidResult userPseudonym = mock(DidResults.CreateAndStoreMyDidResult.class);
+        CreateAndStoreMyDidResult trustAnchorPseudonym = mock(CreateAndStoreMyDidResult.class);
+        CreateAndStoreMyDidResult userPseudonym = mock(CreateAndStoreMyDidResult.class);
         String governmentPseudonymDid = "gov did";
         String governmentPseudonymVerkey = "gov verkey";
         String userPseudonymDid = "user did";
@@ -247,5 +254,88 @@ class IdentityServiceImplTest {
         };
 
         identityService.establishUserConnection(pool, identity, trustAnchorPseudonym, userPseudonym);
+    }
+
+    @SneakyThrows
+    @ParameterizedTest
+    @MethodSource("provideIncompleteDocumentPack")
+    void exchangeContacts_incompletePackOfDocuments_exceptionIsThrown(Identity identity) {
+
+        CreateAndStoreMyDidResult pseudonym = mock(CreateAndStoreMyDidResult.class);
+        assertThrows(ResourceNotFoundException.class, () -> identityService
+                .exchangeContacts(identity, identity, pseudonym, pseudonym));
+    }
+
+    @Test
+    @SneakyThrows
+    void exchangeContacts_validInputs_methodIsExecuted() {
+        List<Credential> credentials = new ArrayList<>();
+        NationalPassport passport = new NationalPassport();
+        NationalNumber nationalNumber = new NationalNumber();
+        credentials.add(new Credential("id", passport, "", ""));
+        credentials.add(new Credential("id", nationalNumber, "", ""));
+
+        Identity identity = Identity.builder()
+                .credentials(credentials)
+                .build();
+
+        CreateAndStoreMyDidResult pseudonym = mock(CreateAndStoreMyDidResult.class);
+
+        identityService = spy(identityService);
+        doNothing().when(identityService).addContact(identity, pseudonym, passport, nationalNumber);
+
+        identityService.exchangeContacts(identity, identity, pseudonym, pseudonym);
+    }
+
+    @Test
+    @SneakyThrows
+    void addContact_validInputs_mathodIsExecuted() {
+        String name = "test";
+
+        CreateAndStoreMyDidResult pseudonym = mock(CreateAndStoreMyDidResult.class);
+        when(pseudonym.getDid()).thenReturn(name);
+
+        NationalPassport passport = new NationalPassport();
+        passport.setFirstName(name);
+        passport.setLastName(name);
+        passport.setFatherName(name);
+        passport.setImage(name);
+
+        NationalNumber nationalNumber = new NationalNumber();
+        nationalNumber.setNumber(name);
+
+        Wallet userWallet = mock(Wallet.class);
+        Identity identity = new Identity();
+        identity.setWallet(userWallet);
+
+        new MockUp<Did>() {
+            @mockit.Mock
+            public CompletableFuture<Void> setDidMetadata(Wallet wallet, String did, String metadata) {
+                assertEquals(userWallet, wallet);
+                assertEquals(name, did);
+
+                return CompletableFuture.runAsync(() -> log.debug("In mock."));
+            }
+        };
+
+        identityService.addContact(identity, pseudonym, passport, nationalNumber);
+    }
+
+    private static Stream<Arguments> provideIncompleteDocumentPack() {
+
+        List<Credential> onlyPassportPack = new ArrayList<>();
+        onlyPassportPack.add(new Credential("id", new NationalPassport(), "", ""));
+
+        Identity onlyPassportIdentity = Identity.builder()
+                .credentials(onlyPassportPack)
+                .build();
+
+        List<Credential> onlyNationalNumberPack = new ArrayList<>();
+        onlyNationalNumberPack.add(new Credential("id", new NationalNumber(), "", ""));
+
+        Identity onlyNationalNumberIdentity = Identity.builder()
+                .credentials(onlyNationalNumberPack)
+                .build();
+        return Stream.of(Arguments.of(onlyPassportIdentity), Arguments.of(onlyNationalNumberIdentity));
     }
 }

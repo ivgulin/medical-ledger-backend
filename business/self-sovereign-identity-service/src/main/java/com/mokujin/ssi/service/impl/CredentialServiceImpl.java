@@ -32,9 +32,7 @@ public class CredentialServiceImpl implements CredentialService {
     public String getCredential(Document document) {
         List<Field> fields = Arrays.stream(document.getClass().getDeclaredFields()).collect(Collectors.toList());
 
-        Class<?> superclass = document.getClass().getSuperclass() == NationalDocument.class
-                ? document.getClass().getSuperclass().getSuperclass()
-                : document.getClass().getSuperclass();
+        Class<?> superclass = document.getClass().getSuperclass().getSuperclass();
 
         fields.addAll(Arrays.stream(superclass.getDeclaredFields()).collect(Collectors.toList()));
 

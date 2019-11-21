@@ -115,12 +115,12 @@ public class IdentityServiceImpl implements IdentityService {
                                  CreateAndStoreMyDidResult patientPseudonym,
                                  CreateAndStoreMyDidResult doctorPseudonym) throws Exception {
 
-        NationalPassport doctorPassport = getNationalPassport(doctorIdentity);
-        NationalNumber doctorNationalNumber = getNationalNumber(doctorIdentity);
+        NationalPassport doctorPassport = this.getNationalPassport(doctorIdentity);
+        NationalNumber doctorNationalNumber = this.getNationalNumber(doctorIdentity);
         this.addContact(patientIdentity, doctorPseudonym, doctorPassport, doctorNationalNumber);
 
-        NationalPassport patientPassport = getNationalPassport(patientIdentity);
-        NationalNumber patientNationalNumber = getNationalNumber(patientIdentity);
+        NationalPassport patientPassport = this.getNationalPassport(patientIdentity);
+        NationalNumber patientNationalNumber = this.getNationalNumber(patientIdentity);
         this.addContact(doctorIdentity, patientPseudonym, patientPassport, patientNationalNumber);
     }
 
@@ -146,7 +146,7 @@ public class IdentityServiceImpl implements IdentityService {
 
     }
 
-    private NationalNumber getNationalNumber(Identity identity) {
+    NationalNumber getNationalNumber(Identity identity) {
         return (NationalNumber) identity.getCredentials().stream()
                 .filter(c -> NationalNumber.class.equals(c.getDocument().getClass()))
                 .findFirst()
@@ -154,7 +154,7 @@ public class IdentityServiceImpl implements IdentityService {
                 .getDocument();
     }
 
-    private NationalPassport getNationalPassport(Identity identity) {
+    NationalPassport getNationalPassport(Identity identity) {
         return (NationalPassport) identity.getCredentials().stream()
                 .filter(c -> NationalPassport.class.equals(c.getDocument().getClass()))
                 .findFirst()

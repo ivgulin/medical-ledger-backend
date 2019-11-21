@@ -27,31 +27,31 @@ public class ChatServiceImpl implements ChatService {
     public Chat get(String publicKey, String privateKey, String connectionNumber) {
 
         try (Wallet wallet = walletService.getOrCreateWallet(publicKey, privateKey);) {
-            return getOrCreateChat(connectionNumber, wallet);
+            return this.getOrCreateChat(connectionNumber, wallet);
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
             throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
-    private Chat getOrCreateChat(String connectionNumber, Wallet wallet) throws Exception {
+    Chat getOrCreateChat(String connectionNumber, Wallet wallet) throws Exception {
         Chat chat;
         try {
             String chatInString = WalletRecord.get(wallet, "chat", connectionNumber, "{}").get()
                     .replace("\\", "")
                     .replace("\"{", "{")
                     .replace("}\"", "}");
-            ;
+
             log.info("'chatInString={}'", chatInString);
             chat = objectMapper.readValue(chatInString, LedgerChatResponse.class).getValue();
+            return chat;
         } catch (Exception e) {
             chat = new Chat();
             String chatInString = objectMapper.writeValueAsString(chat);
             WalletRecord.add(wallet, "chat", connectionNumber, chatInString, "{}");
+            return chat;
         }
-        return chat;
     }
-
 
     @Override
     public Chat addMessage(String publicKey, String privateKey, String connectionNumber, Message message) {

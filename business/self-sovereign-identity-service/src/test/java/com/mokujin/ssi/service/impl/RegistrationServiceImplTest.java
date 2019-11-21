@@ -103,7 +103,6 @@ class RegistrationServiceImplTest {
                 .schemaDefinitionId("certificate schema definition id")
                 .build();
 
-
         registrationService = new RegistrationServiceImpl(new ObjectMapper(), verificationService, walletService,
                 identityService, userService, credentialService, government, steward, pool, passportSchema,
                 nationalNumberSchema, certificateSchema, diplomaSchema);
