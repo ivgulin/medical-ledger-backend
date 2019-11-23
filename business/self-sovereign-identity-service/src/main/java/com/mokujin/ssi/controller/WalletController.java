@@ -2,17 +2,14 @@ package com.mokujin.ssi.controller;
 
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.user.request.UserCredentials;
+import com.mokujin.ssi.model.user.response.Auth;
 import com.mokujin.ssi.service.DeletionService;
 import com.mokujin.ssi.service.WalletService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
@@ -39,21 +36,23 @@ public class WalletController {
         }
     }
 
-    @PostMapping("/check")
-    public ResponseEntity<Boolean> checkWallet(@RequestBody UserCredentials credentials) {
-        log.info("'checkWallet' invoked with params '{}'", credentials);
+    @GetMapping("/check")
+    public ResponseEntity<Auth> checkWallet(@RequestParam("public") String publicKey,
+                                            @RequestParam("private") String privateKey) {
+        log.info("'checkWallet' invoked with params '{}, {}'", publicKey, privateKey);
 
-        boolean doesWalletExist = walletService.doesWalletExist(credentials.getPublicKey(), credentials.getPrivateKey());
+        Auth auth = walletService.doesWalletExist(publicKey, privateKey);
 
-        log.info("'checkWallet' returns = '{}'", doesWalletExist);
-        return ResponseEntity.ok(doesWalletExist);
+        log.info("'checkWallet' returns = '{}'", auth);
+        return ResponseEntity.ok(auth);
     }
 
-    @PostMapping("/delete")
-    public ResponseEntity delete(@RequestBody UserCredentials credentials) {
-        log.info("'delete' invoked with params '{}'", credentials);
+    @DeleteMapping("/delete")
+    public ResponseEntity delete(@RequestParam("public") String publicKey,
+                                 @RequestParam("private") String privateKey) {
+        log.info("'delete' invoked with params '{}, {}'", publicKey, privateKey);
 
-        deletionService.delete(credentials);
+        deletionService.delete(publicKey, privateKey);
 
         log.info("delete is executed successfully.");
         return new ResponseEntity(OK);

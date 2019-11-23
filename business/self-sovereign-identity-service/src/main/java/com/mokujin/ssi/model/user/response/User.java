@@ -3,6 +3,7 @@ package com.mokujin.ssi.model.user.response;
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Role;
+import com.mokujin.ssi.model.record.HealthRecord;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,15 +38,5 @@ public class User {
 
     private List<Credential> credentials = new ArrayList<>();
 
-    public void addNationalCredential(Credential nationalCredential) {
-        nationalCredentials.add(nationalCredential);
-    }
-
-    public void addContact(Contact contact) {
-        contacts.add(contact);
-    }
-
-    public void addCredential(Credential credential) {
-        credentials.add(credential);
-    }
+    private List<HealthRecord> records = new ArrayList<>();
 }

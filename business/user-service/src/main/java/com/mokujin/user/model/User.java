@@ -1,5 +1,6 @@
 package com.mokujin.user.model;
 
+import com.mokujin.user.model.record.HealthRecord;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -25,6 +26,8 @@ public class User {
     private List<Contact> contacts = new ArrayList<>();
 
     private List<Credential> credentials = new ArrayList<>();
+
+    private List<HealthRecord> records = new ArrayList<>();
 
     public enum Role {
         PATIENT,

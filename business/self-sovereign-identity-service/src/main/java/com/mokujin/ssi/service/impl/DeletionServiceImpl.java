@@ -3,7 +3,7 @@ package com.mokujin.ssi.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
-import com.mokujin.ssi.model.user.request.UserCredentials;
+import com.mokujin.ssi.model.user.response.Auth;
 import com.mokujin.ssi.service.DeletionService;
 import com.mokujin.ssi.service.WalletService;
 import lombok.RequiredArgsConstructor;
@@ -23,16 +23,17 @@ public class DeletionServiceImpl implements DeletionService {
 
     @Override
     @SneakyThrows
-    public void delete(UserCredentials userCredentials) {
+    public void delete(String publicKey, String privateKey) {
 
-        if (!walletService.doesWalletExist(userCredentials.getPublicKey(), userCredentials.getPrivateKey())) {
+        Auth auth = walletService.doesWalletExist(publicKey, privateKey);
+        if (!auth.isExists()) {
             throw new ResourceNotFoundException("No wallet was found for this user");
         }
 
         ObjectNode config = objectMapper.createObjectNode();
-        config.put("id", userCredentials.getPublicKey());
+        config.put("id", publicKey);
         ObjectNode credentials = objectMapper.createObjectNode();
-        credentials.put("key", userCredentials.getPrivateKey());
+        credentials.put("key", privateKey);
         deleteWallet(config.toString(), credentials.toString()).get();
     }
 }

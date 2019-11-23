@@ -9,8 +9,8 @@ import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.model.user.request.UserRegistrationDetails;
-import com.mokujin.ssi.model.verification.Proof;
 import com.mokujin.ssi.model.verification.Affirmation;
+import com.mokujin.ssi.model.verification.Proof;
 import com.mokujin.ssi.service.CredentialService;
 import com.mokujin.ssi.service.VerificationService;
 import com.mokujin.ssi.service.WalletService;
@@ -56,7 +56,7 @@ public class VerificationServiceImpl implements VerificationService {
 
         KnownIdentity knownIdentity = restTemplate
                 .postForObject("http://government-service/identity/issue-credentials",
-                details, KnownIdentity.class);
+                        details, KnownIdentity.class);
 
         log.info("'verifyNewbie' returned value '{}'", knownIdentity);
 

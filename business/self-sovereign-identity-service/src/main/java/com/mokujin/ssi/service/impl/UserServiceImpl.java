@@ -8,7 +8,9 @@ import com.mokujin.ssi.model.government.document.impl.NationalPassport;
 import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
+import com.mokujin.ssi.model.record.HealthRecord;
 import com.mokujin.ssi.model.user.response.User;
+import com.mokujin.ssi.service.HealthDataService;
 import com.mokujin.ssi.service.IdentityService;
 import com.mokujin.ssi.service.UserService;
 import com.mokujin.ssi.service.WalletService;
@@ -30,6 +32,8 @@ public class UserServiceImpl implements UserService {
 
     private final WalletService walletService;
     private final IdentityService identityService;
+    private final HealthDataService healthDataService;
+
 
     @Override
     @SneakyThrows
@@ -55,6 +59,8 @@ public class UserServiceImpl implements UserService {
 
         credentials.removeAll(nationalCredentials);
 
+        List<HealthRecord> records = healthDataService.getRecords(identity.getWallet());
+
         return User.builder()
                 .role(identity.getRole())
                 .lastName(passport.getLastName())
@@ -65,6 +71,7 @@ public class UserServiceImpl implements UserService {
                 .contacts(identity.getPseudonyms().stream().map(Pseudonym::getContact).collect(Collectors.toList()))
                 .credentials(credentials)
                 .nationalCredentials(nationalCredentials)
+                .records(records)
                 .build();
     }
 

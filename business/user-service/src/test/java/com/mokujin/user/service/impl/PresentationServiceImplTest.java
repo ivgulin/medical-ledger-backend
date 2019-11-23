@@ -48,6 +48,32 @@ class PresentationServiceImplTest {
     @InjectMocks
     private PresentationServiceImpl presentationService;
 
+    private static Stream<Arguments> provideRolesAndResultExpectations() {
+
+        List<String> passportAttributes = Arrays.asList("number", "firstName", "lastName",
+                "fatherName", "dateOfBirth", "placeOfBirth", "image", "sex", "issuer", "dateOfIssue");
+        List<String> nationalNumberAttributes = Arrays.asList("number", "registrationDate", "issuer");
+
+        PresentationAttributes patientPresentationAttributes = new PresentationAttributes();
+        patientPresentationAttributes.setPassportAttributes(passportAttributes);
+        patientPresentationAttributes.setNationalNumberAttributes(nationalNumberAttributes);
+
+        List<String> diplomaAttributes = Arrays.asList("number", "firstName", "lastName", "fatherName",
+                "placeOfStudy", "courseOfStudy", "dateOfIssue", "qualification", "issuer");
+        List<String> certificateAttributes = Arrays.asList("number", "firstName", "lastName", "fatherName",
+                "dateOfExam", "dateOfIssue", "qualification", "courseOfStudy", "category", "expiresIn", "issuer");
+
+        PresentationAttributes doctorPresentationAttributes = new PresentationAttributes();
+        doctorPresentationAttributes.setPassportAttributes(passportAttributes);
+        doctorPresentationAttributes.setNationalNumberAttributes(nationalNumberAttributes);
+        doctorPresentationAttributes.setDiplomaAttributes(diplomaAttributes);
+        doctorPresentationAttributes.setCertificateAttributes(certificateAttributes);
+
+        return Stream.of(
+                Arguments.of(PATIENT, patientPresentationAttributes),
+                Arguments.of(DOCTOR, doctorPresentationAttributes)
+        );
+    }
 
     @ParameterizedTest
     @MethodSource("provideRolesAndResultExpectations")
@@ -146,32 +172,5 @@ class PresentationServiceImplTest {
         Affirmation result = presentationService.verifyProof(proof, nationalNumber, connectionNumber);
 
         assertEquals(affirmation, result);
-    }
-
-    private static Stream<Arguments> provideRolesAndResultExpectations() {
-
-        List<String> passportAttributes = Arrays.asList("number", "firstName", "lastName",
-                "fatherName", "dateOfBirth", "placeOfBirth", "image", "sex", "issuer", "dateOfIssue");
-        List<String> nationalNumberAttributes = Arrays.asList("number", "registrationDate", "issuer");
-
-        PresentationAttributes patientPresentationAttributes = new PresentationAttributes();
-        patientPresentationAttributes.setPassportAttributes(passportAttributes);
-        patientPresentationAttributes.setNationalNumberAttributes(nationalNumberAttributes);
-
-        List<String> diplomaAttributes = Arrays.asList("number", "firstName", "lastName", "fatherName",
-                "placeOfStudy", "courseOfStudy", "dateOfIssue", "qualification", "issuer");
-        List<String> certificateAttributes = Arrays.asList("number", "firstName", "lastName", "fatherName",
-                "dateOfExam", "dateOfIssue", "qualification", "courseOfStudy", "category", "expiresIn", "issuer");
-
-        PresentationAttributes doctorPresentationAttributes = new PresentationAttributes();
-        doctorPresentationAttributes.setPassportAttributes(passportAttributes);
-        doctorPresentationAttributes.setNationalNumberAttributes(nationalNumberAttributes);
-        doctorPresentationAttributes.setDiplomaAttributes(diplomaAttributes);
-        doctorPresentationAttributes.setCertificateAttributes(certificateAttributes);
-
-        return Stream.of(
-                Arguments.of(PATIENT, patientPresentationAttributes),
-                Arguments.of(DOCTOR, doctorPresentationAttributes)
-        );
     }
 }

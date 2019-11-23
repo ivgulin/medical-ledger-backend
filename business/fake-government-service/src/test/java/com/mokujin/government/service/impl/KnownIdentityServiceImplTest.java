@@ -35,6 +35,80 @@ class KnownIdentityServiceImplTest {
     @InjectMocks
     private KnownIdentityServiceImpl knownIdentityService;
 
+    private static Stream<Arguments> providePersonsAndPassports() {
+
+        String nationalNumber = "number";
+        String fatherName = "fathername";
+        String firstName = "first";
+        String lastName = "last";
+        long dateOfBirth = 1234567L;
+
+        return Stream.of(
+                Arguments.of(
+                        Person.builder()
+                                .nationalNumber(nationalNumber)
+                                .fatherName(fatherName)
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .dateOfBirth(dateOfBirth)
+                                .build()
+                        ,
+                        NationalPassport.builder()
+                                .fatherName(fatherName)
+                                .firstName("another name")
+                                .lastName(lastName)
+                                .dateOfBirth(dateOfBirth)
+                                .build()
+                ),
+                Arguments.of(
+                        Person.builder()
+                                .nationalNumber(nationalNumber)
+                                .fatherName(fatherName)
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .dateOfBirth(dateOfBirth)
+                                .build()
+                        ,
+                        NationalPassport.builder()
+                                .fatherName(fatherName)
+                                .firstName(firstName)
+                                .lastName("another name")
+                                .dateOfBirth(dateOfBirth)
+                                .build()
+                ), Arguments.of(
+                        Person.builder()
+                                .nationalNumber(nationalNumber)
+                                .fatherName(fatherName)
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .dateOfBirth(dateOfBirth)
+                                .build()
+                        ,
+                        NationalPassport.builder()
+                                .fatherName("another name")
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .dateOfBirth(dateOfBirth)
+                                .build()
+                ), Arguments.of(
+                        Person.builder()
+                                .nationalNumber(nationalNumber)
+                                .fatherName(fatherName)
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .dateOfBirth(dateOfBirth)
+                                .build()
+                        ,
+                        NationalPassport.builder()
+                                .fatherName(fatherName)
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .dateOfBirth(11111111L)
+                                .build()
+                )
+        );
+    }
+
     @Test
     void save_knownIdentityIsOk_savedKnownIdentityIsReturned() {
 
@@ -262,79 +336,5 @@ class KnownIdentityServiceImplTest {
         when(knownIdentityRepository.findByNationalNumber_Number(person.getNationalNumber()))
                 .thenReturn(Optional.of(knownIdentity));
         assertThrows(ResourceNotFoundException.class, () -> knownIdentityService.getWithImage(person));
-    }
-
-    private static Stream<Arguments> providePersonsAndPassports() {
-
-        String nationalNumber = "number";
-        String fatherName = "fathername";
-        String firstName = "first";
-        String lastName = "last";
-        long dateOfBirth = 1234567L;
-
-        return Stream.of(
-                Arguments.of(
-                        Person.builder()
-                                .nationalNumber(nationalNumber)
-                                .fatherName(fatherName)
-                                .firstName(firstName)
-                                .lastName(lastName)
-                                .dateOfBirth(dateOfBirth)
-                                .build()
-                        ,
-                        NationalPassport.builder()
-                                .fatherName(fatherName)
-                                .firstName("another name")
-                                .lastName(lastName)
-                                .dateOfBirth(dateOfBirth)
-                                .build()
-                ),
-                Arguments.of(
-                        Person.builder()
-                                .nationalNumber(nationalNumber)
-                                .fatherName(fatherName)
-                                .firstName(firstName)
-                                .lastName(lastName)
-                                .dateOfBirth(dateOfBirth)
-                                .build()
-                        ,
-                        NationalPassport.builder()
-                                .fatherName(fatherName)
-                                .firstName(firstName)
-                                .lastName("another name")
-                                .dateOfBirth(dateOfBirth)
-                                .build()
-                ), Arguments.of(
-                        Person.builder()
-                                .nationalNumber(nationalNumber)
-                                .fatherName(fatherName)
-                                .firstName(firstName)
-                                .lastName(lastName)
-                                .dateOfBirth(dateOfBirth)
-                                .build()
-                        ,
-                        NationalPassport.builder()
-                                .fatherName("another name")
-                                .firstName(firstName)
-                                .lastName(lastName)
-                                .dateOfBirth(dateOfBirth)
-                                .build()
-                ), Arguments.of(
-                        Person.builder()
-                                .nationalNumber(nationalNumber)
-                                .fatherName(fatherName)
-                                .firstName(firstName)
-                                .lastName(lastName)
-                                .dateOfBirth(dateOfBirth)
-                                .build()
-                        ,
-                        NationalPassport.builder()
-                                .fatherName(fatherName)
-                                .firstName(firstName)
-                                .lastName(lastName)
-                                .dateOfBirth(11111111L)
-                                .build()
-                )
-        );
     }
 }

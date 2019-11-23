@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.document.Document;
-import com.mokujin.ssi.model.government.document.NationalDocument;
 import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.service.CredentialService;
 import lombok.AllArgsConstructor;

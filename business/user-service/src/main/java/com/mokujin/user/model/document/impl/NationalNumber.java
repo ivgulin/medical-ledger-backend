@@ -2,8 +2,10 @@ package com.mokujin.user.model.document.impl;
 
 import com.mokujin.user.model.document.NationalDocument;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class NationalNumber extends NationalDocument {
 
     private String number;

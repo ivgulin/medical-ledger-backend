@@ -34,8 +34,8 @@ public class BasicAuthorizationSecurityConfig extends WebSecurityConfigurerAdapt
         httpSecurity.csrf().disable()
                 .requestMatcher(new BasicRequestMatcher())
                 .authorizeRequests()
-                    .antMatchers("/auth/**", "/gov/**").authenticated()
-                .antMatchers(POST,"/user/registration/create-wallet").authenticated()
+                .antMatchers("/auth/**", "/gov/**").authenticated()
+                .antMatchers(POST, "/user/registration/create-wallet").authenticated()
                 .anyRequest().denyAll()
                 .and().httpBasic()
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -50,16 +50,16 @@ public class BasicAuthorizationSecurityConfig extends WebSecurityConfigurerAdapt
                 .authorities("web-client");
     }
 
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     private static class BasicRequestMatcher implements RequestMatcher {
         @Override
         public boolean matches(HttpServletRequest request) {
             String auth = request.getHeader("Authorization");
             return (auth != null && auth.startsWith("Basic"));
         }
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

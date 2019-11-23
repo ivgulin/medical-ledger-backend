@@ -20,8 +20,8 @@ public class InvitationController {
 
     @PostMapping("/invite-back")
     public ResponseEntity<User> inviteBack(@RequestBody Contact doctor,
-                                     @RequestHeader("Public-Key") String publicKey,
-                                     @RequestHeader("Private-Key") String privateKey) {
+                                           @RequestHeader("Public-Key") String publicKey,
+                                           @RequestHeader("Private-Key") String privateKey) {
         log.info("'inviteBack' invoked with params '{}, {}, {}'", publicKey, privateKey, doctor);
 
         User user = invitationService.inviteBack(publicKey, privateKey, doctor);

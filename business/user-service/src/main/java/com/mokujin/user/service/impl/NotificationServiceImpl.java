@@ -8,9 +8,11 @@ import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.model.notification.NotificationCollector;
 import com.mokujin.user.model.notification.SystemNotification;
 import com.mokujin.user.model.notification.extention.ChatNotification;
+import com.mokujin.user.model.notification.extention.HealthNotification;
 import com.mokujin.user.model.notification.extention.PresentationNotification;
 import com.mokujin.user.model.notification.extention.ProofNotification;
 import com.mokujin.user.model.presentation.Proof;
+import com.mokujin.user.model.record.HealthRecord;
 import com.mokujin.user.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,12 +67,19 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(n -> (ProofNotification) n)
                 .collect(Collectors.toList());
 
+        List<HealthNotification> healthNotifications = redissonClient.getMap("health_" + nationalNumber)
+                .values()
+                .stream()
+                .map(n -> (HealthNotification) n)
+                .collect(Collectors.toList());
+
         return NotificationCollector.builder()
                 .messages(messageNotifications)
                 .connections(connectionNotifications)
                 .invitations(invitationNotifications)
                 .presentations(presentationNotifications)
                 .proofs(proofNotifications)
+                .health(healthNotifications)
                 .build();
     }
 
@@ -181,5 +190,28 @@ public class NotificationServiceImpl implements NotificationService {
     public void removeProofNotification(String nationalNumber, String connectionNumber) {
         RMap<String, ProofNotification> proofNotifications = redissonClient.getMap("proofs_" + nationalNumber);
         proofNotifications.remove(connectionNumber);
+    }
+
+    @Override
+    public Notification addHealthNotification(User user, HealthRecord record, String connectionNumber) {
+        RMap<String, HealthNotification> healthNotifications = redissonClient.getMap("health_" + connectionNumber);
+        String nationalNumber = user.getNationalNumber();
+        HealthNotification healthNotification = new HealthNotification(new Date().getTime(),
+                HEALTH,
+                Contact.builder()
+                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .photo(user.getPhoto())
+                        .nationalNumber(nationalNumber)
+                        .isVisible(true)
+                        .build(), PROOF_TITLE_EN, PROOF_TITLE_UKR, PROOF_CONTENT_EN, PROOF_CONTENT_UKR, record);
+        healthNotifications.put(nationalNumber, healthNotification);
+
+        return healthNotification;
+    }
+
+    @Override
+    public void removeHealthNotification(String nationalNumber, String connectionNumber) {
+        RMap<String, HealthNotification> healthNotifications = redissonClient.getMap("health_" + nationalNumber);
+        healthNotifications.remove(connectionNumber);
     }
 }

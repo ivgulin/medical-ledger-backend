@@ -4,7 +4,10 @@ import com.mokujin.user.model.document.NationalDocument;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import static com.mokujin.user.model.document.Document.Type.certificate;
+
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Certificate extends NationalDocument {
 
     private String number;
@@ -31,7 +34,7 @@ public class Certificate extends NationalDocument {
 
     public Certificate(String number, String firstName, String lastName, String fatherName, Long dateOfExam,
                        Long dateOfIssue, String qualification, String courseOfStudy, Long expiresIn, String issuer) {
-        super(Type.certificate.name());
+        super(certificate.name());
         this.number = number;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -45,10 +48,10 @@ public class Certificate extends NationalDocument {
     }
 
     public Certificate() {
-        super(Type.certificate.name());
+        super(certificate.name());
     }
 
-    public enum Category{
+    public enum Category {
         I, II, HIGHER
     }
 }

@@ -20,4 +20,11 @@ public class UserServiceImpl implements UserService {
                 + publicKey + "&private=" + privateKey;
         return restTemplate.getForObject(url, User.class);
     }
+
+    @Override
+    public void delete(String publicKey, String privateKey) {
+        String url = "http://self-sovereign-identity-service/wallet/delete?public="
+                + publicKey + "&private=" + privateKey;
+        restTemplate.delete(url);
+    }
 }

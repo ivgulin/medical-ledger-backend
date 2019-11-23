@@ -26,7 +26,7 @@ public abstract class Document {
 
     private String type;
 
-    public enum Type{
+    public enum Type {
         passport,
         diploma,
         certificate,

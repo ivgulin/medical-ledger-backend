@@ -43,6 +43,24 @@ class IdentityServiceImplTest {
 
     private IdentityServiceImpl identityService;
 
+    private static Stream<Arguments> provideIncompleteDocumentPack() {
+
+        List<Credential> onlyPassportPack = new ArrayList<>();
+        onlyPassportPack.add(new Credential("id", new NationalPassport(), "", ""));
+
+        Identity onlyPassportIdentity = Identity.builder()
+                .credentials(onlyPassportPack)
+                .build();
+
+        List<Credential> onlyNationalNumberPack = new ArrayList<>();
+        onlyNationalNumberPack.add(new Credential("id", new NationalNumber(), "", ""));
+
+        Identity onlyNationalNumberIdentity = Identity.builder()
+                .credentials(onlyNationalNumberPack)
+                .build();
+        return Stream.of(Arguments.of(onlyPassportIdentity), Arguments.of(onlyNationalNumberIdentity));
+    }
+
     @BeforeEach
     void setUp() {
         identityService = new IdentityServiceImpl(objectMapper);
@@ -156,7 +174,6 @@ class IdentityServiceImplTest {
 
         assertEquals(expected, result);
     }
-
 
     @Test
     @SneakyThrows
@@ -319,23 +336,5 @@ class IdentityServiceImplTest {
         };
 
         identityService.addContact(identity, pseudonym, passport, nationalNumber);
-    }
-
-    private static Stream<Arguments> provideIncompleteDocumentPack() {
-
-        List<Credential> onlyPassportPack = new ArrayList<>();
-        onlyPassportPack.add(new Credential("id", new NationalPassport(), "", ""));
-
-        Identity onlyPassportIdentity = Identity.builder()
-                .credentials(onlyPassportPack)
-                .build();
-
-        List<Credential> onlyNationalNumberPack = new ArrayList<>();
-        onlyNationalNumberPack.add(new Credential("id", new NationalNumber(), "", ""));
-
-        Identity onlyNationalNumberIdentity = Identity.builder()
-                .credentials(onlyNationalNumberPack)
-                .build();
-        return Stream.of(Arguments.of(onlyPassportIdentity), Arguments.of(onlyNationalNumberIdentity));
     }
 }

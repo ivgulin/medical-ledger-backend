@@ -6,7 +6,6 @@ import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.government.document.Document;
 import com.mokujin.ssi.model.government.document.impl.NationalNumber;
 import com.mokujin.ssi.model.government.document.impl.NationalPassport;
-import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.service.CredentialService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,23 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class CredentialServiceImplTest {
 
     private CredentialService credentialService = new CredentialServiceImpl(new ObjectMapper());
-
-    @ParameterizedTest
-    @MethodSource("getCredentials_provideDocumentsAndResultExpectations")
-    void getCredential_everyDocumentIsProvided_jsonStringIsReturned(Document document, String expected) {
-
-        String credential = credentialService.getCredential(document);
-        System.out.println("credential = " + credential);
-        String result = credential.replaceAll(",\"encoded\":\"[^\"]*\"", "");
-
-        assertEquals(expected, result);
-    }
-
-    @Test
-    void getCredential_documentHasNullField_exceptionIsThrown() {
-        NationalNumber nationalNumber = new NationalNumber(null, null, null);
-        assertThrows(LedgerException.class, () -> credentialService.getCredential(nationalNumber));
-    }
 
     private static Stream<Arguments> getCredentials_provideDocumentsAndResultExpectations() {
 
@@ -138,5 +120,22 @@ class CredentialServiceImplTest {
         passportNode.set("dateOfIssue", attributeTen);
         passportNode.set("type", attributeEleven);
         return passportNode;
+    }
+
+    @ParameterizedTest
+    @MethodSource("getCredentials_provideDocumentsAndResultExpectations")
+    void getCredential_everyDocumentIsProvided_jsonStringIsReturned(Document document, String expected) {
+
+        String credential = credentialService.getCredential(document);
+        System.out.println("credential = " + credential);
+        String result = credential.replaceAll(",\"encoded\":\"[^\"]*\"", "");
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getCredential_documentHasNullField_exceptionIsThrown() {
+        NationalNumber nationalNumber = new NationalNumber(null, null, null);
+        assertThrows(LedgerException.class, () -> credentialService.getCredential(nationalNumber));
     }
 }

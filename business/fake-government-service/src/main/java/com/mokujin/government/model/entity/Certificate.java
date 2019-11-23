@@ -70,7 +70,7 @@ public class Certificate {
     @JoinColumn(name = "known_identity_id")
     private KnownIdentity knownIdentity;
 
-    public enum Category{
+    public enum Category {
         I, II, HIGHER
     }
 

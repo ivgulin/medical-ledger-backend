@@ -12,6 +12,8 @@ import com.mokujin.user.model.notification.extention.ChatNotification;
 import com.mokujin.user.model.notification.extention.PresentationNotification;
 import com.mokujin.user.model.notification.extention.ProofNotification;
 import com.mokujin.user.model.presentation.Proof;
+import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -42,6 +44,8 @@ class NotificationServiceImplTest {
     private NotificationServiceImpl notificationService;
 
     @Test
+    @Disabled
+        // TODO: 23.11.19 get done when all notifications are described
     void getNotifications_validInputs_collectedNotificationsAreReturned() {
 
         String nationalNumber = "number";

@@ -25,8 +25,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
-import javax.annotation.PreDestroy;
-
 import static com.mokujin.ssi.model.internal.Role.STEWARD;
 import static com.mokujin.ssi.model.internal.Role.TRUST_ANCHOR;
 import static java.util.Objects.isNull;

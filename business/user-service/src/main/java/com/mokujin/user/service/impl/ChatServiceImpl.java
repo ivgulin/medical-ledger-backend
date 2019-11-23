@@ -6,7 +6,6 @@ import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.service.ChatService;
 import com.mokujin.user.service.NotificationService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

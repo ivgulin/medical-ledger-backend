@@ -3,6 +3,7 @@ package com.mokujin.ssi.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.user.request.UserCredentials;
+import com.mokujin.ssi.model.user.response.Auth;
 import com.mokujin.ssi.service.DeletionService;
 import com.mokujin.ssi.service.WalletService;
 import lombok.SneakyThrows;
@@ -42,11 +43,10 @@ class DeletionServiceImplTest {
 
         String email = "test@test.com";
         String password = "test";
-        UserCredentials credentials = new UserCredentials(email, password);
 
-        when(walletService.doesWalletExist(anyString(), anyString())).thenReturn(false);
+        when(walletService.doesWalletExist(anyString(), anyString())).thenReturn(new Auth(false, null));
 
-        assertThrows(ResourceNotFoundException.class, () -> deletionService.delete(credentials));
+        assertThrows(ResourceNotFoundException.class, () -> deletionService.delete(email, password));
 
         verify(walletService, times(0)).getOrCreateWallet(anyString(), anyString());
     }
@@ -57,9 +57,8 @@ class DeletionServiceImplTest {
 
         String email = "test@test.com";
         String password = "test";
-        UserCredentials credentials = new UserCredentials(email, password);
 
-        when(walletService.doesWalletExist(anyString(), anyString())).thenReturn(true);
+        when(walletService.doesWalletExist(anyString(), anyString())).thenReturn(new Auth(true, null));
 
         new MockUp<Wallet>() {
             @mockit.Mock
@@ -72,7 +71,7 @@ class DeletionServiceImplTest {
             }
         };
 
-        deletionService.delete(credentials);
+        deletionService.delete(email, password);
     }
 
 

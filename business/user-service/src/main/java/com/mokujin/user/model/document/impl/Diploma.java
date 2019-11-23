@@ -2,8 +2,12 @@ package com.mokujin.user.model.document.impl;
 
 import com.mokujin.user.model.document.NationalDocument;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import static com.mokujin.user.model.document.Document.Type.diploma;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Diploma extends NationalDocument {
 
     private String number;
@@ -26,7 +30,7 @@ public class Diploma extends NationalDocument {
 
     public Diploma(String number, String firstName, String lastName, String fatherName, String placeOfStudy,
                    String courseOfStudy, Long dateOfIssue, String qualification, String issuer) {
-        super(Type.diploma.name());
+        super(diploma.name());
         this.number = number;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -39,6 +43,6 @@ public class Diploma extends NationalDocument {
     }
 
     public Diploma() {
-        super(Type.diploma.name());
+        super(diploma.name());
     }
 }

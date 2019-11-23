@@ -2,8 +2,12 @@ package com.mokujin.user.model.document.impl;
 
 import com.mokujin.user.model.document.NationalDocument;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import static com.mokujin.user.model.document.Document.Type.passport;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class NationalPassport extends NationalDocument {
 
     private String number;
@@ -28,7 +32,7 @@ public class NationalPassport extends NationalDocument {
 
     public NationalPassport(String number, String firstName, String lastName, String fatherName,
                             Long dateOfBirth, String placeOfBirth, String image, String sex, String issuer, Long dateOfIssue) {
-        super(Type.passport.name());
+        super(passport.name());
         this.number = number;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -43,7 +47,7 @@ public class NationalPassport extends NationalDocument {
 
 
     public NationalPassport() {
-        super(Type.passport.name());
+        super(passport.name());
     }
 
 }

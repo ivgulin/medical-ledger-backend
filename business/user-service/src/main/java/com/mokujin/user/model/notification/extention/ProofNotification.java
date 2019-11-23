@@ -6,8 +6,6 @@ import com.mokujin.user.model.presentation.Proof;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.List;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ProofNotification extends SystemNotification {
