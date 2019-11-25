@@ -292,7 +292,7 @@ public class LedgerConfig {
 
         ArrayNode attributes = objectMapper.createArrayNode();
         attributes
-                .add("type")
+                .add("resourceType")
                 .add("number")
                 .add("firstName")
                 .add("lastName")
@@ -320,7 +320,7 @@ public class LedgerConfig {
 
         ArrayNode attributes = objectMapper.createArrayNode();
         attributes
-                .add("type")
+                .add("resourceType")
                 .add("number")
                 .add("registrationDate")
                 .add("issuer");
@@ -341,7 +341,7 @@ public class LedgerConfig {
 
         ArrayNode attributes = objectMapper.createArrayNode();
         attributes
-                .add("type")
+                .add("resourceType")
                 .add("number")
                 .add("firstName")
                 .add("lastName")
@@ -368,7 +368,7 @@ public class LedgerConfig {
 
         ArrayNode attributes = objectMapper.createArrayNode();
         attributes
-                .add("type")
+                .add("resourceType")
                 .add("number")
                 .add("firstName")
                 .add("lastName")

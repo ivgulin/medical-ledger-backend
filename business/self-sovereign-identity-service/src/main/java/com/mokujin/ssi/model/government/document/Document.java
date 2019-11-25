@@ -15,21 +15,21 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 @Data
 @AllArgsConstructor
-@JsonTypeInfo(use = NAME, property = "type", include = EXISTING_PROPERTY)
+@JsonTypeInfo(use = NAME, property = "resourceType", include = EXISTING_PROPERTY)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = NationalPassport.class, name = "passport"),
-        @JsonSubTypes.Type(value = NationalNumber.class, name = "number"),
-        @JsonSubTypes.Type(value = Diploma.class, name = "diploma"),
-        @JsonSubTypes.Type(value = Certificate.class, name = "certificate")
+        @JsonSubTypes.Type(value = NationalPassport.class, name = "Passport"),
+        @JsonSubTypes.Type(value = NationalNumber.class, name = "Number"),
+        @JsonSubTypes.Type(value = Diploma.class, name = "Diploma"),
+        @JsonSubTypes.Type(value = Certificate.class, name = "Certificate")
 })
 public abstract class Document {
 
-    private String type;
+    private String resourceType;
 
-    public enum Type {
-        passport,
-        diploma,
-        certificate,
-        number
+    public enum NationalDocumentType {
+        Passport,
+        Diploma,
+        Certificate,
+        Number
     }
 }

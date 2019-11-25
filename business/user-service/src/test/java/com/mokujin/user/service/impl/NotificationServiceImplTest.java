@@ -12,7 +12,6 @@ import com.mokujin.user.model.notification.extention.ChatNotification;
 import com.mokujin.user.model.notification.extention.PresentationNotification;
 import com.mokujin.user.model.notification.extention.ProofNotification;
 import com.mokujin.user.model.presentation.Proof;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -88,10 +87,10 @@ class NotificationServiceImplTest {
         List<PresentationNotification> presentationNotifications = new ArrayList<>();
         presentationNotifications.add(new PresentationNotification(123L, PRESENTATION, Contact.builder().build(),
                 "presentation", "presentation", "presentation", "presentation",
-                Document.Type.passport.name(), Collections.emptyList()));
+                Document.NationalDocumentType.Passport.name(), Collections.emptyList()));
         presentationNotifications.add(new PresentationNotification(124L, PRESENTATION, Contact.builder().build(),
                 "presentation", "presentation", "presentation", "presentation",
-                Document.Type.number.name(), Collections.emptyList()));
+                Document.NationalDocumentType.Number.name(), Collections.emptyList()));
 
         RMap presentationsMap = mock(RMap.class);
         when(redissonClient.getMap("presentations_" + nationalNumber)).thenReturn(presentationsMap);
@@ -292,7 +291,7 @@ class NotificationServiceImplTest {
         presentationAttributes.add("firstName");
         presentationAttributes.add("lastName");
         Notification result = notificationService.addPresentationNotification(user,
-                presentationAttributes, Document.Type.passport.name(), number);
+                presentationAttributes, Document.NationalDocumentType.Passport.name(), number);
 
         assertEquals(user.getNationalNumber(), presentationKey.getValue());
         assertEquals(result, presentationValue.getValue());

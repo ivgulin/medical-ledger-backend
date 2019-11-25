@@ -2,10 +2,10 @@ package com.mokujin.user.service.impl;
 
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.document.Document;
-import com.mokujin.user.model.document.impl.Certificate;
-import com.mokujin.user.model.document.impl.Diploma;
-import com.mokujin.user.model.document.impl.NationalNumber;
-import com.mokujin.user.model.document.impl.NationalPassport;
+import com.mokujin.user.model.document.impl.national.Certificate;
+import com.mokujin.user.model.document.impl.national.Diploma;
+import com.mokujin.user.model.document.impl.national.NationalNumber;
+import com.mokujin.user.model.document.impl.national.NationalPassport;
 import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.model.presentation.Affirmation;
 import com.mokujin.user.model.presentation.PresentationAttributes;
@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.mokujin.user.model.User.Role;
-import static com.mokujin.user.model.document.Document.Type;
+import static com.mokujin.user.model.document.Document.NationalDocumentType;
 
 @Slf4j
 @Service
@@ -74,25 +74,25 @@ public class PresentationServiceImpl implements PresentationService {
 
         if (!passportAttributes.isEmpty()) {
             Notification notification = notificationService.addPresentationNotification(user, passportAttributes,
-                    Type.passport.name(), connectionNumber);
+                    NationalDocumentType.Passport.name(), connectionNumber);
             log.info("passport notification =  '{}'", notification);
         }
 
         if (!nationalNumberAttributes.isEmpty()) {
             Notification notification = notificationService.addPresentationNotification(user, nationalNumberAttributes,
-                    Type.number.name(), connectionNumber);
+                    NationalDocumentType.Number.name(), connectionNumber);
             log.info("national number notification =  '{}'", notification);
         }
 
         if (!diplomaAttributes.isEmpty()) {
             Notification notification = notificationService.addPresentationNotification(user, diplomaAttributes,
-                    Type.diploma.name(), connectionNumber);
+                    NationalDocumentType.Diploma.name(), connectionNumber);
             log.info("diploma notification =  '{}'", notification);
         }
 
         if (!certificateAttributes.isEmpty()) {
             Notification notification = notificationService.addPresentationNotification(user, certificateAttributes,
-                    Type.certificate.name(), connectionNumber);
+                    NationalDocumentType.Certificate.name(), connectionNumber);
             log.info("certificate notification =  '{}'", notification);
         }
     }

@@ -130,7 +130,7 @@ class IdentityServiceImplTest {
                 document.put("number", nationalNumber);
                 document.put("registrationDate", registrationDate);
                 document.put("issuer", issuer);
-                document.put("type", "number");
+                document.put("resourceType", "Number");
 
                 ObjectNode credential = objectMapper.createObjectNode();
                 credential.put("referent", credentialId);

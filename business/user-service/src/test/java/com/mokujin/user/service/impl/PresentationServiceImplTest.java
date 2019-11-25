@@ -2,7 +2,7 @@ package com.mokujin.user.service.impl;
 
 import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.User;
-import com.mokujin.user.model.document.impl.NationalPassport;
+import com.mokujin.user.model.document.impl.national.NationalPassport;
 import com.mokujin.user.model.notification.extention.PresentationNotification;
 import com.mokujin.user.model.presentation.Affirmation;
 import com.mokujin.user.model.presentation.PresentationAttributes;
@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 import static com.mokujin.user.model.User.Role;
 import static com.mokujin.user.model.User.Role.DOCTOR;
 import static com.mokujin.user.model.User.Role.PATIENT;
-import static com.mokujin.user.model.document.Document.Type.*;
+import static com.mokujin.user.model.document.Document.NationalDocumentType.*;
 import static com.mokujin.user.model.notification.Notification.Type.PRESENTATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -109,18 +109,18 @@ class PresentationServiceImplTest {
         User user = new User();
         when(userService.get(publicKey, privateKey)).thenReturn(user);
 
-        when(notificationService.addPresentationNotification(user, passportAttributes, passport.name(), connectionNumber))
+        when(notificationService.addPresentationNotification(user, passportAttributes, Passport.name(), connectionNumber))
                 .thenReturn(new PresentationNotification(null, PRESENTATION, Contact.builder().build(),
-                        "", "", "", "", passport.name(), passportAttributes));
-        when(notificationService.addPresentationNotification(user, nationalNumberAttributes, number.name(), connectionNumber))
+                        "", "", "", "", Passport.name(), passportAttributes));
+        when(notificationService.addPresentationNotification(user, nationalNumberAttributes, Number.name(), connectionNumber))
                 .thenReturn(new PresentationNotification(null, PRESENTATION, Contact.builder().build(),
-                        "", "", "", "", number.name(), nationalNumberAttributes));
-        when(notificationService.addPresentationNotification(user, diplomaAttributes, diploma.name(), connectionNumber))
+                        "", "", "", "", Number.name(), nationalNumberAttributes));
+        when(notificationService.addPresentationNotification(user, diplomaAttributes, Diploma.name(), connectionNumber))
                 .thenReturn(new PresentationNotification(null, PRESENTATION, Contact.builder().build(),
-                        "", "", "", "", diploma.name(), diplomaAttributes));
-        when(notificationService.addPresentationNotification(user, certificateAttributes, certificate.name(), connectionNumber))
+                        "", "", "", "", Diploma.name(), diplomaAttributes));
+        when(notificationService.addPresentationNotification(user, certificateAttributes, Certificate.name(), connectionNumber))
                 .thenReturn(new PresentationNotification(null, PRESENTATION, Contact.builder().build(),
-                        "", "", "", "", certificate.name(), certificateAttributes));
+                        "", "", "", "", Certificate.name(), certificateAttributes));
 
         presentationService.requestPresentation(publicKey, privateKey, presentationRequest, connectionNumber);
 

@@ -11,7 +11,6 @@ import com.mokujin.ssi.service.CredentialService;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -60,7 +59,7 @@ public class CredentialServiceImpl implements CredentialService {
         ObjectNode proofRequestNode = objectMapper.createObjectNode();
 
         proofRequestNode.put("nonce", String.valueOf(Math.abs(new Random().nextLong())));
-        proofRequestNode.put("name", StringUtils.capitalize(document.getType()));
+        proofRequestNode.put("name", document.getResourceType());
         proofRequestNode.put("version", "1.0");
 
         ObjectNode restrictionsNode = objectMapper.createObjectNode();

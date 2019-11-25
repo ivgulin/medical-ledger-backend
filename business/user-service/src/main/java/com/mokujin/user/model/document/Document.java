@@ -2,10 +2,10 @@ package com.mokujin.user.model.document;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.mokujin.user.model.document.impl.Certificate;
-import com.mokujin.user.model.document.impl.Diploma;
-import com.mokujin.user.model.document.impl.NationalNumber;
-import com.mokujin.user.model.document.impl.NationalPassport;
+import com.mokujin.user.model.document.impl.national.Certificate;
+import com.mokujin.user.model.document.impl.national.Diploma;
+import com.mokujin.user.model.document.impl.national.NationalNumber;
+import com.mokujin.user.model.document.impl.national.NationalPassport;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -14,7 +14,7 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 @Data
 @AllArgsConstructor
-@JsonTypeInfo(use = NAME, property = "type", include = EXISTING_PROPERTY)
+@JsonTypeInfo(use = NAME, property = "resourceType", include = EXISTING_PROPERTY)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = NationalPassport.class, name = "passport"),
         @JsonSubTypes.Type(value = Diploma.class, name = "diploma"),
@@ -23,13 +23,17 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 })
 public class Document {
 
-    private String type;
+    private String resourceType;
 
-    public enum Type {
-        passport,
-        diploma,
-        certificate,
-        number
+    public enum NationalDocumentType {
+        Passport,
+        Diploma,
+        Certificate,
+        Number
+    }
+
+    public enum MedicalDocumentType {
+        Procedure
     }
 
 }

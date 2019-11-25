@@ -61,12 +61,12 @@ class CredentialServiceImplTest {
         attributeThree.put("raw", issuer);
 
         ObjectNode attributeFour = objectMapper.createObjectNode();
-        attributeFour.put("raw", "number");
+        attributeFour.put("raw", "Number");
 
         nationalNumberNode.set("number", attributeOne);
         nationalNumberNode.set("registrationDate", attributeTwo);
         nationalNumberNode.set("issuer", attributeThree);
-        nationalNumberNode.set("type", attributeFour);
+        nationalNumberNode.set("resourceType", attributeFour);
         return nationalNumberNode;
     }
 
@@ -106,7 +106,7 @@ class CredentialServiceImplTest {
         attributeTen.put("raw", String.valueOf(someDate));
 
         ObjectNode attributeEleven = objectMapper.createObjectNode();
-        attributeEleven.put("raw", "passport");
+        attributeEleven.put("raw", "Passport");
 
         passportNode.set("number", attributeOne);
         passportNode.set("firstName", attributeTwo);
@@ -118,7 +118,7 @@ class CredentialServiceImplTest {
         passportNode.set("sex", attributeEight);
         passportNode.set("issuer", attributeNine);
         passportNode.set("dateOfIssue", attributeTen);
-        passportNode.set("type", attributeEleven);
+        passportNode.set("resourceType", attributeEleven);
         return passportNode;
     }
 
