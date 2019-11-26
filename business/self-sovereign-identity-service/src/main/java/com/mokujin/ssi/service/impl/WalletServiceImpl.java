@@ -69,7 +69,6 @@ public class WalletServiceImpl implements WalletService {
                         auth.setRole(DOCTOR);
                     });
 
-            wallet.closeWallet();
             return auth;
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
