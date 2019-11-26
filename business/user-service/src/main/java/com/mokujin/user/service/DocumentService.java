@@ -13,13 +13,14 @@ public interface DocumentService {
 
     User offerCredential(String publicKey, String privateKey, DocumentDraft documentDraft, String patientNumber);
 
-    User accept(String publicKey, String privateKey, Document document, String nationalNumber, String connectionNumber);
+    User accept(String publicKey, String privateKey, Document document, String patientNumber, String doctorNumber);
 
-    void decline(String nationalNumber, String connectionNumber);
+    void decline(String patientNumber, String doctorNumber);
 
-    void askDocument(String publicKey, String privateKey, List<String> keywords, String connectionNumber);
+    User askDocument(String publicKey, String privateKey, List<String> keywords, String patientNumber);
 
-    void presentDocument(String publicKey, String privateKey, Document document, String connectionNumber);
+    User presentDocument(String publicKey, String privateKey, Document document, String doctorNumber);
 
+    void deleteNotification(String doctorNumber, String patientNumber);
 
 }

@@ -85,10 +85,10 @@ class NotificationServiceImplTest {
 
 
         List<PresentationNotification> presentationNotifications = new ArrayList<>();
-        presentationNotifications.add(new PresentationNotification(123L, PRESENTATION, Contact.builder().build(),
+        presentationNotifications.add(new PresentationNotification(123L, Contact.builder().build(),
                 "presentation", "presentation", "presentation", "presentation",
                 Document.NationalDocumentType.Passport.name(), Collections.emptyList()));
-        presentationNotifications.add(new PresentationNotification(124L, PRESENTATION, Contact.builder().build(),
+        presentationNotifications.add(new PresentationNotification(124L, Contact.builder().build(),
                 "presentation", "presentation", "presentation", "presentation",
                 Document.NationalDocumentType.Number.name(), Collections.emptyList()));
 
@@ -98,9 +98,9 @@ class NotificationServiceImplTest {
 
 
         List<ProofNotification> proofNotifications = new ArrayList<>();
-        proofNotifications.add(new ProofNotification(123L, PROOF, Contact.builder().build(),
+        proofNotifications.add(new ProofNotification(123L, Contact.builder().build(),
                 "proof", "proof", "proof", "proof", new Proof()));
-        proofNotifications.add(new ProofNotification(124L, PROOF, Contact.builder().build(),
+        proofNotifications.add(new ProofNotification(124L, Contact.builder().build(),
                 "proof", "proof", "proof", "proof", new Proof()));
 
         RMap proofsMap = mock(RMap.class);

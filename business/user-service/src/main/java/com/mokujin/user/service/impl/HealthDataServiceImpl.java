@@ -33,13 +33,18 @@ public class HealthDataServiceImpl implements HealthDataService {
     }
 
     @Override
-    public User send(String publicKey, String privateKey, HealthRecord healthRecord, String connectionNumber) {
+    public User send(String publicKey, String privateKey, HealthRecord healthRecord, String doctorNumber) {
 
-        User user = userService.get(publicKey, privateKey);
+        User patient = userService.get(publicKey, privateKey);
 
-        Notification notification = notificationService.addHealthNotification(user, healthRecord, connectionNumber);
+        Notification notification = notificationService.addHealthNotification(patient, healthRecord, doctorNumber);
         log.info("notification =  '{}'", notification);
 
-        return user;
+        return patient;
+    }
+
+    @Override
+    public void deleteNotification(String doctorNumber, String patientNumber) {
+        notificationService.removeHealthNotification(doctorNumber, patientNumber);
     }
 }

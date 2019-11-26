@@ -16,5 +16,5 @@ public class Coding {
     private String code;
 
     private String display;
-    
+
 }

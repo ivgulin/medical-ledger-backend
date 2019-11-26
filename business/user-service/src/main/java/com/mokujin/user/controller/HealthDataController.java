@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.OK;
+
 @Slf4j
 @RestController
 @RequestMapping("/health")
@@ -30,17 +32,28 @@ public class HealthDataController {
         return ResponseEntity.ok(records);
     }
 
-    @PostMapping("/send/{connectionNumber}")
-    public ResponseEntity<User> send(@PathVariable String connectionNumber,
+    @PostMapping("/send/{doctorNumber}")
+    public ResponseEntity<User> send(@PathVariable String doctorNumber,
                                      @RequestBody HealthRecord record,
                                      @RequestHeader("Public-Key") String publicKey,
                                      @RequestHeader("Private-Key") String privateKey) {
-        log.info("'send' invoked with params '{}, {}, {}, {}'", connectionNumber, record, publicKey, privateKey);
+        log.info("'send' invoked with params '{}, {}, {}, {}'", doctorNumber, record, publicKey, privateKey);
 
-        User user = healthDataService.send(publicKey, privateKey, record, connectionNumber);
+        User user = healthDataService.send(publicKey, privateKey, record, doctorNumber);
 
         log.info("'send' returned '{}'", user);
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/delete/notification")
+    public ResponseEntity deleteNotification(@RequestParam String patientNumber,
+                                             @RequestParam String doctorNumber) {
+        log.info("'deleteNotification' invoked with params '{}, {}'", patientNumber, doctorNumber);
+
+        healthDataService.deleteNotification(patientNumber, doctorNumber);
+
+        log.info("'deleteNotification' has executed successfully.");
+        return new ResponseEntity(OK);
     }
 
 }

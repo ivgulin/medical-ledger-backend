@@ -2,7 +2,6 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
-import com.mokujin.ssi.model.user.request.UserCredentials;
 import com.mokujin.ssi.model.user.response.Auth;
 import com.mokujin.ssi.service.DeletionService;
 import com.mokujin.ssi.service.WalletService;

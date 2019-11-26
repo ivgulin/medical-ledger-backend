@@ -120,20 +120,15 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>www.dcm4che.org</id>
-            <name>dcm4che Repository</name>
-            <url>http://www.dcm4che.org/maven2</url>
-        </repository>
     </repositories>
 
     <modules>
-        <module>structural/auth-service</module>
-        <module>business/user-service</module>
         <module>structural/eureka-server</module>
-        <module>business/self-sovereign-identity-service</module>
         <module>structural/zuul-gateway</module>
+        <module>structural/auth-service</module>
         <module>structural/documentation-service</module>
+        <module>business/user-service</module>
+        <module>business/self-sovereign-identity-service</module>
         <module>business/fake-government-service</module>
     </modules>
 </project>

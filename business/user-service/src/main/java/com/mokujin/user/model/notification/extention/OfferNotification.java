@@ -3,11 +3,10 @@ package com.mokujin.user.model.notification.extention;
 import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.document.Document;
 import com.mokujin.user.model.notification.SystemNotification;
-import com.mokujin.user.model.record.HealthRecord;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import static com.mokujin.user.model.notification.Notification.Type.*;
+import static com.mokujin.user.model.notification.Notification.Type.OFFER;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

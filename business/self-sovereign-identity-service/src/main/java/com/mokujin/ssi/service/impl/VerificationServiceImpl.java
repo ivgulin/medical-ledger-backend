@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import static com.mokujin.ssi.model.government.document.Document.NationalDocumentType.Number;
 import static com.mokujin.ssi.model.government.document.Document.NationalDocumentType.*;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;

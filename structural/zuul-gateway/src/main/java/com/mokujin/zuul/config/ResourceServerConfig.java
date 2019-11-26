@@ -1,5 +1,6 @@
 package com.mokujin.zuul.config;
 
+import com.mokujin.zuul.model.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http.csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/docs/**").permitAll()
+                .antMatchers("/user/invitation/invite-back").hasRole(Role.PATIENT.name())
+                .antMatchers("/user/invitation/accept", "/user/invitation/decline").hasRole(Role.DOCTOR.name())
                 .antMatchers("/auth/**", "/gov/**").denyAll()
                 .antMatchers(POST, "/user/registration/**").denyAll()
                 .anyRequest().authenticated();

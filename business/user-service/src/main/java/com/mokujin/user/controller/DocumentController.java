@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
@@ -48,14 +50,14 @@ public class DocumentController {
 
 
     @PostMapping("/accept")
-    public ResponseEntity<User> accept(@RequestParam String nationalNumber,
-                                       @RequestParam String connectionNumber,
+    public ResponseEntity<User> accept(@RequestParam String patientNumber,
+                                       @RequestParam String doctorNumber,
                                        @RequestBody Document document,
                                        @RequestHeader("Public-Key") String publicKey,
                                        @RequestHeader("Private-Key") String privateKey) {
-        log.info("'accept' invoked with params '{}, {}, {}, {}, {}'", publicKey, privateKey, document, nationalNumber, connectionNumber);
+        log.info("'accept' invoked with params '{}, {}, {}, {}, {}'", publicKey, privateKey, document, patientNumber, doctorNumber);
 
-        User user = documentService.accept(publicKey, privateKey, document, nationalNumber, connectionNumber);
+        User user = documentService.accept(publicKey, privateKey, document, patientNumber, doctorNumber);
 
         log.info("'accept' returned '{}'", user);
         return ResponseEntity.ok(user);
@@ -63,13 +65,50 @@ public class DocumentController {
 
 
     @PostMapping("/decline")
-    public ResponseEntity decline(@RequestParam String nationalNumber,
-                                  @RequestParam String connectionNumber) {
-        log.info("'decline' invoked with params '{}, {}'", nationalNumber, connectionNumber);
+    public ResponseEntity decline(@RequestParam String patientNumber,
+                                  @RequestParam String doctorNumber) {
+        log.info("'decline' invoked with params '{}, {}'", patientNumber, doctorNumber);
 
-        documentService.decline(nationalNumber, connectionNumber);
+        documentService.decline(patientNumber, doctorNumber);
 
         log.info("'decline' has executed successfully.");
+        return new ResponseEntity(OK);
+    }
+
+    @PostMapping("/ask/{patientNumber}")
+    public ResponseEntity<User> ask(@PathVariable String patientNumber,
+                                    @RequestBody List<String> keywords,
+                                    @RequestHeader("Public-Key") String publicKey,
+                                    @RequestHeader("Private-Key") String privateKey) {
+        log.info("'ask' invoked with params '{}, {}, {}, {}'", publicKey, privateKey, patientNumber, keywords);
+
+        User user = documentService.askDocument(publicKey, privateKey, keywords, patientNumber);
+
+        log.info("'ask' returned '{}'", user);
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/present/{doctorNumber}")
+    public ResponseEntity<User> present(@PathVariable String doctorNumber,
+                                        @RequestBody Document document,
+                                        @RequestHeader("Public-Key") String publicKey,
+                                        @RequestHeader("Private-Key") String privateKey) {
+        log.info("'present' invoked with params '{}, {}, {}, {}'", publicKey, privateKey, doctorNumber, document);
+
+        User user = documentService.presentDocument(publicKey, privateKey, document, doctorNumber);
+
+        log.info("'ask' returned '{}'", user);
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/delete/notification")
+    public ResponseEntity deleteNotification(@RequestParam String doctorNumber,
+                                             @RequestParam String patientNumber) {
+        log.info("'deleteNotification' invoked with params '{}, {}'", patientNumber, doctorNumber);
+
+        documentService.deleteNotification(doctorNumber, patientNumber);
+
+        log.info("'deleteNotification' has executed successfully.");
         return new ResponseEntity(OK);
     }
 }

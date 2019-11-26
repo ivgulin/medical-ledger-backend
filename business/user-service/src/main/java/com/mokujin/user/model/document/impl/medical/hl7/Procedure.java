@@ -1,7 +1,10 @@
 package com.mokujin.user.model.document.impl.medical.hl7;
 
 import com.mokujin.user.model.document.Document;
-import com.mokujin.user.model.document.impl.medical.hl7.component.*;
+import com.mokujin.user.model.document.impl.medical.hl7.component.CodeableConcept;
+import com.mokujin.user.model.document.impl.medical.hl7.component.Narrative;
+import com.mokujin.user.model.document.impl.medical.hl7.component.PerformedPeriod;
+import com.mokujin.user.model.document.impl.medical.hl7.component.Reference;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

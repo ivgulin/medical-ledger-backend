@@ -5,7 +5,7 @@ import com.mokujin.user.model.notification.Notification;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import static com.mokujin.user.model.notification.Notification.Type.*;
+import static com.mokujin.user.model.notification.Notification.Type.MESSAGE;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

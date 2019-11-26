@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import static com.mokujin.user.model.User.Role;
 import static com.mokujin.user.model.User.Role.DOCTOR;
 import static com.mokujin.user.model.User.Role.PATIENT;
+import static com.mokujin.user.model.document.Document.NationalDocumentType.Number;
 import static com.mokujin.user.model.document.Document.NationalDocumentType.*;
 import static com.mokujin.user.model.notification.Notification.Type.PRESENTATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,16 +111,16 @@ class PresentationServiceImplTest {
         when(userService.get(publicKey, privateKey)).thenReturn(user);
 
         when(notificationService.addPresentationNotification(user, passportAttributes, Passport.name(), connectionNumber))
-                .thenReturn(new PresentationNotification(null, PRESENTATION, Contact.builder().build(),
+                .thenReturn(new PresentationNotification(null, Contact.builder().build(),
                         "", "", "", "", Passport.name(), passportAttributes));
         when(notificationService.addPresentationNotification(user, nationalNumberAttributes, Number.name(), connectionNumber))
-                .thenReturn(new PresentationNotification(null, PRESENTATION, Contact.builder().build(),
+                .thenReturn(new PresentationNotification(null, Contact.builder().build(),
                         "", "", "", "", Number.name(), nationalNumberAttributes));
         when(notificationService.addPresentationNotification(user, diplomaAttributes, Diploma.name(), connectionNumber))
-                .thenReturn(new PresentationNotification(null, PRESENTATION, Contact.builder().build(),
+                .thenReturn(new PresentationNotification(null, Contact.builder().build(),
                         "", "", "", "", Diploma.name(), diplomaAttributes));
         when(notificationService.addPresentationNotification(user, certificateAttributes, Certificate.name(), connectionNumber))
-                .thenReturn(new PresentationNotification(null, PRESENTATION, Contact.builder().build(),
+                .thenReturn(new PresentationNotification(null, Contact.builder().build(),
                         "", "", "", "", Certificate.name(), certificateAttributes));
 
         presentationService.requestPresentation(publicKey, privateKey, presentationRequest, connectionNumber);

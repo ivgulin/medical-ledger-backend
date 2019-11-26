@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
-import static com.mokujin.user.model.notification.Notification.Type.*;
+import static com.mokujin.user.model.notification.Notification.Type.PRESENTATION;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

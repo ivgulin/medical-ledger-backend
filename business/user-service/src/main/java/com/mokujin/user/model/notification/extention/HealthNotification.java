@@ -6,7 +6,7 @@ import com.mokujin.user.model.record.HealthRecord;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import static com.mokujin.user.model.notification.Notification.Type.*;
+import static com.mokujin.user.model.notification.Notification.Type.HEALTH;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

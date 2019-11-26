@@ -102,9 +102,9 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public User accept(String publicKey, String privateKey, Document document, String nationalNumber, String connectionNumber) {
+    public User accept(String publicKey, String privateKey, Document document, String patientNumber, String doctorNumber) {
 
-        notificationService.removeOfferNotification(nationalNumber, connectionNumber);
+        notificationService.removeOfferNotification(patientNumber, doctorNumber);
 
         String url = "http://self-sovereign-identity-service/credential/add?public="
                 + publicKey + "&private=" + privateKey;
@@ -112,31 +112,39 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public void decline(String nationalNumber, String connectionNumber) {
-        notificationService.removeOfferNotification(nationalNumber, connectionNumber);
+    public void decline(String patientNumber, String doctorNumber) {
+        notificationService.removeOfferNotification(patientNumber, doctorNumber);
     }
 
     @Override
-    public void askDocument(String publicKey, String privateKey, List<String> keywords, String connectionNumber) {
+    public User askDocument(String publicKey, String privateKey, List<String> keywords, String patientNumber) {
 
         User user = userService.get(publicKey, privateKey);
 
-        Notification notification = notificationService.addAskNotification(user, keywords, connectionNumber);
+        Notification notification = notificationService.addAskNotification(user, keywords, patientNumber);
         log.info("notification =  '{}'", notification);
 
+        return user;
     }
 
     @Override
-    public void presentDocument(String publicKey, String privateKey, Document document, String connectionNumber) {
+    public User presentDocument(String publicKey, String privateKey, Document document, String doctorNumber) {
 
         User user = userService.get(publicKey, privateKey);
         String nationalNumber = user.getNationalNumber();
 
-        notificationService.removeAskNotification(nationalNumber, connectionNumber);
+        notificationService.removeAskNotification(nationalNumber, doctorNumber);
 
-        Notification notification = notificationService.addDocumentNotification(user, document, connectionNumber);
+        Notification notification = notificationService.addDocumentNotification(user, document, doctorNumber);
         log.info("notification =  '{}'", notification);
 
+        return user;
+
+    }
+
+    @Override
+    public void deleteNotification(String doctorNumber, String patientNumber) {
+        notificationService.removeDocumentNotification(doctorNumber, patientNumber);
     }
 
     private String getTagInformation(AttributeTag attrTag, AttributeList list) {
