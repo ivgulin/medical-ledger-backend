@@ -1,5 +1,6 @@
 package com.mokujin.user.model.presentation;
 
+import com.mokujin.user.model.document.Document;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,5 +17,5 @@ public class Proof {
     private String schemaConfig;
     private String credConfig;
     private String formedCredential;
-
+    private Document document;
 }

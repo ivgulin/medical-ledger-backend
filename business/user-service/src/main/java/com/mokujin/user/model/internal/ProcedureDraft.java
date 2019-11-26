@@ -38,12 +38,9 @@ public class ProcedureDraft extends DocumentDraft {
 
     private String note;
 
-
-
     public ProcedureDraft() {
         super(Type.Procedure.name());
     }
-
 
     public enum Status {
         planned,

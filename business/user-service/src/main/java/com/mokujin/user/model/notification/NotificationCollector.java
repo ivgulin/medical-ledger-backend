@@ -1,9 +1,6 @@
 package com.mokujin.user.model.notification;
 
-import com.mokujin.user.model.notification.extention.ChatNotification;
-import com.mokujin.user.model.notification.extention.HealthNotification;
-import com.mokujin.user.model.notification.extention.PresentationNotification;
-import com.mokujin.user.model.notification.extention.ProofNotification;
+import com.mokujin.user.model.notification.extention.*;
 import lombok.Builder;
 import lombok.Data;
 
@@ -19,5 +16,8 @@ public class NotificationCollector {
     private List<PresentationNotification> presentations;
     private List<ProofNotification> proofs;
     private List<HealthNotification> health;
+    private List<OfferNotification> offers;
+    private List<AskNotification> asks;
+    private List<DocumentNotification> documents;
 
 }

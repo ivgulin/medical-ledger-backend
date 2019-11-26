@@ -1,6 +1,7 @@
 package com.mokujin.user.controller;
 
 import com.mokujin.user.model.User;
+import com.mokujin.user.model.document.Document;
 import com.mokujin.user.model.internal.DocumentDraft;
 import com.mokujin.user.service.DocumentService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
 @RestController
@@ -31,15 +34,42 @@ public class DocumentController {
     }
 
     @PostMapping("/offer/{patientNumber}")
-    public ResponseEntity offer(@PathVariable String patientNumber,
-                                @RequestBody DocumentDraft documentDraft,
-                                @RequestHeader("Public-Key") String publicKey,
-                                @RequestHeader("Private-Key") String privateKey) {
+    public ResponseEntity<User> offer(@PathVariable String patientNumber,
+                                      @RequestBody DocumentDraft documentDraft,
+                                      @RequestHeader("Public-Key") String publicKey,
+                                      @RequestHeader("Private-Key") String privateKey) {
         log.info("'send' invoked with params '{}, {}, {}, {}'", patientNumber, documentDraft, publicKey, privateKey);
 
         User user = documentService.offerCredential(publicKey, privateKey, documentDraft, patientNumber);
 
         log.info("'offer' returned '{}'", user);
         return ResponseEntity.ok(user);
+    }
+
+
+    @PostMapping("/accept")
+    public ResponseEntity<User> accept(@RequestParam String nationalNumber,
+                                       @RequestParam String connectionNumber,
+                                       @RequestBody Document document,
+                                       @RequestHeader("Public-Key") String publicKey,
+                                       @RequestHeader("Private-Key") String privateKey) {
+        log.info("'accept' invoked with params '{}, {}, {}, {}, {}'", publicKey, privateKey, document, nationalNumber, connectionNumber);
+
+        User user = documentService.accept(publicKey, privateKey, document, nationalNumber, connectionNumber);
+
+        log.info("'accept' returned '{}'", user);
+        return ResponseEntity.ok(user);
+    }
+
+
+    @PostMapping("/decline")
+    public ResponseEntity decline(@RequestParam String nationalNumber,
+                                  @RequestParam String connectionNumber) {
+        log.info("'decline' invoked with params '{}, {}'", nationalNumber, connectionNumber);
+
+        documentService.decline(nationalNumber, connectionNumber);
+
+        log.info("'decline' has executed successfully.");
+        return new ResponseEntity(OK);
     }
 }

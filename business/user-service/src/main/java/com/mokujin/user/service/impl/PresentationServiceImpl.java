@@ -103,6 +103,7 @@ public class PresentationServiceImpl implements PresentationService {
         String url = "http://self-sovereign-identity-service/verification/present?public="
                 + publicKey + "&private=" + privateKey;
         Proof proof = restTemplate.postForObject(url, document, Proof.class);
+        proof.setDocument(document);
         log.info("proof =  '{}'", proof);
 
         User user = userService.get(publicKey, privateKey);

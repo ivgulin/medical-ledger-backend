@@ -41,4 +41,11 @@ public interface NotificationService {
 
     void removeOfferNotification(String nationalNumber, String connectionNumber);
 
+    Notification addAskNotification(User user, List<String> keywords, String connectionNumber);
+
+    void removeAskNotification(String nationalNumber, String connectionNumber);
+
+    Notification addDocumentNotification(User user, Document document, String connectionNumber);
+
+    void removeDocumentNotification(String nationalNumber, String connectionNumber);
 }

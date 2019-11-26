@@ -16,11 +16,8 @@ import com.mokujin.user.service.UserService;
 import com.pixelmed.dicom.*;
 import com.pixelmed.display.ConsumerFormatImageMaker;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
@@ -46,9 +42,6 @@ public class DocumentServiceImpl implements DocumentService {
     private final UserService userService;
     private final NotificationService notificationService;
     private final RestTemplate restTemplate;
-
-    @Value(value = "${dicom.path}")
-    private String filePath;
 
     @Override
     public User offerDicom(String publicKey, String privateKey, MultipartFile document, String patientNumber) {
@@ -108,66 +101,103 @@ public class DocumentServiceImpl implements DocumentService {
         return user;
     }
 
+    @Override
+    public User accept(String publicKey, String privateKey, Document document, String nationalNumber, String connectionNumber) {
+
+        notificationService.removeOfferNotification(nationalNumber, connectionNumber);
+
+        String url = "http://self-sovereign-identity-service/credential/add?public="
+                + publicKey + "&private=" + privateKey;
+        return restTemplate.postForObject(url, document, User.class);
+    }
+
+    @Override
+    public void decline(String nationalNumber, String connectionNumber) {
+        notificationService.removeOfferNotification(nationalNumber, connectionNumber);
+    }
+
+    @Override
+    public void askDocument(String publicKey, String privateKey, List<String> keywords, String connectionNumber) {
+
+        User user = userService.get(publicKey, privateKey);
+
+        Notification notification = notificationService.addAskNotification(user, keywords, connectionNumber);
+        log.info("notification =  '{}'", notification);
+
+    }
+
+    @Override
+    public void presentDocument(String publicKey, String privateKey, Document document, String connectionNumber) {
+
+        User user = userService.get(publicKey, privateKey);
+        String nationalNumber = user.getNationalNumber();
+
+        notificationService.removeAskNotification(nationalNumber, connectionNumber);
+
+        Notification notification = notificationService.addDocumentNotification(user, document, connectionNumber);
+        log.info("notification =  '{}'", notification);
+
+    }
+
     private String getTagInformation(AttributeTag attrTag, AttributeList list) {
         return Attribute.getDelimitedStringValuesOrEmptyString(list, attrTag);
     }
 
     private Document convertToDocument(DocumentDraft documentDraft) {
         if (documentDraft.getType().equals(Document.MedicalDocumentType.Procedure.name())) {
-            ProcedureDraft draft = (ProcedureDraft) documentDraft;
-
-            String name = draft.getName();
-            Narrative text = new Narrative(Narrative.NarrativeStatus.generated,
-                    "<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">" + draft.getName() + "</div>");
-            String status = ProcedureDraft.Status.getValue(draft.getStatus());
-
-            CodeableConcept notDoneReason = new CodeableConcept();
-            notDoneReason.setText(draft.getNotDoneReason());
-
-            ArrayList<Coding> coding = new ArrayList<>();
-            coding.add(new Coding("https://medical-ledger.io/", "1.0", "123456", draft.getName()));
-            CodeableConcept code = new CodeableConcept(coding, draft.getDescription());
-
-            Reference subject = new Reference(draft.getPatient().getContactName(), draft.getPatient().getNationalNumber());
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String startDate = dateFormat.format(new Date(draft.getStartDate()));
-
-            PerformedPeriod performedPeriod = null;
-            String performedDateTime = null;
-            if (Objects.nonNull(draft.getEndDate())) {
-                String endDate = dateFormat.format(new Date(draft.getEndDate()));
-                performedPeriod = new PerformedPeriod(startDate, endDate);
-            } else {
-                performedDateTime = startDate;
-            }
-
-            Reference recorder = new Reference("Doctor", draft.getRecorder());
-            Reference asserter = new Reference("Doctor", draft.getAsserter());
-            Reference performer = new Reference("Doctor", draft.getPerformer());
-
-            List<CodeableConcept> reasons = new ArrayList<>();
-            CodeableConcept reasonCode = new CodeableConcept(Collections.emptyList(), draft.getReason());
-            reasons.add(reasonCode);
-
-            List<CodeableConcept> bodySites = new ArrayList<>();
-            CodeableConcept bodySite = new CodeableConcept(Collections.emptyList(), draft.getBodySite());
-            bodySites.add(bodySite);
-
-            List<CodeableConcept> complications = new ArrayList<>();
-            CodeableConcept complication = new CodeableConcept(Collections.emptyList(), draft.getComplication());
-            complications.add(complication);
-
-            List<CodeableConcept> followUps = new ArrayList<>();
-            CodeableConcept followUp = new CodeableConcept(Collections.emptyList(), draft.getFollowUp());
-            followUps.add(followUp);
-
-            List<CodeableConcept> notes = new ArrayList<>();
-            CodeableConcept note = new CodeableConcept(Collections.emptyList(), draft.getNote());
-            notes.add(note);
-
-            return new Procedure(name, text, status, notDoneReason, code, subject, performedPeriod, performedDateTime,
-                    recorder, asserter, performer, reasons, bodySites, complications, followUps, notes);
+            return getConvertToProcedure((ProcedureDraft) documentDraft);
         } else throw new ClientException(NOT_FOUND, "Invalid document type has been provided.");
+    }
+
+    private Procedure getConvertToProcedure(ProcedureDraft procedureDraft) {
+
+        String name = procedureDraft.getName();
+        Narrative text = new Narrative(Narrative.NarrativeStatus.generated,
+                "<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">" + procedureDraft.getName() + "</div>");
+        String status = ProcedureDraft.Status.getValue(procedureDraft.getStatus());
+
+        CodeableConcept notDoneReason = new CodeableConcept();
+        notDoneReason.setText(procedureDraft.getNotDoneReason());
+
+        ArrayList<Coding> coding = new ArrayList<>();
+        coding.add(new Coding("https://medical-ledger.io/", "1.0", "123456", procedureDraft.getName()));
+        CodeableConcept code = new CodeableConcept(coding, procedureDraft.getDescription());
+
+        Reference subject = new Reference(procedureDraft.getPatient().getContactName(), procedureDraft.getPatient().getNationalNumber());
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String startDate = dateFormat.format(new Date(procedureDraft.getStartDate()));
+
+        PerformedPeriod performedPeriod = null;
+        String performedDateTime = null;
+        if (Objects.nonNull(procedureDraft.getEndDate())) {
+            String endDate = dateFormat.format(new Date(procedureDraft.getEndDate()));
+            performedPeriod = new PerformedPeriod(startDate, endDate);
+        } else {
+            performedDateTime = startDate;
+        }
+
+        Reference recorder = new Reference("Doctor", procedureDraft.getRecorder());
+        Reference asserter = new Reference("Doctor", procedureDraft.getAsserter());
+        Reference performer = new Reference("Doctor", procedureDraft.getPerformer());
+
+        List<CodeableConcept> reasons = new ArrayList<>();
+        CodeableConcept reasonCode = new CodeableConcept(Collections.emptyList(), procedureDraft.getReason());
+        reasons.add(reasonCode);
+
+        CodeableConcept bodySite = new CodeableConcept(Collections.emptyList(), procedureDraft.getBodySite());
+        List<CodeableConcept> bodySites = Collections.singletonList(bodySite);
+
+        CodeableConcept complication = new CodeableConcept(Collections.emptyList(), procedureDraft.getComplication());
+        List<CodeableConcept> complications = Collections.singletonList(complication);
+
+        CodeableConcept followUp = new CodeableConcept(Collections.emptyList(), procedureDraft.getFollowUp());
+        List<CodeableConcept> followUps = Collections.singletonList(followUp);
+
+        CodeableConcept note = new CodeableConcept(Collections.emptyList(), procedureDraft.getNote());
+        List<CodeableConcept> notes = Collections.singletonList(note);
+
+        return new Procedure(name, text, status, notDoneReason, code, subject, performedPeriod, performedDateTime,
+                recorder, asserter, performer, reasons, bodySites, complications, followUps, notes);
     }
 }

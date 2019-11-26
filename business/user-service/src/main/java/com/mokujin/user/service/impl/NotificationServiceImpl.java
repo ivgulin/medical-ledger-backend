@@ -23,7 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.mokujin.user.model.notification.Notification.Type.*;
+import static com.mokujin.user.model.notification.Notification.Type.CONNECTION;
+import static com.mokujin.user.model.notification.Notification.Type.INVITATION;
 import static com.mokujin.user.model.notification.NotificationConstants.*;
 
 @Slf4j
@@ -71,6 +72,24 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(n -> (HealthNotification) n)
                 .collect(Collectors.toList());
 
+        List<OfferNotification> offerNotifications = redissonClient.getMap("offers_" + nationalNumber)
+                .values()
+                .stream()
+                .map(n -> (OfferNotification) n)
+                .collect(Collectors.toList());
+
+        List<AskNotification> askNotifications = redissonClient.getMap("asks_" + nationalNumber)
+                .values()
+                .stream()
+                .map(n -> (AskNotification) n)
+                .collect(Collectors.toList());
+
+        List<DocumentNotification> documentNotifications = redissonClient.getMap("documents_" + nationalNumber)
+                .values()
+                .stream()
+                .map(n -> (DocumentNotification) n)
+                .collect(Collectors.toList());
+
         return NotificationCollector.builder()
                 .messages(messageNotifications)
                 .connections(connectionNotifications)
@@ -78,6 +97,9 @@ public class NotificationServiceImpl implements NotificationService {
                 .presentations(presentationNotifications)
                 .proofs(proofNotifications)
                 .health(healthNotifications)
+                .offers(offerNotifications)
+                .asks(askNotifications)
+                .documents(documentNotifications)
                 .build();
     }
 
@@ -198,7 +220,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .photo(user.getPhoto())
                         .nationalNumber(nationalNumber)
                         .isVisible(true)
-                        .build(), PROOF_TITLE_EN, PROOF_TITLE_UKR, PROOF_CONTENT_EN, PROOF_CONTENT_UKR, record);
+                        .build(), HEALTH_TITLE_EN, HEALTH_TITLE_UKR, HEALTH_CONTENT_EN, HEALTH_CONTENT_UKR, record);
         healthNotifications.put(nationalNumber, healthNotification);
 
         return healthNotification;
@@ -212,7 +234,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Notification addOfferNotification(User user, Document document, String connectionNumber) {
-        RMap<String, OfferNotification> offerNotifications = redissonClient.getMap("offer_" + connectionNumber);
+        RMap<String, OfferNotification> offerNotifications = redissonClient.getMap("offers_" + connectionNumber);
         String nationalNumber = user.getNationalNumber();
         OfferNotification healthNotification = new OfferNotification(new Date().getTime(),
                 Contact.builder()
@@ -220,7 +242,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .photo(user.getPhoto())
                         .nationalNumber(nationalNumber)
                         .isVisible(true)
-                        .build(), PROOF_TITLE_EN, PROOF_TITLE_UKR, PROOF_CONTENT_EN, PROOF_CONTENT_UKR, document);
+                        .build(), OFFER_TITLE_EN, OFFER_TITLE_UKR, OFFER_CONTENT_EN, OFFER_CONTENT_UKR, document);
         offerNotifications.put(nationalNumber, healthNotification);
 
         return healthNotification;
@@ -228,8 +250,53 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void removeOfferNotification(String nationalNumber, String connectionNumber) {
-        RMap<String, OfferNotification> offerNotifications = redissonClient.getMap("offer_" + nationalNumber);
+        RMap<String, OfferNotification> offerNotifications = redissonClient.getMap("offers_" + nationalNumber);
         offerNotifications.remove(connectionNumber);
     }
+
+    @Override
+    public Notification addAskNotification(User user, List<String> keywords, String connectionNumber) {
+        RMap<String, AskNotification> askNotifications = redissonClient.getMap("asks_" + connectionNumber);
+        String nationalNumber = user.getNationalNumber();
+        AskNotification askNotification = new AskNotification(new Date().getTime(),
+                Contact.builder()
+                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .photo(user.getPhoto())
+                        .nationalNumber(nationalNumber)
+                        .isVisible(true)
+                        .build(), ASK_TITLE_EN, ASK_TITLE_UKR, ASK_CONTENT_EN, ASK_CONTENT_UKR, keywords);
+        askNotifications.put(nationalNumber, askNotification);
+
+        return askNotification;
+    }
+
+    @Override
+    public void removeAskNotification(String nationalNumber, String connectionNumber) {
+        RMap<String, AskNotification> askNotifications = redissonClient.getMap("asks_" + nationalNumber);
+        askNotifications.remove(connectionNumber);
+    }
+
+    @Override
+    public Notification addDocumentNotification(User user, Document document, String connectionNumber) {
+        RMap<String, DocumentNotification> documentNotifications = redissonClient.getMap("documents_" + connectionNumber);
+        String nationalNumber = user.getNationalNumber();
+        DocumentNotification documentNotification = new DocumentNotification(new Date().getTime(),
+                Contact.builder()
+                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .photo(user.getPhoto())
+                        .nationalNumber(nationalNumber)
+                        .isVisible(true)
+                        .build(), DOCUMENT_TITLE_EN, DOCUMENT_TITLE_UKR, DOCUMENT_CONTENT_EN, DOCUMENT_CONTENT_UKR, document);
+        documentNotifications.put(nationalNumber, documentNotification);
+
+        return documentNotification;
+    }
+
+    @Override
+    public void removeDocumentNotification(String nationalNumber, String connectionNumber) {
+        RMap<String, DocumentNotification> documentNotifications = redissonClient.getMap("documents_" + nationalNumber);
+        documentNotifications.remove(connectionNumber);
+    }
+
 
 }
