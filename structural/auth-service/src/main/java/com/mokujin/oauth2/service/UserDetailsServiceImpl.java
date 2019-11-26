@@ -30,9 +30,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                         "&private=" + credentials[1], AuthResponse.class);
 
         if (authResponse.isExists()) {
-            User user = new User(1, "test",
+            User user = new User(credentials[0],
                     "$2a$10$APikXN.LGwEBvb4KkHN0wegMpgLbDKNI2SoJ6tUu.4ZCAwMPf2K2u",
-                    "test@test.com", Collections.singleton(authResponse.getRole()));
+                    Collections.singleton(authResponse.getRole()));
             return new UserDetailsImpl(user);
         } else {
             throw new UsernameNotFoundException("User not found with username: " + username);

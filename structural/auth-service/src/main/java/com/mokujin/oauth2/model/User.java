@@ -13,13 +13,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class User implements Serializable {
 
-    private Integer userId;
-
     private String username;
 
     private String password;
-
-    private String email;
 
     private Set<Role> roles = new HashSet<>();
 }
