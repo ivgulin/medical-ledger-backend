@@ -37,9 +37,9 @@ public interface NotificationService {
 
     void removeHealthNotification(String nationalNumber, String connectionNumber);
 
-    Notification addOfferNotification(User user, Document document, String connectionNumber);
+    Notification addOfferNotification(String publicKey, String privateKey, User doctor, Document document, String patientNumber);
 
-    void removeOfferNotification(String nationalNumber, String connectionNumber);
+    ProcessedUserCredentials removeOfferNotification(String nationalNumber, String connectionNumber);
 
     Notification addAskNotification(User user, List<String> keywords, String connectionNumber);
 

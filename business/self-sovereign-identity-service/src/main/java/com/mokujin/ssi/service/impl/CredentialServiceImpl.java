@@ -2,21 +2,33 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.document.Document;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
-import com.mokujin.ssi.model.government.document.Document;
+import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Schema;
+import com.mokujin.ssi.model.user.request.OfferRequest;
+import com.mokujin.ssi.model.user.request.UserCredentials;
+import com.mokujin.ssi.model.user.response.User;
 import com.mokujin.ssi.service.CredentialService;
+import com.mokujin.ssi.service.IdentityService;
+import com.mokujin.ssi.service.UserService;
+import com.mokujin.ssi.service.WalletService;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hyperledger.indy.sdk.anoncreds.AnoncredsResults;
+import org.hyperledger.indy.sdk.pool.Pool;
+import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
@@ -25,6 +37,12 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 public class CredentialServiceImpl implements CredentialService {
 
     private final ObjectMapper objectMapper;
+    private final SchemaService schemaService;
+    private final IdentityService identityService;
+    private final WalletService walletService;
+    private final UserService userService;
+    private final Pool pool;
+
 
     @Override
     public String getCredential(Document document) {
@@ -173,4 +191,87 @@ public class CredentialServiceImpl implements CredentialService {
 
         return formedCredential.toString();
     }
+
+    @Override
+    public User addCredential(String publicKey, String privateKey, OfferRequest offerRequest) {
+
+        UserCredentials credentials = offerRequest.getDoctorCredentials();
+        Document document = offerRequest.getDocument();
+
+        try (Wallet patientWallet = walletService.getOrCreateWallet(publicKey, privateKey);
+             Wallet doctorWallet = walletService.getOrCreateWallet(credentials.getPublicKey(), credentials.getPrivateKey())) {
+
+            Identity doctorIdentity = identityService.findByWallet(doctorWallet);
+            String schemaName = document.getResourceType();
+            String tag = schemaName.toLowerCase();
+
+            // TODO: 11/26/2019 read fields
+            ArrayNode attributes = objectMapper.createArrayNode();
+
+            Schema schema = schemaService.getSchema(pool, doctorIdentity, schemaName, tag, attributes);
+            log.info("'schema={}'", schema);
+
+            User doctor = userService.convert(doctorIdentity);
+
+            Identity patientIdentity = identityService.findByWallet(patientWallet);
+            String doctorPseudonym = patientIdentity.getPseudonyms().stream()
+                    .filter(pseudonym -> pseudonym.getContact().getNationalNumber().equals(doctor.getNationalNumber()))
+                    .findFirst()
+                    .get()
+                    .getPseudonymDid();
+
+            // TODO: 11/26/2019 change getCredentials method
+            this.issueCredential(patientWallet, doctorWallet, doctorPseudonym, schema.getSchemaDefinitionId(),
+                    schema.getSchemaDefinition(), document, publicKey);
+
+            patientIdentity = identityService.findByWallet(patientWallet);
+            return userService.convert(patientIdentity);
+        } catch (Exception e) {
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    @Override
+    public void issueCredential(Wallet userWallet, Wallet trustAnchorWallet, String trustAnchorPseudonym,
+                                String schemaDefinitionId, String schemaDefinition, Document document,
+                                String masterSecretId) throws Exception {
+
+        String credentialOffer = issuerCreateCredentialOffer(
+                trustAnchorWallet,
+                schemaDefinitionId).get();
+        log.info("'credentialOffer={}'", credentialOffer);
+
+        AnoncredsResults.ProverCreateCredentialRequestResult proverCreateCredentialRequestResult = proverCreateCredentialReq(
+                userWallet,
+                trustAnchorPseudonym,
+                credentialOffer,
+                schemaDefinition,
+                masterSecretId)
+                .get();
+        log.info("'proverCreateCredentialRequestResult={}'", proverCreateCredentialRequestResult);
+
+        String credential = this.getCredential(document);
+        log.info("'credential={}'", credential);
+
+        AnoncredsResults.IssuerCreateCredentialResult issuerCreateCredentialResult = issuerCreateCredential(
+                trustAnchorWallet,
+                credentialOffer,
+                proverCreateCredentialRequestResult.getCredentialRequestJson(),
+                credential,
+                null,
+                0)
+                .get();
+        log.info("'issuerCreateCredentialResult={}'", issuerCreateCredentialResult);
+
+        String gottenCredential = proverStoreCredential(
+                userWallet,
+                null,
+                proverCreateCredentialRequestResult.getCredentialRequestMetadataJson(),
+                issuerCreateCredentialResult.getCredentialJson(),
+                schemaDefinition,
+                issuerCreateCredentialResult.getRevocRegDeltaJson()).get();
+        log.info("'gottenCredential={}'", gottenCredential);
+    }
 }
+

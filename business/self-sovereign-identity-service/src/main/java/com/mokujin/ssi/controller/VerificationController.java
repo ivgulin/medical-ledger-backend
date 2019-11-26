@@ -1,6 +1,6 @@
 package com.mokujin.ssi.controller;
 
-import com.mokujin.ssi.model.government.document.Document;
+import com.mokujin.ssi.model.document.Document;
 import com.mokujin.ssi.model.verification.Affirmation;
 import com.mokujin.ssi.model.verification.Proof;
 import com.mokujin.ssi.service.VerificationService;

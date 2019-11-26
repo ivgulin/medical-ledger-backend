@@ -34,9 +34,9 @@ public class HealthDataController {
 
     @PostMapping("/share/{doctorNumber}")
     public ResponseEntity<User> share(@PathVariable String doctorNumber,
-                                     @RequestBody HealthRecord record,
-                                     @RequestHeader("Public-Key") String publicKey,
-                                     @RequestHeader("Private-Key") String privateKey) {
+                                      @RequestBody HealthRecord record,
+                                      @RequestHeader("Public-Key") String publicKey,
+                                      @RequestHeader("Private-Key") String privateKey) {
         log.info("'share' invoked with params '{}, {}, {}, {}'", doctorNumber, record, publicKey, privateKey);
 
         User user = healthDataService.share(publicKey, privateKey, record, doctorNumber);

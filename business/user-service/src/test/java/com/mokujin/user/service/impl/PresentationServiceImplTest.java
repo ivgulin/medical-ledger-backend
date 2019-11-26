@@ -30,7 +30,6 @@ import static com.mokujin.user.model.User.Role.DOCTOR;
 import static com.mokujin.user.model.User.Role.PATIENT;
 import static com.mokujin.user.model.document.Document.NationalDocumentType.Number;
 import static com.mokujin.user.model.document.Document.NationalDocumentType.*;
-import static com.mokujin.user.model.notification.Notification.Type.PRESENTATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 

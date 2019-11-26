@@ -2,6 +2,7 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokujin.ssi.model.chat.Chat;
+import com.mokujin.ssi.model.chat.LedgerChatResponse;
 import com.mokujin.ssi.model.chat.Message;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.service.WalletService;
@@ -126,8 +127,10 @@ class ChatServiceImplTest {
 
         Wallet userWallet = Mockito.mock(Wallet.class);
 
+        LedgerChatResponse response = new LedgerChatResponse();
         Chat chat = new Chat();
-        String chatInString = objectMapper.writeValueAsString(chat);
+        response.setValue(chat);
+        String chatInString = objectMapper.writeValueAsString(response);
 
         new MockUp<WalletRecord>() {
             @mockit.Mock

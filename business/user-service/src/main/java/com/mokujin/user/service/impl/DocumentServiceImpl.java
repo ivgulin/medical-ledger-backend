@@ -1,5 +1,6 @@
 package com.mokujin.user.service.impl;
 
+import com.mokujin.user.model.ProcessedUserCredentials;
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.document.Document;
 import com.mokujin.user.model.document.impl.medical.dicom.MedicalImage;
@@ -8,6 +9,7 @@ import com.mokujin.user.model.document.impl.medical.hl7.component.*;
 import com.mokujin.user.model.exception.extention.ClientException;
 import com.mokujin.user.model.exception.extention.ServerException;
 import com.mokujin.user.model.internal.DocumentDraft;
+import com.mokujin.user.model.internal.OfferRequest;
 import com.mokujin.user.model.internal.ProcedureDraft;
 import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.service.DocumentService;
@@ -46,7 +48,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public User offerDicom(String publicKey, String privateKey, MultipartFile document, String patientNumber) {
 
-        User user = userService.get(publicKey, privateKey);
+        User doctor = userService.get(publicKey, privateKey);
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 
@@ -79,10 +81,11 @@ public class DocumentServiceImpl implements DocumentService {
             dicomMap.put("Image", encodedImage);
             System.out.println("dicomMap: " + dicomMap);
 
-            Notification notification = notificationService.addOfferNotification(user, new MedicalImage(dicomMap), patientNumber);
+            Notification notification = notificationService
+                    .addOfferNotification(publicKey, privateKey, doctor, new MedicalImage(dicomMap), patientNumber);
             log.info("notification =  '{}'", notification);
 
-            return user;
+            return doctor;
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
             throw new ServerException(INTERNAL_SERVER_ERROR, e.getMessage());
@@ -91,24 +94,27 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public User offerCredential(String publicKey, String privateKey, DocumentDraft documentDraft, String patientNumber) {
-        User user = userService.get(publicKey, privateKey);
+        User doctor = userService.get(publicKey, privateKey);
 
         Document document = this.convertToDocument(documentDraft);
 
-        Notification notification = notificationService.addOfferNotification(user, document, patientNumber);
+        Notification notification = notificationService.addOfferNotification(publicKey, privateKey, doctor,
+                document, patientNumber);
         log.info("notification =  '{}'", notification);
 
-        return user;
+        return doctor;
     }
 
     @Override
     public User accept(String publicKey, String privateKey, Document document, String patientNumber, String doctorNumber) {
 
-        notificationService.removeOfferNotification(patientNumber, doctorNumber);
+        ProcessedUserCredentials doctorCredentials = notificationService.removeOfferNotification(patientNumber, doctorNumber);
+
+        OfferRequest request = OfferRequest.builder().doctorCredentials(doctorCredentials).document(document).build();
 
         String url = "http://self-sovereign-identity-service/credential/add?public="
                 + publicKey + "&private=" + privateKey;
-        return restTemplate.postForObject(url, document, User.class);
+        return restTemplate.postForObject(url, request, User.class);
     }
 
     @Override

@@ -233,25 +233,43 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Notification addOfferNotification(User user, Document document, String connectionNumber) {
-        RMap<String, OfferNotification> offerNotifications = redissonClient.getMap("offers_" + connectionNumber);
-        String nationalNumber = user.getNationalNumber();
-        OfferNotification healthNotification = new OfferNotification(new Date().getTime(),
+    public Notification addOfferNotification(String publicKey, String privateKey, User doctor,
+                                             Document document, String patientNumber) {
+
+        String doctorNumber = doctor.getNationalNumber();
+
+        ProcessedUserCredentials patientCredentials = ProcessedUserCredentials.builder()
+                .publicKey(publicKey)
+                .privateKey(privateKey)
+                .build();
+        RMap<String, ProcessedUserCredentials> credentials = redissonClient.getMap("credentials");
+        credentials.put(patientNumber + doctorNumber, patientCredentials);
+
+        RMap<String, OfferNotification> offerNotifications = redissonClient.getMap("offers_" + patientNumber);
+        String nationalNumber = doctor.getNationalNumber();
+        OfferNotification offerNotification = new OfferNotification(new Date().getTime(),
                 Contact.builder()
-                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
-                        .photo(user.getPhoto())
+                        .contactName(doctor.getFirstName() + " " + doctor.getFirstName() + " " + doctor.getFatherName())
+                        .photo(doctor.getPhoto())
                         .nationalNumber(nationalNumber)
                         .isVisible(true)
                         .build(), OFFER_TITLE_EN, OFFER_TITLE_UKR, OFFER_CONTENT_EN, OFFER_CONTENT_UKR, document);
-        offerNotifications.put(nationalNumber, healthNotification);
+        offerNotifications.put(publicKey, offerNotification);
 
-        return healthNotification;
+        return offerNotification;
     }
 
     @Override
-    public void removeOfferNotification(String nationalNumber, String connectionNumber) {
-        RMap<String, OfferNotification> offerNotifications = redissonClient.getMap("offers_" + nationalNumber);
-        offerNotifications.remove(connectionNumber);
+    public ProcessedUserCredentials removeOfferNotification(String patientNumber, String doctorNumber) {
+
+        RMap<String, ProcessedUserCredentials> credentials = redissonClient.getMap("credentials");
+        ProcessedUserCredentials doctorCredentials = credentials.get(patientNumber + doctorNumber);
+        credentials.remove(patientNumber + doctorNumber);
+
+        RMap<String, OfferNotification> offerNotifications = redissonClient.getMap("offers_" + patientNumber);
+        offerNotifications.remove(doctorCredentials.getPublicKey());
+
+        return doctorCredentials;
     }
 
     @Override

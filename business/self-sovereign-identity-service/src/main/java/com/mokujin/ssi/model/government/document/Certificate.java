@@ -1,6 +1,6 @@
-package com.mokujin.ssi.model.government.document.impl;
+package com.mokujin.ssi.model.government.document;
 
-import com.mokujin.ssi.model.government.document.NationalDocument;
+import com.mokujin.ssi.model.document.national.NationalDocument;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

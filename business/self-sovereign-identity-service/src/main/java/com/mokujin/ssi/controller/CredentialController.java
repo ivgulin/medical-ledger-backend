@@ -1,8 +1,9 @@
 package com.mokujin.ssi.controller;
 
 
-import com.mokujin.ssi.model.chat.Chat;
-import com.mokujin.ssi.model.chat.Message;
+import com.mokujin.ssi.model.user.request.OfferRequest;
+import com.mokujin.ssi.model.user.response.User;
+import com.mokujin.ssi.service.CredentialService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -14,18 +15,18 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CredentialController {
 
+    private final CredentialService credentialService;
 
-    @PostMapping("/add/{connectionNumber}")
-    public ResponseEntity<Chat> addMessage(@PathVariable String connectionNumber,
-                                           @RequestBody Message message,
-                                           @RequestParam("public") String publicKey,
-                                           @RequestParam("private") String privateKey) {
-        log.info("'addMessage' invoked with params '{}, {}, {}, {}'", connectionNumber, message, publicKey, privateKey);
+    @PostMapping("/add")
+    public ResponseEntity<User> add(@RequestBody OfferRequest offerRequest,
+                                    @RequestParam("public") String publicKey,
+                                    @RequestParam("private") String privateKey) {
+        log.info("'add' invoked with params '{}, {}, {}'", publicKey, privateKey, offerRequest);
 
-        Chat chat = chatService.addMessage(publicKey, privateKey, connectionNumber, message);
+        User user = credentialService.addCredential(publicKey, privateKey, offerRequest);
 
-        log.info("'addMessage' returned '{}'", chat);
-        return ResponseEntity.ok(chat);
+        log.info("'add' returned '{}'", user);
+        return ResponseEntity.ok(user);
     }
 
 }
