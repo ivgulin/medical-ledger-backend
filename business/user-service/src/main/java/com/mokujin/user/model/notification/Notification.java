@@ -17,7 +17,8 @@ public abstract class Notification {
         INVITATION,
         PRESENTATION,
         PROOF,
-        HEALTH
+        HEALTH,
+        OFFER
     }
 
 }

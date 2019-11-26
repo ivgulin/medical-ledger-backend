@@ -4,6 +4,7 @@ import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.ProcessedUserCredentials;
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.chat.Message;
+import com.mokujin.user.model.document.Document;
 import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.model.notification.NotificationCollector;
 import com.mokujin.user.model.presentation.Proof;
@@ -35,5 +36,9 @@ public interface NotificationService {
     Notification addHealthNotification(User user, HealthRecord record, String connectionNumber);
 
     void removeHealthNotification(String nationalNumber, String connectionNumber);
+
+    Notification addOfferNotification(User user, Document document, String connectionNumber);
+
+    void removeOfferNotification(String nationalNumber, String connectionNumber);
 
 }

@@ -6,15 +6,17 @@ import com.mokujin.user.model.record.HealthRecord;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import static com.mokujin.user.model.notification.Notification.Type.*;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class HealthNotification extends SystemNotification {
 
     private HealthRecord record;
 
-    public HealthNotification(Long date, Type type, Contact contact, String titleEn, String titleUkr, String contentEn,
+    public HealthNotification(Long date, Contact contact, String titleEn, String titleUkr, String contentEn,
                               String contentUkr, HealthRecord record) {
-        super(date, type, contact, titleEn, titleUkr, contentEn, contentUkr);
+        super(date, HEALTH, contact, titleEn, titleUkr, contentEn, contentUkr);
         this.record = record;
     }
 }

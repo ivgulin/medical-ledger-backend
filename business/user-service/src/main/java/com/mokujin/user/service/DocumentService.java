@@ -1,10 +1,13 @@
 package com.mokujin.user.service;
 
+import com.mokujin.user.model.User;
+import com.mokujin.user.model.internal.DocumentDraft;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface DocumentService {
 
-    void sendDicom(String publicKey, String privateKey, MultipartFile document, String patientNumber);
-    //void send(String publicKey, String privateKey, DomainResource document, String patientNumber);
+    User offerDicom(String publicKey, String privateKey, MultipartFile document, String patientNumber);
+
+    User offerCredential(String publicKey, String privateKey, DocumentDraft documentDraft, String patientNumber);
 
 }

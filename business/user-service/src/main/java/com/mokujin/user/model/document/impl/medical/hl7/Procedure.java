@@ -1,15 +1,11 @@
 package com.mokujin.user.model.document.impl.medical.hl7;
 
 import com.mokujin.user.model.document.Document;
-import com.mokujin.user.model.document.impl.medical.hl7.component.CodeableConcept;
-import com.mokujin.user.model.document.impl.medical.hl7.component.Narrative;
-import com.mokujin.user.model.document.impl.medical.hl7.component.PerformedPeriod;
-import com.mokujin.user.model.document.impl.medical.hl7.component.Reference;
+import com.mokujin.user.model.document.impl.medical.hl7.component.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.List;
-
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -33,7 +29,7 @@ public class Procedure extends Document {
 
     private Reference recorder;
 
-    private Reference accepter;
+    private Reference asserter;
 
     private Reference performer;
 
@@ -47,28 +43,32 @@ public class Procedure extends Document {
 
     private List<CodeableConcept> note;
 
+    public Procedure(String id, Narrative text, String status, CodeableConcept notDoneReason,
+                     CodeableConcept code, Reference subject, PerformedPeriod performedPeriod, String performedDateTime,
+                     Reference recorder, Reference asserter, Reference performer, List<CodeableConcept> reasonCode,
+                     List<CodeableConcept> bodySite, List<CodeableConcept> complication, List<CodeableConcept> followUp,
+                     List<CodeableConcept> note) {
+        super(MedicalDocumentType.Procedure.name());
+        this.id = id;
+        this.text = text;
+        this.status = status;
+        this.notDoneReason = notDoneReason;
+        this.code = code;
+        this.subject = subject;
+        this.performedPeriod = performedPeriod;
+        this.performedDateTime = performedDateTime;
+        this.recorder = recorder;
+        this.asserter = asserter;
+        this.performer = performer;
+        this.reasonCode = reasonCode;
+        this.bodySite = bodySite;
+        this.complication = complication;
+        this.followUp = followUp;
+        this.note = note;
+    }
 
     public Procedure() {
         super(MedicalDocumentType.Procedure.name());
-    }
-
-
-    public enum Status {
-        preparation,
-        progress,
-        suspended,
-        aborted,
-        completed,
-        error,
-        unknown;
-
-        public String getValue(Status status) {
-            if (status.equals(progress))
-                return "in-progress";
-            if (status.equals(error))
-                return "entered-in-error";
-            return status.name();
-        }
     }
 
 }

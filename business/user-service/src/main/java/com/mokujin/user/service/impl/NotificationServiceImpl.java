@@ -4,13 +4,11 @@ import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.ProcessedUserCredentials;
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.chat.Message;
+import com.mokujin.user.model.document.Document;
 import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.model.notification.NotificationCollector;
 import com.mokujin.user.model.notification.SystemNotification;
-import com.mokujin.user.model.notification.extention.ChatNotification;
-import com.mokujin.user.model.notification.extention.HealthNotification;
-import com.mokujin.user.model.notification.extention.PresentationNotification;
-import com.mokujin.user.model.notification.extention.ProofNotification;
+import com.mokujin.user.model.notification.extention.*;
 import com.mokujin.user.model.presentation.Proof;
 import com.mokujin.user.model.record.HealthRecord;
 import com.mokujin.user.service.NotificationService;
@@ -149,7 +147,6 @@ public class NotificationServiceImpl implements NotificationService {
         RMap<String, PresentationNotification> presentationNotifications = redissonClient.getMap("presentations_" + connectionNumber);
         String nationalNumber = user.getNationalNumber();
         PresentationNotification presentationNotification = new PresentationNotification(new Date().getTime(),
-                PRESENTATION,
                 Contact.builder()
                         .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
                         .photo(user.getPhoto())
@@ -174,7 +171,6 @@ public class NotificationServiceImpl implements NotificationService {
         RMap<String, ProofNotification> proofNotifications = redissonClient.getMap("proofs_" + connectionNumber);
         String nationalNumber = user.getNationalNumber();
         ProofNotification proofNotification = new ProofNotification(new Date().getTime(),
-                PROOF,
                 Contact.builder()
                         .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
                         .photo(user.getPhoto())
@@ -197,7 +193,6 @@ public class NotificationServiceImpl implements NotificationService {
         RMap<String, HealthNotification> healthNotifications = redissonClient.getMap("health_" + connectionNumber);
         String nationalNumber = user.getNationalNumber();
         HealthNotification healthNotification = new HealthNotification(new Date().getTime(),
-                HEALTH,
                 Contact.builder()
                         .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
                         .photo(user.getPhoto())
@@ -214,4 +209,27 @@ public class NotificationServiceImpl implements NotificationService {
         RMap<String, HealthNotification> healthNotifications = redissonClient.getMap("health_" + nationalNumber);
         healthNotifications.remove(connectionNumber);
     }
+
+    @Override
+    public Notification addOfferNotification(User user, Document document, String connectionNumber) {
+        RMap<String, OfferNotification> offerNotifications = redissonClient.getMap("offer_" + connectionNumber);
+        String nationalNumber = user.getNationalNumber();
+        OfferNotification healthNotification = new OfferNotification(new Date().getTime(),
+                Contact.builder()
+                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .photo(user.getPhoto())
+                        .nationalNumber(nationalNumber)
+                        .isVisible(true)
+                        .build(), PROOF_TITLE_EN, PROOF_TITLE_UKR, PROOF_CONTENT_EN, PROOF_CONTENT_UKR, document);
+        offerNotifications.put(nationalNumber, healthNotification);
+
+        return healthNotification;
+    }
+
+    @Override
+    public void removeOfferNotification(String nationalNumber, String connectionNumber) {
+        RMap<String, OfferNotification> offerNotifications = redissonClient.getMap("offer_" + nationalNumber);
+        offerNotifications.remove(connectionNumber);
+    }
+
 }

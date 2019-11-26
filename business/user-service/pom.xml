@@ -35,10 +35,11 @@
             <version>3.10.2</version>
         </dependency>
         <dependency>
-            <groupId>org.dcm4che</groupId>
-            <artifactId>dcm4che-all</artifactId>
-            <version>3.3.8</version>
-            <type>pom</type>
+            <groupId>pixelmed</groupId>
+            <artifactId>pixelmed</artifactId>
+            <scope>system</scope>
+            <version>1.0</version>
+            <systemPath>${basedir}\external\pixelmed.jar</systemPath>
         </dependency>
     </dependencies>
 
