@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.mokujin.ssi.model.internal.Role.DOCTOR;
+import static com.mokujin.ssi.model.internal.Role.PATIENT;
 import static org.hyperledger.indy.sdk.wallet.Wallet.createWallet;
 import static org.hyperledger.indy.sdk.wallet.Wallet.openWallet;
 
@@ -51,7 +52,7 @@ public class WalletServiceImpl implements WalletService {
 
         try (Wallet wallet = openWallet(config.toString(), credentials.toString()).get()) {
 
-            Auth auth = new Auth(true, null);
+            Auth auth = new Auth(true, PATIENT);
             String listOfDids = Did.getListMyDidsWithMeta(wallet).get()
                     .replace("\\", "")
                     .replace("\"{", "{")
@@ -65,9 +66,7 @@ public class WalletServiceImpl implements WalletService {
             didsWithMetadata.stream()
                     .filter(d -> d.getMetadata().isVerinym())
                     .findAny()
-                    .ifPresent(didWithMetadata -> {
-                        auth.setRole(DOCTOR);
-                    });
+                    .ifPresent(didWithMetadata -> auth.setRole(DOCTOR));
 
             return auth;
         } catch (Exception e) {

@@ -29,7 +29,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/docs/**").permitAll()
                 .antMatchers("/auth/**", "/gov/**").denyAll()
-                .antMatchers(POST, "/user/registration/create-wallet").denyAll()
+                .antMatchers(POST, "/user/registration/**").denyAll()
                 .anyRequest().authenticated();
     }
 

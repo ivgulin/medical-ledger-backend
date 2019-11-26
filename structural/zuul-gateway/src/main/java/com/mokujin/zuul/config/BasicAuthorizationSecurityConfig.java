@@ -35,7 +35,7 @@ public class BasicAuthorizationSecurityConfig extends WebSecurityConfigurerAdapt
                 .requestMatcher(new BasicRequestMatcher())
                 .authorizeRequests()
                 .antMatchers("/auth/**", "/gov/**").authenticated()
-                .antMatchers(POST, "/user/registration/create-wallet").authenticated()
+                .antMatchers(POST, "/user/registration/**").authenticated()
                 .anyRequest().denyAll()
                 .and().httpBasic()
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
