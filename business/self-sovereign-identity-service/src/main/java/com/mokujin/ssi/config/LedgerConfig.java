@@ -9,7 +9,7 @@ import com.mokujin.ssi.model.internal.Pseudonym;
 import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.service.IdentityService;
 import com.mokujin.ssi.service.WalletService;
-import com.mokujin.ssi.service.impl.SchemaService;
+import com.mokujin.ssi.service.SchemaService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.indy.sdk.did.Did;

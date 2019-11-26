@@ -1,4 +1,4 @@
-package com.mokujin.ssi.service.impl;
+package com.mokujin.ssi.service;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.mokujin.ssi.model.internal.Identity;

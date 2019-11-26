@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.document.Document;
+import com.mokujin.ssi.model.document.Document.MedicalDocumentType;
+import com.mokujin.ssi.model.document.medical.dicom.MedicalImage;
+import com.mokujin.ssi.model.document.medical.hl7.ModifiedProcedure;
+import com.mokujin.ssi.model.document.medical.hl7.Procedure;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.internal.Identity;
@@ -12,10 +16,7 @@ import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.model.user.request.OfferRequest;
 import com.mokujin.ssi.model.user.request.UserCredentials;
 import com.mokujin.ssi.model.user.response.User;
-import com.mokujin.ssi.service.CredentialService;
-import com.mokujin.ssi.service.IdentityService;
-import com.mokujin.ssi.service.UserService;
-import com.mokujin.ssi.service.WalletService;
+import com.mokujin.ssi.service.*;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -46,28 +47,50 @@ public class CredentialServiceImpl implements CredentialService {
 
     @Override
     public String getCredential(Document document) {
-        List<Field> fields = Arrays.stream(document.getClass().getDeclaredFields()).collect(Collectors.toList());
-
-        Class<?> superclass = document.getClass().getSuperclass().getSuperclass();
-
-        fields.addAll(Arrays.stream(superclass.getDeclaredFields()).collect(Collectors.toList()));
-
         ObjectNode credentialNode = objectMapper.createObjectNode();
 
-        fields.forEach(f -> {
-            f.setAccessible(true);
+        if (document.getResourceType().equals(MedicalDocumentType.MedicalImage.name())) {
+
             try {
-                ObjectNode attribute = objectMapper.createObjectNode();
-                Object value = f.get(document);
-                attribute.put("raw", value.toString());
-                attribute.put("encoded", String.valueOf(Math.abs(new Random().nextLong())));
-                credentialNode.set(f.getName(), attribute);
+                MedicalImage medicalImage = (MedicalImage) document;
+                Map<String, String> attributes = medicalImage.getAttributes();
+                attributes.put("resourceType", MedicalDocumentType.MedicalImage.name());
+
+                attributes.forEach((k, v) -> {
+                    ObjectNode attribute = objectMapper.createObjectNode();
+                    attribute.put("raw", v);
+                    attribute.put("encoded", String.valueOf(Math.abs(new Random().nextLong())));
+                    credentialNode.set(k, attribute);
+
+                });
             } catch (Exception e) {
                 log.error("Exception was thrown: " + e);
                 throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
             }
-        });
+        } else {
 
+            List<Field> fields = Arrays.stream(document.getClass().getDeclaredFields()).collect(Collectors.toList());
+
+            Class<?> superclass = document.getClass().getSuperclass().getSuperclass();
+
+            fields.addAll(Arrays.stream(superclass.getDeclaredFields()).collect(Collectors.toList()));
+
+            fields.forEach(f -> {
+                f.setAccessible(true);
+                try {
+                    ObjectNode attribute = objectMapper.createObjectNode();
+                    Object value = f.get(document);
+                    attribute.put("raw", value.toString());
+                    attribute.put("encoded", String.valueOf(Math.abs(new Random().nextLong())));
+                    credentialNode.set(f.getName(), attribute);
+                } catch (Exception e) {
+                    log.error("Exception was thrown: " + e);
+                    throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
+                } finally {
+                    f.setAccessible(false);
+                }
+            });
+        }
         return credentialNode.toString();
     }
 
@@ -103,6 +126,8 @@ public class CredentialServiceImpl implements CredentialService {
             } catch (Exception e) {
                 log.error("Exception was thrown: " + e);
                 throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
+            } finally {
+                field.setAccessible(false);
             }
         }
 
@@ -205,8 +230,8 @@ public class CredentialServiceImpl implements CredentialService {
             String schemaName = document.getResourceType();
             String tag = schemaName.toLowerCase();
 
-            // TODO: 11/26/2019 read fields
-            ArrayNode attributes = objectMapper.createArrayNode();
+            ArrayNode attributes = this.prepareAttributes(document);
+            attributes.add("resourceType");
 
             Schema schema = schemaService.getSchema(pool, doctorIdentity, schemaName, tag, attributes);
             log.info("'schema={}'", schema);
@@ -220,7 +245,9 @@ public class CredentialServiceImpl implements CredentialService {
                     .get()
                     .getPseudonymDid();
 
-            // TODO: 11/26/2019 change getCredentials method
+            if (document.getResourceType().equals(MedicalDocumentType.Procedure.name()))
+                document = new ModifiedProcedure((Procedure) document);
+
             this.issueCredential(patientWallet, doctorWallet, doctorPseudonym, schema.getSchemaDefinitionId(),
                     schema.getSchemaDefinition(), document, publicKey);
 
@@ -273,5 +300,21 @@ public class CredentialServiceImpl implements CredentialService {
                 issuerCreateCredentialResult.getRevocRegDeltaJson()).get();
         log.info("'gottenCredential={}'", gottenCredential);
     }
-}
 
+    private ArrayNode prepareAttributes(Document document) {
+        ArrayNode response = objectMapper.createArrayNode();
+
+        if (document.getResourceType().equals(MedicalDocumentType.MedicalImage.name())) {
+            MedicalImage medicalImage = (MedicalImage) document;
+            medicalImage.getAttributes().keySet().forEach(response::add);
+        } else if (document.getResourceType().equals(MedicalDocumentType.Procedure.name())) {
+            response.add("id").add("textStatus").add("textDiv").add("status").add("notDoneReason").add("codeSystem")
+                    .add("codeVersion").add("code").add("codeDisplay").add("subjectReference").add("subjectDisplay")
+                    .add("performedDateTime").add("start").add("end").add("recorderReference").add("recorderDisplay")
+                    .add("asserterReference").add("asserterDisplay").add("performerReference").add("performerDisplay")
+                    .add("reasonCode").add("bodySite").add("complication").add("followUp").add("note");
+        } else throw new ResourceNotFoundException("Unknown type of document has been provided.");
+
+        return response;
+    }
+}

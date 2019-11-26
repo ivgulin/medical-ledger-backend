@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Schema;
+import com.mokujin.ssi.service.SchemaService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -42,8 +43,13 @@ public class SchemaServiceImpl implements SchemaService {
 
             schemaDefinitionId = trustAnchor.getVerinymDid() + ":3:CL:" + seqNo + ":" + tag;
 
-            schemaDefinition = Cache.getCredDef(pool, trustAnchor.getWallet(),
-                    trustAnchor.getVerinymDid(), schemaDefinitionId, "{}").get();
+            try {
+                schemaDefinition = Cache.getCredDef(pool, trustAnchor.getWallet(),
+                        trustAnchor.getVerinymDid(), schemaDefinitionId, "{}").get();
+            } catch (Exception e){
+                log.error("Exception was thrown: " + e);
+                schemaDefinition = this.createSchemaDefinition(pool, trustAnchor, tag, schema);
+            }
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
 
