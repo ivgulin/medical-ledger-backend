@@ -8,7 +8,7 @@ public class NationalPassportDTO extends NationalPassport {
 
     private String image;
 
-    private String type;
+    private String resourceType;
 
     public NationalPassportDTO(NationalPassport nationalPassport, String image) {
         super(nationalPassport.getId(), nationalPassport.getNumber(), nationalPassport.getFirstName(), nationalPassport.getLastName(),
@@ -16,7 +16,7 @@ public class NationalPassportDTO extends NationalPassport {
                 nationalPassport.getImageName(), nationalPassport.getSex(), nationalPassport.getIssuer(),
                 nationalPassport.getDateOfIssue(), nationalPassport.getPlacesOfResidence());
         this.image = image;
-        this.type = "passport";
+        this.resourceType = DocumentType.Passport.name();
     }
 
     public NationalPassportDTO(NationalPassport nationalPassport) {
@@ -24,7 +24,7 @@ public class NationalPassportDTO extends NationalPassport {
                 nationalPassport.getFatherName(), nationalPassport.getDateOfBirth(), nationalPassport.getPlaceOfBirth(),
                 nationalPassport.getImageName(), nationalPassport.getSex(), nationalPassport.getIssuer(),
                 nationalPassport.getDateOfIssue(), nationalPassport.getPlacesOfResidence());
-        this.type = "passport";
+        this.resourceType = DocumentType.Passport.name();
     }
 
 }

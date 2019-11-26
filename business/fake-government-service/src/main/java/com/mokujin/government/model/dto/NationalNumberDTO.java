@@ -6,10 +6,10 @@ import lombok.Data;
 @Data
 public class NationalNumberDTO extends NationalNumber {
 
-    private String type;
+    private String resourceType;
 
     public NationalNumberDTO(NationalNumber nationalNumber) {
         super(nationalNumber.getNumber(), nationalNumber.getRegistrationDate(), nationalNumber.getIssuer());
-        this.type = "number";
+        this.resourceType = DocumentType.Number.name();
     }
 }

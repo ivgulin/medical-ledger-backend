@@ -39,7 +39,7 @@
             <artifactId>pixelmed</artifactId>
             <scope>system</scope>
             <version>1.0</version>
-            <systemPath>${basedir}\external\pixelmed.jar</systemPath>
+            <systemPath>${basedir}/external/pixelmed.jar</systemPath>
         </dependency>
     </dependencies>
 
