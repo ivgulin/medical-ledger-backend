@@ -32,16 +32,16 @@ public class HealthDataController {
         return ResponseEntity.ok(records);
     }
 
-    @PostMapping("/send/{doctorNumber}")
-    public ResponseEntity<User> send(@PathVariable String doctorNumber,
+    @PostMapping("/share/{doctorNumber}")
+    public ResponseEntity<User> share(@PathVariable String doctorNumber,
                                      @RequestBody HealthRecord record,
                                      @RequestHeader("Public-Key") String publicKey,
                                      @RequestHeader("Private-Key") String privateKey) {
-        log.info("'send' invoked with params '{}, {}, {}, {}'", doctorNumber, record, publicKey, privateKey);
+        log.info("'share' invoked with params '{}, {}, {}, {}'", doctorNumber, record, publicKey, privateKey);
 
-        User user = healthDataService.send(publicKey, privateKey, record, doctorNumber);
+        User user = healthDataService.share(publicKey, privateKey, record, doctorNumber);
 
-        log.info("'send' returned '{}'", user);
+        log.info("'share' returned '{}'", user);
         return ResponseEntity.ok(user);
     }
 

@@ -9,7 +9,7 @@ public interface HealthDataService {
 
     List<HealthRecord> save(String publicKey, String privateKey, HealthRecord healthRecord);
 
-    User send(String publicKey, String privateKey, HealthRecord healthRecord, String doctorNumber);
+    User share(String publicKey, String privateKey, HealthRecord healthRecord, String doctorNumber);
 
     void deleteNotification(String patientNumber, String doctorNumber);
 

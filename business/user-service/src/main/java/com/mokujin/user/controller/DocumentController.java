@@ -40,7 +40,7 @@ public class DocumentController {
                                       @RequestBody DocumentDraft documentDraft,
                                       @RequestHeader("Public-Key") String publicKey,
                                       @RequestHeader("Private-Key") String privateKey) {
-        log.info("'send' invoked with params '{}, {}, {}, {}'", patientNumber, documentDraft, publicKey, privateKey);
+        log.info("'offer' invoked with params '{}, {}, {}, {}'", patientNumber, documentDraft, publicKey, privateKey);
 
         User user = documentService.offerCredential(publicKey, privateKey, documentDraft, patientNumber);
 

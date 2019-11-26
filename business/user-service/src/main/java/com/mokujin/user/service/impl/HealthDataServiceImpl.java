@@ -33,7 +33,7 @@ public class HealthDataServiceImpl implements HealthDataService {
     }
 
     @Override
-    public User send(String publicKey, String privateKey, HealthRecord healthRecord, String doctorNumber) {
+    public User share(String publicKey, String privateKey, HealthRecord healthRecord, String doctorNumber) {
 
         User patient = userService.get(publicKey, privateKey);
 

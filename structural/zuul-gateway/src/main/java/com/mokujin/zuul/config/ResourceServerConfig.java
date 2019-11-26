@@ -29,8 +29,10 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http.csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/docs/**").permitAll()
-                .antMatchers("/user/invitation/invite-back").hasRole(Role.PATIENT.name())
-                .antMatchers("/user/invitation/accept", "/user/invitation/decline").hasRole(Role.DOCTOR.name())
+                .antMatchers("/user/invitation/invite-back", "/user/document/accept","/user/document/decline",
+                        "/user/document/present/**", "/user/health/save","/user/health/share/**").hasRole(Role.PATIENT.name())
+                .antMatchers("/user/invitation/accept", "/user/invitation/decline", "/user/document/offer/**",
+                        "/user/document/ask/**", "/user/document/delete/**", "/user/health/delete/**").hasRole(Role.DOCTOR.name())
                 .antMatchers("/auth/**", "/gov/**").denyAll()
                 .antMatchers(POST, "/user/registration/**").denyAll()
                 .anyRequest().authenticated();
