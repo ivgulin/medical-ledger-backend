@@ -1,6 +1,5 @@
 package com.mokujin.user.model.chat;
 
-import com.mokujin.user.model.Contact;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,8 +12,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class Message implements Serializable {
 
-    @NotNull(message = "Contact is required")
-    private Contact contact;
+    @NotNull(message = "From number is required")
+    private String from;
 
     @NotNull(message = "Message date is required")
     private Long date;

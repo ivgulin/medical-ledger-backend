@@ -51,12 +51,12 @@ class NotificationServiceImplTest {
         String nationalNumber = "number";
 
         List<Message> messages = new ArrayList<>();
-        messages.add(new Message(Contact.builder().build(), 123L, "hi", false));
-        messages.add(new Message(Contact.builder().build(), 124L, "how r u", false));
+        messages.add(new Message("number",123L, "hi", false));
+        messages.add(new Message("number",124L, "how r u", false));
 
         List<ChatNotification> messageNotifications = new ArrayList<>();
-        messageNotifications.add(new ChatNotification(new Message(Contact.builder().build(), 123L, "hi", false)));
-        messageNotifications.add(new ChatNotification(new Message(Contact.builder().build(), 124L, "how r u", false)));
+        messageNotifications.add(new ChatNotification(new Message("number",123L, "hi", false)));
+        messageNotifications.add(new ChatNotification(new Message("number",124L, "how r u", false)));
 
         RList messagesList = mock(RList.class);
         when(redissonClient.getList("messages_" + nationalNumber)).thenReturn(messagesList);
@@ -242,7 +242,7 @@ class NotificationServiceImplTest {
     @Test
     void addMessage_validInputs_notificationIsReturned() {
         String number = "number";
-        Message message = new Message(Contact.builder().build(), 123L, "message", false);
+        Message message = new Message("number",123L, "message", false);
 
         RList messagesList = mock(RList.class);
         when(redissonClient.getList("messages_" + number)).thenReturn(messagesList);
@@ -259,7 +259,7 @@ class NotificationServiceImplTest {
     @Test
     void removeMessage_validInputs_notificationIsDeleted() {
         String number = "number";
-        Message message = new Message(Contact.builder().build(), 123L, "message", false);
+        Message message = new Message("number",123L, "message", false);
 
         RList messagesList = mock(RList.class);
         when(redissonClient.getList("messages_" + number)).thenReturn(messagesList);

@@ -180,6 +180,7 @@ public class LedgerConfig {
             Did.setDidMetadata(trustAnchorWallet, verinym.getDid(), selfContactJson).get();
 
             trustAnchorIdentity.setVerinymDid(verinym.getDid());
+            trustAnchorIdentity.setImage(trustAnchorPhoto);
 
             DidResults.CreateAndStoreMyDidResult stewardPseudonym = createAndStoreMyDid(
                     stewardWallet,

@@ -118,7 +118,7 @@ public class NotificationServiceImpl implements NotificationService {
         RMap<String, SystemNotification> doctorNotifications = redissonClient.getMap("connections_" + doctorNumber);
         SystemNotification connectionNotification = new SystemNotification(new Date().getTime(), CONNECTION,
                 Contact.builder()
-                        .contactName(patient.getFirstName() + " " + patient.getFirstName() + " " + patient.getFatherName())
+                        .contactName(patient.getLastName() + " " + patient.getFirstName() + " " + patient.getFatherName())
                         .photo(patient.getPhoto())
                         .nationalNumber(patientNumber)
                         .isVisible(true)
@@ -170,7 +170,7 @@ public class NotificationServiceImpl implements NotificationService {
         String nationalNumber = user.getNationalNumber();
         PresentationNotification presentationNotification = new PresentationNotification(new Date().getTime(),
                 Contact.builder()
-                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .contactName(user.getLastName() + " " + user.getFirstName() + " " + user.getFatherName())
                         .photo(user.getPhoto())
                         .nationalNumber(nationalNumber)
                         .isVisible(true)
@@ -194,7 +194,7 @@ public class NotificationServiceImpl implements NotificationService {
         String nationalNumber = user.getNationalNumber();
         ProofNotification proofNotification = new ProofNotification(new Date().getTime(),
                 Contact.builder()
-                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .contactName(user.getLastName() + " " + user.getFirstName() + " " + user.getFatherName())
                         .photo(user.getPhoto())
                         .nationalNumber(nationalNumber)
                         .isVisible(true)
@@ -216,7 +216,7 @@ public class NotificationServiceImpl implements NotificationService {
         String nationalNumber = user.getNationalNumber();
         HealthNotification healthNotification = new HealthNotification(new Date().getTime(),
                 Contact.builder()
-                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .contactName(user.getLastName() + " " + user.getFirstName() + " " + user.getFatherName())
                         .photo(user.getPhoto())
                         .nationalNumber(nationalNumber)
                         .isVisible(true)
@@ -249,7 +249,7 @@ public class NotificationServiceImpl implements NotificationService {
         String nationalNumber = doctor.getNationalNumber();
         OfferNotification offerNotification = new OfferNotification(new Date().getTime(),
                 Contact.builder()
-                        .contactName(doctor.getFirstName() + " " + doctor.getFirstName() + " " + doctor.getFatherName())
+                        .contactName(doctor.getLastName() + " " + doctor.getFirstName() + " " + doctor.getFatherName())
                         .photo(doctor.getPhoto())
                         .nationalNumber(nationalNumber)
                         .isVisible(true)
@@ -278,7 +278,7 @@ public class NotificationServiceImpl implements NotificationService {
         String nationalNumber = user.getNationalNumber();
         AskNotification askNotification = new AskNotification(new Date().getTime(),
                 Contact.builder()
-                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .contactName(user.getLastName() + " " + user.getFirstName() + " " + user.getFatherName())
                         .photo(user.getPhoto())
                         .nationalNumber(nationalNumber)
                         .isVisible(true)
@@ -300,7 +300,7 @@ public class NotificationServiceImpl implements NotificationService {
         String nationalNumber = user.getNationalNumber();
         DocumentNotification documentNotification = new DocumentNotification(new Date().getTime(),
                 Contact.builder()
-                        .contactName(user.getFirstName() + " " + user.getFirstName() + " " + user.getFatherName())
+                        .contactName(user.getLastName() + " " + user.getFirstName() + " " + user.getFatherName())
                         .photo(user.getPhoto())
                         .nationalNumber(nationalNumber)
                         .isVisible(true)
