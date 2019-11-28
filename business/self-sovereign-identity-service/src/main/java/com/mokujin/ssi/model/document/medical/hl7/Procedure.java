@@ -1,14 +1,14 @@
 package com.mokujin.ssi.model.document.medical.hl7;
 
 import com.mokujin.ssi.model.document.Document;
-import com.mokujin.ssi.model.document.medical.hl7.component.CodeableConcept;
-import com.mokujin.ssi.model.document.medical.hl7.component.Narrative;
-import com.mokujin.ssi.model.document.medical.hl7.component.PerformedPeriod;
-import com.mokujin.ssi.model.document.medical.hl7.component.Reference;
+import com.mokujin.ssi.model.document.medical.hl7.component.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.List;
+
+import static com.mokujin.ssi.model.document.medical.hl7.component.Narrative.NarrativeStatus.valueOf;
+import static java.util.Collections.singletonList;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -74,8 +74,25 @@ public class Procedure extends Document {
         super(MedicalDocumentType.Procedure.name());
     }
 
-    public Procedure(ModifiedProcedure modifiedProcedure) {
+    public Procedure(LedgerModifiedProcedure modifiedProcedure) {
         super(MedicalDocumentType.Procedure.name());
-
+        this.id = modifiedProcedure.getId();
+        this.text = new Narrative(valueOf(modifiedProcedure.getTextStatus()), modifiedProcedure.getTextDiv());
+        this.status = modifiedProcedure.getStatus();
+        this.notDoneReason = new CodeableConcept(null, modifiedProcedure.getNotDoneReason());
+        this.code = new CodeableConcept(singletonList(new Coding(modifiedProcedure.getCodeSystem(),
+                modifiedProcedure.getCodeVersion(), modifiedProcedure.getCode(), modifiedProcedure.getCodeDisplay())),
+                modifiedProcedure.getCodeText());
+        this.subject = new Reference(modifiedProcedure.getSubjectReference(), modifiedProcedure.getSubjectDisplay());
+        this.performedPeriod = new PerformedPeriod(modifiedProcedure.getStart(), modifiedProcedure.getEnd());
+        this.performedDateTime = modifiedProcedure.getPerformedDateTime();
+        this.recorder = new Reference(modifiedProcedure.getRecorderReference(), modifiedProcedure.getRecorderDisplay());
+        this.asserter = new Reference(modifiedProcedure.getAsserterReference(), modifiedProcedure.getAsserterDisplay());
+        this.performer = new Reference(modifiedProcedure.getPerformerReference(), modifiedProcedure.getPerformerDisplay());
+        this.reasonCode = singletonList(new CodeableConcept(null, modifiedProcedure.getReasonCode()));
+        this.bodySite = singletonList(new CodeableConcept(null, modifiedProcedure.getBodySite()));
+        this.complication = singletonList(new CodeableConcept(null, modifiedProcedure.getComplication()));
+        this.followUp = singletonList(new CodeableConcept(null, modifiedProcedure.getFollowUp()));
+        this.note = singletonList(new CodeableConcept(null, modifiedProcedure.getNote()));
     }
 }

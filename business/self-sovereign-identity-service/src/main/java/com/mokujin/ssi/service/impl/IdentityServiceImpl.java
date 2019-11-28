@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.document.Document.MedicalDocumentType;
 import com.mokujin.ssi.model.document.medical.dicom.MedicalImage;
-import com.mokujin.ssi.model.document.medical.hl7.ModifiedProcedure;
+import com.mokujin.ssi.model.document.medical.hl7.LedgerModifiedProcedure;
 import com.mokujin.ssi.model.document.medical.hl7.Procedure;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.document.NationalNumber;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.mokujin.ssi.model.document.Document.MedicalDocumentType;
 import static com.mokujin.ssi.model.internal.Role.DOCTOR;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.proverGetCredentials;
 import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
@@ -131,18 +131,18 @@ public class IdentityServiceImpl implements IdentityService {
                         .convertValue(attrs, new TypeReference<HashMap<String, String>>() {
                         });
                 medicalImage = new MedicalImage(dicomProperties);
-                attrs.remove(MedicalDocumentType.MedicalImage.name());
+                ((ObjectNode) credentialNode).remove("attrs");
             }
             if (resourceType.equals(MedicalDocumentType.Procedure.name())) {
-                ModifiedProcedure modifiedProcedure = objectMapper.convertValue(attrs, ModifiedProcedure.class);
+                LedgerModifiedProcedure modifiedProcedure = objectMapper.convertValue(attrs, LedgerModifiedProcedure.class);
                 procedure = new Procedure(modifiedProcedure);
-                attrs.remove(MedicalDocumentType.Procedure.name());
+                ((ObjectNode) credentialNode).remove("attrs");
             }
         }
 
         List<Credential> credentialList = credentials.equals("[]")
                 ? new ArrayList<>()
-                : objectMapper.readValue(credentials, new TypeReference<List<Credential>>() {
+                : objectMapper.convertValue(credentialsNode, new TypeReference<List<Credential>>() {
         });
 
         for (Credential credential : credentialList) {
@@ -180,7 +180,6 @@ public class IdentityServiceImpl implements IdentityService {
                 .isVisible(true)
                 .build();
         String contactJson = objectMapper.writeValueAsString(contact);
-        System.out.println("contactJson = " + contactJson);
         Did.setDidMetadata(userIdentity.getWallet(), contactPseudonym.getDid(), contactJson).get();
 
         userIdentity.addPseudonym(Pseudonym.builder()

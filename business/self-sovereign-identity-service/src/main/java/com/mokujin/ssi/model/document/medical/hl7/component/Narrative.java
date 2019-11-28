@@ -17,6 +17,6 @@ public class Narrative {
         generated,
         extensions,
         additional,
-        empty
+        empty;
     }
 }

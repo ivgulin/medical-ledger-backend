@@ -103,6 +103,13 @@ public class DocumentServiceImpl implements DocumentService {
 
     }
 
+    @Override
+    public void deleteDocument(String publicKey, String privateKey, String credentialId) {
+        String url = "http://self-sovereign-identity-service/credential/delete/" + credentialId +
+                "?public=" + publicKey + "&private=" + privateKey;
+        restTemplate.delete(url);
+    }
+
     private String getTagInformation(AttributeTag attrTag, AttributeList list) {
         return Attribute.getDelimitedStringValuesOrEmptyString(list, attrTag);
     }

@@ -19,4 +19,5 @@ public interface CredentialService {
     void issueCredential(Wallet userWallet, Wallet trustAnchorWallet, String trustAnchorPseudonym,
                          String schemaDefinitionId, String schemaDefinition, Document document, String masterSecretId) throws Exception;
 
+    void deleteCredential(String publicKey, String privateKey, String credentialId);
 }

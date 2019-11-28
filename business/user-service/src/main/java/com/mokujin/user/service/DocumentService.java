@@ -18,4 +18,6 @@ public interface DocumentService {
 
     User shareDocument(String publicKey, String privateKey, Document document, String doctorNumber);
 
+    void deleteDocument(String publicKey, String privateKey, String credentialId);
+
 }

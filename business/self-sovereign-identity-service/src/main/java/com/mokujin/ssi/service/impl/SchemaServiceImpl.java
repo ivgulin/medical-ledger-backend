@@ -72,6 +72,7 @@ public class SchemaServiceImpl implements SchemaService {
     @SneakyThrows
     private String createSchema(Pool pool, Identity government, String schemaName,
                                 String version, String attributes) {
+        log.info("'create schema attributes={}'", attributes);
 
         AnoncredsResults.IssuerCreateSchemaResult schemaBlueprint = issuerCreateSchema(
                 government.getVerinymDid(),

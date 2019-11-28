@@ -4,7 +4,6 @@ import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.ProcessedUserCredentials;
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.chat.Message;
-import com.mokujin.user.model.document.Document;
 import com.mokujin.user.model.document.impl.national.NationalNumber;
 import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.model.notification.NotificationCollector;
@@ -28,7 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.mokujin.user.model.document.Document.NationalDocumentType.*;
+import static com.mokujin.user.model.document.Document.NationalDocumentType.Number;
+import static com.mokujin.user.model.document.Document.NationalDocumentType.Passport;
 import static com.mokujin.user.model.notification.Notification.Type.CONNECTION;
 import static com.mokujin.user.model.notification.Notification.Type.INVITATION;
 import static com.mokujin.user.model.notification.NotificationConstants.*;

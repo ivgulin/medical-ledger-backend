@@ -68,12 +68,13 @@ public class CredentialServiceImpl implements CredentialService {
                 throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
             }
         } else {
-
             List<Field> fields = Arrays.stream(document.getClass().getDeclaredFields()).collect(Collectors.toList());
 
-            Class<?> superclass = document.getClass().getSuperclass().getSuperclass();
-
+            Class<?> superclass = document.getClass().getSuperclass();
             fields.addAll(Arrays.stream(superclass.getDeclaredFields()).collect(Collectors.toList()));
+
+            Class<?> superiorClass = superclass.getSuperclass();
+            fields.addAll(Arrays.stream(superiorClass.getDeclaredFields()).collect(Collectors.toList()));
 
             fields.forEach(f -> {
                 f.setAccessible(true);
@@ -212,14 +213,11 @@ public class CredentialServiceImpl implements CredentialService {
 
             Identity patientIdentity = identityService.findByWallet(patientWallet);
             String doctorPseudonym = patientIdentity.getPseudonyms().stream()
-                    .filter(pseudonym -> pseudonym.getContact().getNationalNumber().equals(doctor.getNationalNumber()))
+                    .filter(pseudonym -> doctor.getNationalNumber().equals(pseudonym.getContact().getNationalNumber()))
                     .findFirst()
                     .get()
                     .getPseudonymDid();
 
-
-            log.info("'document={}'", document);
-            log.info("'document resource type={}'", document.getResourceType());
             this.issueCredential(patientWallet, doctorWallet, doctorPseudonym, schema.getSchemaDefinitionId(),
                     schema.getSchemaDefinition(), document, publicKey);
 
@@ -227,6 +225,7 @@ public class CredentialServiceImpl implements CredentialService {
             return userService.convert(patientIdentity);
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
+            e.printStackTrace();
             throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
@@ -273,6 +272,16 @@ public class CredentialServiceImpl implements CredentialService {
         log.info("'gottenCredential={}'", gottenCredential);
     }
 
+    @Override
+    public void deleteCredential(String publicKey, String privateKey, String credentialId) {
+        try (Wallet wallet = walletService.getOrCreateWallet(publicKey, privateKey)) {
+            proverDeleteCredential(wallet, credentialId);
+        } catch (Exception e) {
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
     private ArrayNode prepareAttributes(Document document) {
         ArrayNode response = objectMapper.createArrayNode();
 
@@ -282,9 +291,7 @@ public class CredentialServiceImpl implements CredentialService {
             response.add("resourceType");
         } else {
             List<Field> fields = Arrays.stream(document.getClass().getDeclaredFields()).collect(Collectors.toList());
-
-            Class<?> superclass = document.getClass().getSuperclass().getSuperclass();
-
+            Class<?> superclass = document.getClass().getSuperclass();
             fields.addAll(Arrays.stream(superclass.getDeclaredFields()).collect(Collectors.toList()));
 
             fields.forEach(f -> {

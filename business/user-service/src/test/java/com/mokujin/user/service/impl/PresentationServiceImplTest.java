@@ -2,7 +2,6 @@ package com.mokujin.user.service.impl;
 
 import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.User;
-import com.mokujin.user.model.document.NationalDocument;
 import com.mokujin.user.model.document.impl.national.NationalNumber;
 import com.mokujin.user.model.document.impl.national.NationalPassport;
 import com.mokujin.user.model.notification.extention.PresentationNotification;
