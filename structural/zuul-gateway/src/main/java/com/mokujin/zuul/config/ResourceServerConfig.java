@@ -24,7 +24,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Value("${auth.server.clientSecret}")
     private String clientSecret;
 
-    // TODO: 27.11.19 fix it 
+    // TODO: 27.11.19 fix it
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()

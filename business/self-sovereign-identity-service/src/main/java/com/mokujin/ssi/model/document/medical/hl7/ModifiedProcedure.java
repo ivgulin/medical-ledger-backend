@@ -17,6 +17,7 @@ public class ModifiedProcedure extends Document {
     private String codeVersion;
     private String code;
     private String codeDisplay;
+    private String codeText;
     private String subjectReference;
     private String subjectDisplay;
     private String performedDateTime;
@@ -45,6 +46,7 @@ public class ModifiedProcedure extends Document {
         this.codeVersion = procedure.getCode().getCoding().get(0).getVersion();
         this.code = procedure.getCode().getCoding().get(0).getCode();
         this.codeDisplay = procedure.getCode().getCoding().get(0).getDisplay();
+        this.codeText = procedure.getCode().getText();
         this.subjectReference = procedure.getSubject().getReference();
         this.subjectDisplay = procedure.getSubject().getDisplay();
         this.performedDateTime = procedure.getPerformedDateTime();

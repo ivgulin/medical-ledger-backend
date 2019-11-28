@@ -13,14 +13,15 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 @AllArgsConstructor
 @JsonTypeInfo(use = NAME, property = "type", include = EXISTING_PROPERTY)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = ProcedureDraft.class, name = "Procedure")
-
+        @JsonSubTypes.Type(value = ProcedureDraft.class, name = "Procedure"),
+        @JsonSubTypes.Type(value = MedicalImageDraft.class, name = "MedicalImage")
 })
 public class DocumentDraft {
 
     private String type;
 
     public enum Type {
-        Procedure
+        Procedure,
+        MedicalImage
     }
 }

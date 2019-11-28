@@ -49,12 +49,15 @@ public class HealthDataServiceImpl implements HealthDataService {
             String recordsInString = WalletRecord.get(wallet, "health", "records", "{}").get()
                     .replace("\\", "")
                     .replace("\"{", "{")
-                    .replace("}\"", "}");
+                    .replace("}\"", "}")
+                    .replace("\"[", "[")
+                    .replace("]\"", "]");
 
             log.info("'recordsInString={}'", recordsInString);
             records = objectMapper.readValue(recordsInString, LedgerHealthData.class).getValue();
             return records;
         } catch (Exception e) {
+            log.error("Exception was thrown: " + e);
             records = new ArrayList<>();
             String recordsInString = objectMapper.writeValueAsString(records);
             WalletRecord.add(wallet, "health", "records", recordsInString, "{}");

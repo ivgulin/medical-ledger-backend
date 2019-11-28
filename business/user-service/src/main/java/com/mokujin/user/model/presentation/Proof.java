@@ -6,16 +6,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Proof {
+public class Proof implements Serializable {
 
     private String proofRequest;
     private String proofApplication;
     private String schemaConfig;
     private String credConfig;
-    private String formedCredential;
     private Document document;
 }

@@ -27,11 +27,11 @@ public interface NotificationService {
     Notification addPresentationNotification(User user, List<String> presentationAttributes,
                                              String documentType, String connectionNumber);
 
-    void removePresentationNotification(User user, String connectionNumber);
+    void removePresentationNotification(User user, String connectionNumber, String documentType);
 
     Notification addProofNotification(User user, Proof proof, String connectionNumber);
 
-    void removeProofNotification(String nationalNumber, String connectionNumber);
+    void removeProofNotification(String nationalNumber, String connectionNumber, String documentType);
 
     Notification addHealthNotification(User user, HealthRecord record, String connectionNumber);
 

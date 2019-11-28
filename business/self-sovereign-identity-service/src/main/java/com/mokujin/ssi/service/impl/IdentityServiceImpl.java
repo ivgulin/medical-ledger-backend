@@ -129,13 +129,13 @@ public class IdentityServiceImpl implements IdentityService {
 
             if (resourceType.equals(MedicalDocumentType.MedicalImage.name())) {
                 Map<String, String> dicomProperties = objectMapper
-                        .readValue(credentials, new TypeReference<HashMap<String, String>>() {
+                        .convertValue(attrs, new TypeReference<HashMap<String, String>>() {
                         });
                 medicalImage = new MedicalImage(dicomProperties);
                 attrs.remove(MedicalDocumentType.MedicalImage.name());
             }
             if (resourceType.equals(MedicalDocumentType.Procedure.name())) {
-                ModifiedProcedure modifiedProcedure = objectMapper.readValue(attrs.asText(), ModifiedProcedure.class);
+                ModifiedProcedure modifiedProcedure = objectMapper.convertValue(attrs, ModifiedProcedure.class);
                 procedure = new Procedure(modifiedProcedure);
                 attrs.remove(MedicalDocumentType.Procedure.name());
             }

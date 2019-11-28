@@ -16,8 +16,6 @@ public interface CredentialService {
 
     String getProofResponse(String proofRequest, String suitableCredential);
 
-    String getFormedCredential(String primaryCredential);
-
     User addCredential(String publicKey, String privateKey, OfferRequest offerRequest);
 
     void issueCredential(Wallet userWallet, Wallet trustAnchorWallet, String trustAnchorPseudonym,

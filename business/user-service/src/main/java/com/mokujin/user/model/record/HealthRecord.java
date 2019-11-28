@@ -7,6 +7,8 @@ import com.mokujin.user.model.record.impl.HeartHealthRecord;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
+
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.EXISTING_PROPERTY;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 
@@ -17,7 +19,7 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = HeartHealthRecord.class, name = "heart"),
         @JsonSubTypes.Type(value = BodyMeasurement.class, name = "body")
 })
-public class HealthRecord {
+public class HealthRecord implements Serializable {
 
     private String type;
 

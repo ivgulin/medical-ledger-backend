@@ -176,16 +176,16 @@ public class NotificationServiceImpl implements NotificationService {
                         .isVisible(true)
                         .build(), PRESENTATION_TITLE_EN, PRESENTATION_TITLE_UKR, PRESENTATION_CONTENT_EN,
                 PRESENTATION_CONTENT_UKR, documentType, presentationAttributes);
-        presentationNotifications.put(nationalNumber, presentationNotification);
+        presentationNotifications.put(nationalNumber + documentType, presentationNotification);
 
         return presentationNotification;
     }
 
     @Override
-    public void removePresentationNotification(User user, String connectionNumber) {
+    public void removePresentationNotification(User user,  String connectionNumber, String documentType) {
         String nationalNumber = user.getNationalNumber();
         RMap<String, PresentationNotification> presentationNotifications = redissonClient.getMap("presentations_" + nationalNumber);
-        presentationNotifications.remove(connectionNumber);
+        presentationNotifications.remove(connectionNumber + documentType);
     }
 
     @Override
@@ -199,15 +199,15 @@ public class NotificationServiceImpl implements NotificationService {
                         .nationalNumber(nationalNumber)
                         .isVisible(true)
                         .build(), PROOF_TITLE_EN, PROOF_TITLE_UKR, PROOF_CONTENT_EN, PROOF_CONTENT_UKR, proof);
-        proofNotifications.put(nationalNumber, proofNotification);
+        proofNotifications.put(nationalNumber + proof.getDocument().getResourceType(), proofNotification);
 
         return proofNotification;
     }
 
     @Override
-    public void removeProofNotification(String nationalNumber, String connectionNumber) {
+    public void removeProofNotification(String nationalNumber, String connectionNumber, String documentType) {
         RMap<String, ProofNotification> proofNotifications = redissonClient.getMap("proofs_" + nationalNumber);
-        proofNotifications.remove(connectionNumber);
+        proofNotifications.remove(connectionNumber + documentType);
     }
 
     @Override

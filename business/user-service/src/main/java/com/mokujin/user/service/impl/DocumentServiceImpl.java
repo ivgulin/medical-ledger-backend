@@ -22,10 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static java.util.Objects.nonNull;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -46,13 +47,15 @@ public class DocumentServiceImpl implements DocumentService {
     private final RestTemplate restTemplate;
 
     @Override
-    public User offerDicom(String publicKey, String privateKey, MultipartFile document, String patientNumber) {
+    public User offerDicom(String publicKey, String privateKey, String image, String patientNumber) {
+
+        byte[] imageBytes = Base64.decodeBase64(image);
 
         User doctor = userService.get(publicKey, privateKey);
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 
-            DicomInputStream dicomInputStream = new DicomInputStream(document.getInputStream());
+            DicomInputStream dicomInputStream = new DicomInputStream(new ByteArrayInputStream(imageBytes));
             AttributeList list = new AttributeList();
             list.read(dicomInputStream);
 
@@ -134,7 +137,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public User presentDocument(String publicKey, String privateKey, Document document, String doctorNumber) {
+    public User shareDocument(String publicKey, String privateKey, Document document, String doctorNumber) {
 
         User user = userService.get(publicKey, privateKey);
         String nationalNumber = user.getNationalNumber();
@@ -171,7 +174,8 @@ public class DocumentServiceImpl implements DocumentService {
         String status = ProcedureDraft.Status.getValue(procedureDraft.getStatus());
 
         CodeableConcept notDoneReason = new CodeableConcept();
-        notDoneReason.setText(procedureDraft.getNotDoneReason());
+        String notDoneReasonString = nonNull(procedureDraft.getNotDoneReason()) ? procedureDraft.getNotDoneReason() : "";
+        notDoneReason.setText(notDoneReasonString);
 
         ArrayList<Coding> coding = new ArrayList<>();
         coding.add(new Coding("https://medical-ledger.io/", "1.0", "123456", procedureDraft.getName()));
@@ -182,9 +186,9 @@ public class DocumentServiceImpl implements DocumentService {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String startDate = dateFormat.format(new Date(procedureDraft.getStartDate()));
 
-        PerformedPeriod performedPeriod = null;
-        String performedDateTime = null;
-        if (Objects.nonNull(procedureDraft.getEndDate())) {
+        PerformedPeriod performedPeriod = new PerformedPeriod("", "");
+        String performedDateTime = "";
+        if (nonNull(procedureDraft.getEndDate())) {
             String endDate = dateFormat.format(new Date(procedureDraft.getEndDate()));
             performedPeriod = new PerformedPeriod(startDate, endDate);
         } else {
@@ -199,16 +203,20 @@ public class DocumentServiceImpl implements DocumentService {
         CodeableConcept reasonCode = new CodeableConcept(Collections.emptyList(), procedureDraft.getReason());
         reasons.add(reasonCode);
 
-        CodeableConcept bodySite = new CodeableConcept(Collections.emptyList(), procedureDraft.getBodySite());
+        String bodySiteString = nonNull(procedureDraft.getBodySite()) ? procedureDraft.getBodySite() : "";
+        CodeableConcept bodySite = new CodeableConcept(Collections.emptyList(), bodySiteString);
         List<CodeableConcept> bodySites = Collections.singletonList(bodySite);
 
-        CodeableConcept complication = new CodeableConcept(Collections.emptyList(), procedureDraft.getComplication());
+        String complicationString = nonNull(procedureDraft.getComplication()) ? procedureDraft.getComplication() : "";
+        CodeableConcept complication = new CodeableConcept(Collections.emptyList(), complicationString);
         List<CodeableConcept> complications = Collections.singletonList(complication);
 
-        CodeableConcept followUp = new CodeableConcept(Collections.emptyList(), procedureDraft.getFollowUp());
+        String followUpString = Objects.nonNull(procedureDraft.getFollowUp()) ? procedureDraft.getFollowUp() : "";
+        CodeableConcept followUp = new CodeableConcept(Collections.emptyList(), followUpString);
         List<CodeableConcept> followUps = Collections.singletonList(followUp);
 
-        CodeableConcept note = new CodeableConcept(Collections.emptyList(), procedureDraft.getNote());
+        String noteString = Objects.nonNull(procedureDraft.getNote()) ? procedureDraft.getNote() : "";
+        CodeableConcept note = new CodeableConcept(Collections.emptyList(), noteString);
         List<CodeableConcept> notes = Collections.singletonList(note);
 
         return new Procedure(name, text, status, notDoneReason, code, subject, performedPeriod, performedDateTime,

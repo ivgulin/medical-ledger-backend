@@ -3,12 +3,12 @@ package com.mokujin.user.controller;
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.document.Document;
 import com.mokujin.user.model.internal.DocumentDraft;
+import com.mokujin.user.model.internal.MedicalImageDraft;
 import com.mokujin.user.service.DocumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,12 +24,12 @@ public class DocumentController {
 
     @PostMapping("/offer/dicom/{patientNumber}")
     public ResponseEntity<User> offerDicom(@PathVariable String patientNumber,
-                                           @RequestParam("file") MultipartFile file,
+                                           @RequestBody MedicalImageDraft draft,
                                            @RequestHeader("Public-Key") String publicKey,
                                            @RequestHeader("Private-Key") String privateKey) {
-        log.info("'offerDicom' invoked with params '{}, {}, {}, {}'", patientNumber, file, publicKey, privateKey);
+        log.info("'offerDicom' invoked with params '{}, {}, {}, {}'", patientNumber, draft, publicKey, privateKey);
 
-        User user = documentService.offerDicom(publicKey, privateKey, file, patientNumber);
+        User user = documentService.offerDicom(publicKey, privateKey, draft.getImage(), patientNumber);
 
         log.info("'offerDicom' returned '{}'", user);
         return ResponseEntity.ok(user);
@@ -64,7 +64,7 @@ public class DocumentController {
     }
 
 
-    @PostMapping("/decline")
+    @GetMapping("/decline")
     public ResponseEntity decline(@RequestParam String patientNumber,
                                   @RequestParam String doctorNumber) {
         log.info("'decline' invoked with params '{}, {}'", patientNumber, doctorNumber);
@@ -88,20 +88,20 @@ public class DocumentController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/present/{doctorNumber}")
-    public ResponseEntity<User> present(@PathVariable String doctorNumber,
-                                        @RequestBody Document document,
-                                        @RequestHeader("Public-Key") String publicKey,
-                                        @RequestHeader("Private-Key") String privateKey) {
-        log.info("'present' invoked with params '{}, {}, {}, {}'", publicKey, privateKey, doctorNumber, document);
+    @PostMapping("/share/{doctorNumber}")
+    public ResponseEntity<User> share(@PathVariable String doctorNumber,
+                                      @RequestBody Document document,
+                                      @RequestHeader("Public-Key") String publicKey,
+                                      @RequestHeader("Private-Key") String privateKey) {
+        log.info("'share' invoked with params '{}, {}, {}, {}'", publicKey, privateKey, doctorNumber, document);
 
-        User user = documentService.presentDocument(publicKey, privateKey, document, doctorNumber);
+        User user = documentService.shareDocument(publicKey, privateKey, document, doctorNumber);
 
-        log.info("'ask' returned '{}'", user);
+        log.info("'share' returned '{}'", user);
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/delete/notification")
+    @DeleteMapping("/delete/notification")
     public ResponseEntity deleteNotification(@RequestParam String doctorNumber,
                                              @RequestParam String patientNumber) {
         log.info("'deleteNotification' invoked with params '{}, {}'", patientNumber, doctorNumber);

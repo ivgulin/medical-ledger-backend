@@ -4,30 +4,41 @@ import com.mokujin.user.model.Contact;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.NotNull;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ProcedureDraft extends DocumentDraft {
 
+    @NotNull
     private String name;
 
+    @NotNull
     private String description;
 
+    @NotNull
     private Status status;
 
     private String notDoneReason;
 
+    @NotNull
     private Contact patient;
 
+    @NotNull
     private Long startDate;
 
     private Long endDate;
 
+    @NotNull
     private String recorder;
 
+    @NotNull
     private String asserter;
 
+    @NotNull
     private String performer;
 
+    @NotNull
     private String reason;
 
     private String bodySite;

@@ -45,12 +45,12 @@ public class HealthDataController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/delete/notification")
+    @DeleteMapping("/delete/notification")
     public ResponseEntity deleteNotification(@RequestParam String patientNumber,
                                              @RequestParam String doctorNumber) {
         log.info("'deleteNotification' invoked with params '{}, {}'", patientNumber, doctorNumber);
 
-        healthDataService.deleteNotification(patientNumber, doctorNumber);
+        healthDataService.deleteNotification(doctorNumber, patientNumber);
 
         log.info("'deleteNotification' has executed successfully.");
         return new ResponseEntity(OK);

@@ -188,36 +188,6 @@ public class CredentialServiceImpl implements CredentialService {
     }
 
     @Override
-    @SneakyThrows
-    public String getFormedCredential(String primaryCredential) {
-
-        JsonNode credentialNode = objectMapper.readTree(primaryCredential);
-
-        JsonNode formedCredential = null;
-        if (credentialNode.has("attrs")) {
-            JsonNode tempNode = credentialNode.get("attrs");
-            if (tempNode.has("attr1_referent")) {
-                tempNode = tempNode.get("attr1_referent");
-                if (tempNode.has(0)) {
-                    tempNode = tempNode.get(0);
-                    if (tempNode.has("cred_info")) {
-                        tempNode = tempNode.get("cred_info");
-                        if (tempNode.has("attrs")) {
-                            formedCredential = tempNode.get("attrs");
-                        }
-                    }
-                }
-            }
-        }
-
-        if (Objects.isNull(formedCredential)) {
-            throw new ResourceNotFoundException("Credential wasn't found");
-        }
-
-        return formedCredential.toString();
-    }
-
-    @Override
     public User addCredential(String publicKey, String privateKey, OfferRequest offerRequest) {
 
         UserCredentials credentials = offerRequest.getDoctorCredentials();
@@ -230,8 +200,10 @@ public class CredentialServiceImpl implements CredentialService {
             String schemaName = document.getResourceType();
             String tag = schemaName.toLowerCase();
 
+            if (document.getResourceType().equals(MedicalDocumentType.Procedure.name()))
+                document = new ModifiedProcedure((Procedure) document);
+
             ArrayNode attributes = this.prepareAttributes(document);
-            attributes.add("resourceType");
 
             Schema schema = schemaService.getSchema(pool, doctorIdentity, schemaName, tag, attributes);
             log.info("'schema={}'", schema);
@@ -245,9 +217,9 @@ public class CredentialServiceImpl implements CredentialService {
                     .get()
                     .getPseudonymDid();
 
-            if (document.getResourceType().equals(MedicalDocumentType.Procedure.name()))
-                document = new ModifiedProcedure((Procedure) document);
 
+            log.info("'document={}'", document);
+            log.info("'document resource type={}'", document.getResourceType());
             this.issueCredential(patientWallet, doctorWallet, doctorPseudonym, schema.getSchemaDefinitionId(),
                     schema.getSchemaDefinition(), document, publicKey);
 
@@ -307,13 +279,26 @@ public class CredentialServiceImpl implements CredentialService {
         if (document.getResourceType().equals(MedicalDocumentType.MedicalImage.name())) {
             MedicalImage medicalImage = (MedicalImage) document;
             medicalImage.getAttributes().keySet().forEach(response::add);
-        } else if (document.getResourceType().equals(MedicalDocumentType.Procedure.name())) {
-            response.add("id").add("textStatus").add("textDiv").add("status").add("notDoneReason").add("codeSystem")
-                    .add("codeVersion").add("code").add("codeDisplay").add("subjectReference").add("subjectDisplay")
-                    .add("performedDateTime").add("start").add("end").add("recorderReference").add("recorderDisplay")
-                    .add("asserterReference").add("asserterDisplay").add("performerReference").add("performerDisplay")
-                    .add("reasonCode").add("bodySite").add("complication").add("followUp").add("note");
-        } else throw new ResourceNotFoundException("Unknown type of document has been provided.");
+            response.add("resourceType");
+        } else {
+            List<Field> fields = Arrays.stream(document.getClass().getDeclaredFields()).collect(Collectors.toList());
+
+            Class<?> superclass = document.getClass().getSuperclass().getSuperclass();
+
+            fields.addAll(Arrays.stream(superclass.getDeclaredFields()).collect(Collectors.toList()));
+
+            fields.forEach(f -> {
+                f.setAccessible(true);
+                try {
+                    response.add(f.getName());
+                } catch (Exception e) {
+                    log.error("Exception was thrown: " + e);
+                    throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
+                } finally {
+                    f.setAccessible(false);
+                }
+            });
+        }
 
         return response;
     }

@@ -11,6 +11,8 @@ import com.mokujin.user.model.document.impl.national.NationalPassport;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
+
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.EXISTING_PROPERTY;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 
@@ -25,7 +27,7 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = Procedure.class, name = "Procedure"),
         @JsonSubTypes.Type(value = MedicalImage.class, name = "MedicalImage")
 })
-public class Document {
+public class Document implements Serializable {
 
     private String resourceType;
 

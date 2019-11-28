@@ -15,6 +15,5 @@ public class Proof {
     private String proofApplication;
     private String schemaConfig;
     private String credConfig;
-    private String formedCredential;
 
 }

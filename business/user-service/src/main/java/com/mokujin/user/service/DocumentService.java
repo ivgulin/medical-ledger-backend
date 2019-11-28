@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface DocumentService {
 
-    User offerDicom(String publicKey, String privateKey, MultipartFile document, String patientNumber);
+    User offerDicom(String publicKey, String privateKey, String image, String patientNumber);
 
     User offerCredential(String publicKey, String privateKey, DocumentDraft documentDraft, String patientNumber);
 
@@ -19,7 +19,7 @@ public interface DocumentService {
 
     User askDocument(String publicKey, String privateKey, List<String> keywords, String patientNumber);
 
-    User presentDocument(String publicKey, String privateKey, Document document, String doctorNumber);
+    User shareDocument(String publicKey, String privateKey, Document document, String doctorNumber);
 
     void deleteNotification(String doctorNumber, String patientNumber);
 

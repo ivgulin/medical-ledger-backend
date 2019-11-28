@@ -311,9 +311,9 @@ class NotificationServiceImplTest {
         when(redissonClient.getMap("presentations_" + user.getNationalNumber())).thenReturn(presentationNotifications);
         when(presentationNotifications.remove(connectionNumberCaptor.capture())).thenReturn(null);
 
-        notificationService.removePresentationNotification(user, number);
+        notificationService.removePresentationNotification(user, number, number);
 
-        assertEquals(number, connectionNumberCaptor.getValue());
+        assertEquals(number + number, connectionNumberCaptor.getValue());
     }
 
     @Test
@@ -351,8 +351,8 @@ class NotificationServiceImplTest {
         when(redissonClient.getMap("proofs_" + nationalNumber)).thenReturn(proofNotifications);
         when(proofNotifications.remove(connectionNumberCaptor.capture())).thenReturn(null);
 
-        notificationService.removeProofNotification(nationalNumber, connectionNumber);
+        notificationService.removeProofNotification(nationalNumber, connectionNumber, nationalNumber);
 
-        assertEquals(connectionNumber, connectionNumberCaptor.getValue());
+        assertEquals(connectionNumber + nationalNumber, connectionNumberCaptor.getValue());
     }
 }

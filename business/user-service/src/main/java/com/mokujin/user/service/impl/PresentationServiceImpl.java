@@ -108,7 +108,7 @@ public class PresentationServiceImpl implements PresentationService {
 
         User user = userService.get(publicKey, privateKey);
 
-        notificationService.removePresentationNotification(user, connectionNumber);
+        notificationService.removePresentationNotification(user, connectionNumber, document.getResourceType());
 
         Notification notification = notificationService.addProofNotification(user, proof, connectionNumber);
         log.info("proof notification =  '{}'", notification);
@@ -120,7 +120,7 @@ public class PresentationServiceImpl implements PresentationService {
         String url = "http://self-sovereign-identity-service/verification/verify";
         Affirmation affirmation = restTemplate.postForObject(url, proof, Affirmation.class);
 
-        notificationService.removeProofNotification(nationalNumber, connectionNumber);
+        notificationService.removeProofNotification(nationalNumber, connectionNumber, proof.getDocument().getResourceType());
 
         return affirmation;
     }

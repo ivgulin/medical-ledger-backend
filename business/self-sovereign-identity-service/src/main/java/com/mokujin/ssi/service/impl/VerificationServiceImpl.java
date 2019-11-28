@@ -116,14 +116,11 @@ public class VerificationServiceImpl implements VerificationService {
                     "{}").get();
             log.info("'proofApplication={}'", proofApplication);
 
-            String formedCredential = credentialService.getFormedCredential(suitableCredential);
-
             return Proof.builder()
                     .proofRequest(proofRequest)
                     .proofApplication(proofApplication)
                     .schemaConfig(schemaConfig.toString())
                     .credConfig(credConfig.toString())
-                    .formedCredential(formedCredential)
                     .build();
         } catch (LedgerException e) {
             log.error("Exception was thrown: " + e);
