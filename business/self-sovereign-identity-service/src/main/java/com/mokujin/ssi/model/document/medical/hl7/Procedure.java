@@ -74,7 +74,7 @@ public class Procedure extends Document {
         super(MedicalDocumentType.Procedure.name());
     }
 
-    public Procedure(ModifiedProcedure modifiedProcedure){
+    public Procedure(ModifiedProcedure modifiedProcedure) {
         super(MedicalDocumentType.Procedure.name());
 
     }

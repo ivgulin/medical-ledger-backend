@@ -182,8 +182,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void removePresentationNotification(User user,  String connectionNumber, String documentType) {
-        String nationalNumber = user.getNationalNumber();
+    public void removePresentationNotification(String nationalNumber, String connectionNumber, String documentType) {
         RMap<String, PresentationNotification> presentationNotifications = redissonClient.getMap("presentations_" + nationalNumber);
         presentationNotifications.remove(connectionNumber + documentType);
     }
@@ -314,6 +313,34 @@ public class NotificationServiceImpl implements NotificationService {
     public void removeDocumentNotification(String nationalNumber, String connectionNumber) {
         RMap<String, DocumentNotification> documentNotifications = redissonClient.getMap("documents_" + nationalNumber);
         documentNotifications.remove(connectionNumber);
+    }
+
+    @Override
+    public void removeNotification(String nationalNumber, SystemNotification notification) {
+        String type = notification.getType().name();
+
+        switch (type) {
+            case "INVITATION":
+                this.removeInviteNotification(notification.getContact().getNationalNumber(), nationalNumber);
+                break;
+            case "CONNECTION":
+                this.removeInviteNotification(nationalNumber, notification.getContact().getNationalNumber());
+                break;
+            case "PRESENTATION":
+                this.removePresentationNotification(nationalNumber, notification.getContact().getNationalNumber(),
+                        ((PresentationNotification) notification).getDocumentType());
+                break;
+            case "PROOF":
+                this.removeProofNotification(nationalNumber, notification.getContact().getNationalNumber(),
+                        ((PresentationNotification) notification).getDocumentType());
+                break;
+            case "ASK":
+                this.removeAskNotification(nationalNumber, notification.getContact().getNationalNumber());
+                break;
+            case "DOCUMENT":
+                this.removeDocumentNotification(nationalNumber, notification.getContact().getNationalNumber());
+                break;
+        }
     }
 
 

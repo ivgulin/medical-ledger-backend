@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mokujin.ssi.model.document.Document;
 import com.mokujin.ssi.model.document.medical.dicom.MedicalImage;
 import com.mokujin.ssi.model.document.medical.hl7.ModifiedProcedure;
 import com.mokujin.ssi.model.document.medical.hl7.Procedure;

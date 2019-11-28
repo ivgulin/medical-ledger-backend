@@ -9,6 +9,7 @@ import com.mokujin.user.model.document.impl.medical.hl7.component.*;
 import com.mokujin.user.model.exception.extention.ClientException;
 import com.mokujin.user.model.exception.extention.ServerException;
 import com.mokujin.user.model.internal.DocumentDraft;
+import com.mokujin.user.model.internal.MedicalImageDraft;
 import com.mokujin.user.model.internal.OfferRequest;
 import com.mokujin.user.model.internal.ProcedureDraft;
 import com.mokujin.user.model.notification.Notification;
@@ -45,55 +46,6 @@ public class DocumentServiceImpl implements DocumentService {
     private final UserService userService;
     private final NotificationService notificationService;
     private final RestTemplate restTemplate;
-
-    @Override
-    public User offerDicom(String publicKey, String privateKey, String image, String patientNumber) {
-
-        byte[] imageBytes = Base64.decodeBase64(image);
-
-        User doctor = userService.get(publicKey, privateKey);
-
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-
-            DicomInputStream dicomInputStream = new DicomInputStream(new ByteArrayInputStream(imageBytes));
-            AttributeList list = new AttributeList();
-            list.read(dicomInputStream);
-
-            Map<String, String> dicomMap = new HashMap<>();
-            List<Field> fields = Arrays.asList(TagFromName.class.getDeclaredFields());
-            fields.stream().filter(field -> field.getType() == AttributeTag.class).forEach(field -> {
-
-                if (Modifier.isFinal(field.getModifiers())) {
-                    try {
-                        String tagInformation = this.getTagInformation((AttributeTag) field.get(null), list);
-                        if (!tagInformation.isEmpty())
-                            dicomMap.put(field.getName(), tagInformation);
-                    } catch (IllegalAccessException e) {
-                        throw new ServerException(INTERNAL_SERVER_ERROR, e.getMessage());
-                    }
-                }
-            });
-
-            BufferedImage bufferedImage = ConsumerFormatImageMaker.makeEightBitImage(list);
-            ImageIO.write(bufferedImage, "png", baos);
-            baos.flush();
-            byte[] imageInByte = baos.toByteArray();
-            String encodedImage = new String(Base64.encodeBase64(imageInByte), StandardCharsets.UTF_8);
-            System.out.println("encoded image: " + encodedImage);
-
-            dicomMap.put("Image", encodedImage);
-            System.out.println("dicomMap: " + dicomMap);
-
-            Notification notification = notificationService
-                    .addOfferNotification(publicKey, privateKey, doctor, new MedicalImage(dicomMap), patientNumber);
-            log.info("notification =  '{}'", notification);
-
-            return doctor;
-        } catch (Exception e) {
-            log.error("Exception was thrown: " + e);
-            throw new ServerException(INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-    }
 
     @Override
     public User offerCredential(String publicKey, String privateKey, DocumentDraft documentDraft, String patientNumber) {
@@ -151,22 +103,19 @@ public class DocumentServiceImpl implements DocumentService {
 
     }
 
-    @Override
-    public void deleteNotification(String doctorNumber, String patientNumber) {
-        notificationService.removeDocumentNotification(doctorNumber, patientNumber);
-    }
-
     private String getTagInformation(AttributeTag attrTag, AttributeList list) {
         return Attribute.getDelimitedStringValuesOrEmptyString(list, attrTag);
     }
 
     private Document convertToDocument(DocumentDraft documentDraft) {
         if (documentDraft.getType().equals(Document.MedicalDocumentType.Procedure.name())) {
-            return getConvertToProcedure((ProcedureDraft) documentDraft);
+            return this.convertToProcedure((ProcedureDraft) documentDraft);
+        } else if (documentDraft.getType().equals(Document.MedicalDocumentType.MedicalImage.name())) {
+            return this.convertToMedicalImage((MedicalImageDraft) documentDraft);
         } else throw new ClientException(NOT_FOUND, "Invalid document type has been provided.");
     }
 
-    private Procedure getConvertToProcedure(ProcedureDraft procedureDraft) {
+    private Procedure convertToProcedure(ProcedureDraft procedureDraft) {
 
         String name = procedureDraft.getName();
         Narrative text = new Narrative(Narrative.NarrativeStatus.generated,
@@ -221,5 +170,47 @@ public class DocumentServiceImpl implements DocumentService {
 
         return new Procedure(name, text, status, notDoneReason, code, subject, performedPeriod, performedDateTime,
                 recorder, asserter, performer, reasons, bodySites, complications, followUps, notes);
+    }
+
+    private MedicalImage convertToMedicalImage(MedicalImageDraft medicalImageDraft) {
+
+        byte[] imageBytes = Base64.decodeBase64(medicalImageDraft.getImage());
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+
+            DicomInputStream dicomInputStream = new DicomInputStream(new ByteArrayInputStream(imageBytes));
+            AttributeList list = new AttributeList();
+            list.read(dicomInputStream);
+
+            Map<String, String> dicomMap = new HashMap<>();
+            List<Field> fields = Arrays.asList(TagFromName.class.getDeclaredFields());
+            fields.stream().filter(field -> field.getType() == AttributeTag.class).forEach(field -> {
+
+                if (Modifier.isFinal(field.getModifiers())) {
+                    try {
+                        String tagInformation = this.getTagInformation((AttributeTag) field.get(null), list);
+                        if (!tagInformation.isEmpty())
+                            dicomMap.put(field.getName(), tagInformation);
+                    } catch (IllegalAccessException e) {
+                        throw new ServerException(INTERNAL_SERVER_ERROR, e.getMessage());
+                    }
+                }
+            });
+
+            BufferedImage bufferedImage = ConsumerFormatImageMaker.makeEightBitImage(list);
+            ImageIO.write(bufferedImage, "png", baos);
+            baos.flush();
+            byte[] imageInByte = baos.toByteArray();
+            String encodedImage = new String(Base64.encodeBase64(imageInByte), StandardCharsets.UTF_8);
+            System.out.println("encoded image: " + encodedImage);
+
+            dicomMap.put("Image", encodedImage);
+            System.out.println("dicomMap: " + dicomMap);
+
+            return new MedicalImage(dicomMap);
+        } catch (Exception e) {
+            log.error("Exception was thrown: " + e);
+            throw new ServerException(INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 }

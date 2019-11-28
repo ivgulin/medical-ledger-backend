@@ -46,7 +46,7 @@ public class SchemaServiceImpl implements SchemaService {
             try {
                 schemaDefinition = Cache.getCredDef(pool, trustAnchor.getWallet(),
                         trustAnchor.getVerinymDid(), schemaDefinitionId, "{}").get();
-            } catch (Exception e){
+            } catch (Exception e) {
                 log.error("Exception was thrown: " + e);
                 schemaDefinition = this.createSchemaDefinition(pool, trustAnchor, tag, schema);
             }

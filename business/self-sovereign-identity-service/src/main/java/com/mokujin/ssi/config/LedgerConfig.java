@@ -8,8 +8,8 @@ import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
 import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.service.IdentityService;
-import com.mokujin.ssi.service.WalletService;
 import com.mokujin.ssi.service.SchemaService;
+import com.mokujin.ssi.service.WalletService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperledger.indy.sdk.did.Did;
@@ -27,7 +27,8 @@ import static com.mokujin.ssi.model.internal.Role.STEWARD;
 import static com.mokujin.ssi.model.internal.Role.TRUST_ANCHOR;
 import static java.util.Objects.isNull;
 import static org.hyperledger.indy.sdk.did.Did.createAndStoreMyDid;
-import static org.hyperledger.indy.sdk.ledger.Ledger.*;
+import static org.hyperledger.indy.sdk.ledger.Ledger.buildNymRequest;
+import static org.hyperledger.indy.sdk.ledger.Ledger.signAndSubmitRequest;
 import static org.hyperledger.indy.sdk.pool.Pool.*;
 
 @Slf4j

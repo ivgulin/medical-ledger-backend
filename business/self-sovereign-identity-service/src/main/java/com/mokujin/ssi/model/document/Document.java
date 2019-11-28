@@ -3,12 +3,12 @@ package com.mokujin.ssi.model.document;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.mokujin.ssi.model.document.medical.dicom.MedicalImage;
+import com.mokujin.ssi.model.document.medical.hl7.Procedure;
 import com.mokujin.ssi.model.government.document.Certificate;
 import com.mokujin.ssi.model.government.document.Diploma;
 import com.mokujin.ssi.model.government.document.NationalNumber;
 import com.mokujin.ssi.model.government.document.NationalPassport;
-import com.mokujin.ssi.model.document.medical.dicom.MedicalImage;
-import com.mokujin.ssi.model.document.medical.hl7.Procedure;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

@@ -7,6 +7,7 @@ import com.mokujin.user.model.chat.Message;
 import com.mokujin.user.model.document.Document;
 import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.model.notification.NotificationCollector;
+import com.mokujin.user.model.notification.SystemNotification;
 import com.mokujin.user.model.presentation.Proof;
 import com.mokujin.user.model.record.HealthRecord;
 
@@ -27,7 +28,7 @@ public interface NotificationService {
     Notification addPresentationNotification(User user, List<String> presentationAttributes,
                                              String documentType, String connectionNumber);
 
-    void removePresentationNotification(User user, String connectionNumber, String documentType);
+    void removePresentationNotification(String nationalNumber, String connectionNumber, String documentType);
 
     Notification addProofNotification(User user, Proof proof, String connectionNumber);
 
@@ -48,4 +49,6 @@ public interface NotificationService {
     Notification addDocumentNotification(User user, Document document, String connectionNumber);
 
     void removeDocumentNotification(String nationalNumber, String connectionNumber);
+
+    void removeNotification(String nationalNumber, SystemNotification notification);
 }

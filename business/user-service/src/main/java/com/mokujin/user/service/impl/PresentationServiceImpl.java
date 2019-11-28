@@ -108,7 +108,7 @@ public class PresentationServiceImpl implements PresentationService {
 
         User user = userService.get(publicKey, privateKey);
 
-        notificationService.removePresentationNotification(user, connectionNumber, document.getResourceType());
+        notificationService.removePresentationNotification(user.getNationalNumber(), connectionNumber, document.getResourceType());
 
         Notification notification = notificationService.addProofNotification(user, proof, connectionNumber);
         log.info("proof notification =  '{}'", notification);

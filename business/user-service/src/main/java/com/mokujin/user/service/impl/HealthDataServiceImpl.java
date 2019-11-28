@@ -42,9 +42,4 @@ public class HealthDataServiceImpl implements HealthDataService {
 
         return patient;
     }
-
-    @Override
-    public void deleteNotification(String doctorNumber, String patientNumber) {
-        notificationService.removeHealthNotification(doctorNumber, patientNumber);
-    }
 }

@@ -3,7 +3,6 @@ package com.mokujin.user.controller;
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.document.Document;
 import com.mokujin.user.model.internal.DocumentDraft;
-import com.mokujin.user.model.internal.MedicalImageDraft;
 import com.mokujin.user.service.DocumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,19 +20,6 @@ import static org.springframework.http.HttpStatus.OK;
 public class DocumentController {
 
     private final DocumentService documentService;
-
-    @PostMapping("/offer/dicom/{patientNumber}")
-    public ResponseEntity<User> offerDicom(@PathVariable String patientNumber,
-                                           @RequestBody MedicalImageDraft draft,
-                                           @RequestHeader("Public-Key") String publicKey,
-                                           @RequestHeader("Private-Key") String privateKey) {
-        log.info("'offerDicom' invoked with params '{}, {}, {}, {}'", patientNumber, draft, publicKey, privateKey);
-
-        User user = documentService.offerDicom(publicKey, privateKey, draft.getImage(), patientNumber);
-
-        log.info("'offerDicom' returned '{}'", user);
-        return ResponseEntity.ok(user);
-    }
 
     @PostMapping("/offer/{patientNumber}")
     public ResponseEntity<User> offer(@PathVariable String patientNumber,
@@ -99,16 +85,5 @@ public class DocumentController {
 
         log.info("'share' returned '{}'", user);
         return ResponseEntity.ok(user);
-    }
-
-    @DeleteMapping("/delete/notification")
-    public ResponseEntity deleteNotification(@RequestParam String doctorNumber,
-                                             @RequestParam String patientNumber) {
-        log.info("'deleteNotification' invoked with params '{}, {}'", patientNumber, doctorNumber);
-
-        documentService.deleteNotification(doctorNumber, patientNumber);
-
-        log.info("'deleteNotification' has executed successfully.");
-        return new ResponseEntity(OK);
     }
 }

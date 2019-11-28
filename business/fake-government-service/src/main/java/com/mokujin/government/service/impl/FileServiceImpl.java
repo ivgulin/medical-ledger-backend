@@ -34,11 +34,10 @@ public class FileServiceImpl implements FileService {
         String fileName = generateFileName();
 
         File file = new File(fileFolderPath + fileName);
-        boolean newFile = file.createNewFile();
+        file.createNewFile();
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-            if (newFile) copy(multipartFile.getInputStream(), fileOutputStream);
-            else throw new FileUploadFailureException();
+            copy(multipartFile.getInputStream(), fileOutputStream);
         } catch (Exception e) {
             log.error("Fail to save on disc multipart file, e = " + e);
             file.delete();

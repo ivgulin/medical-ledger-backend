@@ -1,6 +1,5 @@
 package com.mokujin.zuul.config;
 
-import com.mokujin.zuul.model.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

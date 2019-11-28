@@ -2,6 +2,8 @@ package com.mokujin.user.service.impl;
 
 import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.User;
+import com.mokujin.user.model.document.NationalDocument;
+import com.mokujin.user.model.document.impl.national.NationalNumber;
 import com.mokujin.user.model.document.impl.national.NationalPassport;
 import com.mokujin.user.model.notification.extention.PresentationNotification;
 import com.mokujin.user.model.presentation.Affirmation;
@@ -164,6 +166,7 @@ class PresentationServiceImplTest {
         String connectionNumber = "connection number";
 
         Proof proof = new Proof();
+        proof.setDocument(new NationalNumber());
 
         Affirmation affirmation = Affirmation.builder().result(true).issuedBy(Contact.builder().build()).build();
 

@@ -6,8 +6,6 @@ import com.mokujin.ssi.model.user.request.OfferRequest;
 import com.mokujin.ssi.model.user.response.User;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 
-import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
-
 public interface CredentialService {
 
     String getCredential(Document document);

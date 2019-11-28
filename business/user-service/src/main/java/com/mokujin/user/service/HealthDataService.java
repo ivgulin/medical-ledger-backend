@@ -11,6 +11,4 @@ public interface HealthDataService {
 
     User share(String publicKey, String privateKey, HealthRecord healthRecord, String doctorNumber);
 
-    void deleteNotification(String patientNumber, String doctorNumber);
-
 }

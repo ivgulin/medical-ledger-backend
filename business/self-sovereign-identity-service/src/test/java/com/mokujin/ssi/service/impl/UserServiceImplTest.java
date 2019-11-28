@@ -1,8 +1,8 @@
 package com.mokujin.ssi.service.impl;
 
+import com.mokujin.ssi.model.document.Document;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
-import com.mokujin.ssi.model.document.Document;
 import com.mokujin.ssi.model.government.document.NationalNumber;
 import com.mokujin.ssi.model.government.document.NationalPassport;
 import com.mokujin.ssi.model.internal.Contact;
