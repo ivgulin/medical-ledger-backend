@@ -4,7 +4,7 @@ import com.mokujin.user.model.Contact;
 import com.mokujin.user.model.ProcessedUserCredentials;
 import com.mokujin.user.model.User;
 import com.mokujin.user.model.chat.Message;
-import com.mokujin.user.model.document.Document;
+import com.mokujin.user.model.document.impl.national.NationalNumber;
 import com.mokujin.user.model.notification.Notification;
 import com.mokujin.user.model.notification.NotificationCollector;
 import com.mokujin.user.model.notification.SystemNotification;
@@ -12,7 +12,6 @@ import com.mokujin.user.model.notification.extention.ChatNotification;
 import com.mokujin.user.model.notification.extention.PresentationNotification;
 import com.mokujin.user.model.notification.extention.ProofNotification;
 import com.mokujin.user.model.presentation.Proof;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +27,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.mokujin.user.model.notification.Notification.Type.*;
+import static com.mokujin.user.model.document.Document.NationalDocumentType.Number;
+import static com.mokujin.user.model.document.Document.NationalDocumentType.Passport;
+import static com.mokujin.user.model.notification.Notification.Type.CONNECTION;
+import static com.mokujin.user.model.notification.Notification.Type.INVITATION;
 import static com.mokujin.user.model.notification.NotificationConstants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -51,12 +53,12 @@ class NotificationServiceImplTest {
         String nationalNumber = "number";
 
         List<Message> messages = new ArrayList<>();
-        messages.add(new Message(Contact.builder().build(), 123L, "hi", false));
-        messages.add(new Message(Contact.builder().build(), 124L, "how r u", false));
+        messages.add(new Message("number", 123L, "hi", false));
+        messages.add(new Message("number", 124L, "how r u", false));
 
         List<ChatNotification> messageNotifications = new ArrayList<>();
-        messageNotifications.add(new ChatNotification(new Message(Contact.builder().build(), 123L, "hi", false)));
-        messageNotifications.add(new ChatNotification(new Message(Contact.builder().build(), 124L, "how r u", false)));
+        messageNotifications.add(new ChatNotification(new Message("number", 123L, "hi", false)));
+        messageNotifications.add(new ChatNotification(new Message("number", 124L, "how r u", false)));
 
         RList messagesList = mock(RList.class);
         when(redissonClient.getList("messages_" + nationalNumber)).thenReturn(messagesList);
@@ -86,12 +88,12 @@ class NotificationServiceImplTest {
 
 
         List<PresentationNotification> presentationNotifications = new ArrayList<>();
-        presentationNotifications.add(new PresentationNotification(123L, PRESENTATION, Contact.builder().build(),
+        presentationNotifications.add(new PresentationNotification(123L, Contact.builder().build(),
                 "presentation", "presentation", "presentation", "presentation",
-                Document.Type.passport.name(), Collections.emptyList()));
-        presentationNotifications.add(new PresentationNotification(124L, PRESENTATION, Contact.builder().build(),
+                Passport.name(), Collections.emptyList()));
+        presentationNotifications.add(new PresentationNotification(124L, Contact.builder().build(),
                 "presentation", "presentation", "presentation", "presentation",
-                Document.Type.number.name(), Collections.emptyList()));
+                Number.name(), Collections.emptyList()));
 
         RMap presentationsMap = mock(RMap.class);
         when(redissonClient.getMap("presentations_" + nationalNumber)).thenReturn(presentationsMap);
@@ -99,9 +101,9 @@ class NotificationServiceImplTest {
 
 
         List<ProofNotification> proofNotifications = new ArrayList<>();
-        proofNotifications.add(new ProofNotification(123L, PROOF, Contact.builder().build(),
+        proofNotifications.add(new ProofNotification(123L, Contact.builder().build(),
                 "proof", "proof", "proof", "proof", new Proof()));
-        proofNotifications.add(new ProofNotification(124L, PROOF, Contact.builder().build(),
+        proofNotifications.add(new ProofNotification(124L, Contact.builder().build(),
                 "proof", "proof", "proof", "proof", new Proof()));
 
         RMap proofsMap = mock(RMap.class);
@@ -184,7 +186,7 @@ class NotificationServiceImplTest {
         connectionValue.setDate(null);
         assertEquals(new SystemNotification(null, CONNECTION,
                 Contact.builder()
-                        .contactName(patient.getFirstName() + " " + patient.getFirstName() + " " + patient.getFatherName())
+                        .contactName(patient.getLastName() + " " + patient.getFirstName() + " " + patient.getFatherName())
                         .photo(patient.getPhoto())
                         .nationalNumber(patient.getNationalNumber())
                         .isVisible(true)
@@ -242,7 +244,7 @@ class NotificationServiceImplTest {
     @Test
     void addMessage_validInputs_notificationIsReturned() {
         String number = "number";
-        Message message = new Message(Contact.builder().build(), 123L, "message", false);
+        Message message = new Message("number", 123L, "message", false);
 
         RList messagesList = mock(RList.class);
         when(redissonClient.getList("messages_" + number)).thenReturn(messagesList);
@@ -259,7 +261,7 @@ class NotificationServiceImplTest {
     @Test
     void removeMessage_validInputs_notificationIsDeleted() {
         String number = "number";
-        Message message = new Message(Contact.builder().build(), 123L, "message", false);
+        Message message = new Message("number", 123L, "message", false);
 
         RList messagesList = mock(RList.class);
         when(redissonClient.getList("messages_" + number)).thenReturn(messagesList);
@@ -292,9 +294,9 @@ class NotificationServiceImplTest {
         presentationAttributes.add("firstName");
         presentationAttributes.add("lastName");
         Notification result = notificationService.addPresentationNotification(user,
-                presentationAttributes, Document.Type.passport.name(), number);
+                presentationAttributes, Passport.name(), number);
 
-        assertEquals(user.getNationalNumber(), presentationKey.getValue());
+        assertEquals(user.getNationalNumber() + Passport.name(), presentationKey.getValue());
         assertEquals(result, presentationValue.getValue());
     }
 
@@ -311,9 +313,9 @@ class NotificationServiceImplTest {
         when(redissonClient.getMap("presentations_" + user.getNationalNumber())).thenReturn(presentationNotifications);
         when(presentationNotifications.remove(connectionNumberCaptor.capture())).thenReturn(null);
 
-        notificationService.removePresentationNotification(user, number);
+        notificationService.removePresentationNotification(user.getNationalNumber(), number, number);
 
-        assertEquals(number, connectionNumberCaptor.getValue());
+        assertEquals(number + number, connectionNumberCaptor.getValue());
     }
 
     @Test
@@ -326,6 +328,7 @@ class NotificationServiceImplTest {
         user.setPhoto("photo");
         user.setNationalNumber("another number");
         Proof proof = new Proof();
+        proof.setDocument(new NationalNumber());
 
         ArgumentCaptor<String> proofKey = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<ProofNotification> proofValue = ArgumentCaptor.forClass(ProofNotification.class);
@@ -336,7 +339,7 @@ class NotificationServiceImplTest {
 
         Notification result = notificationService.addProofNotification(user, proof, number);
 
-        assertEquals(user.getNationalNumber(), proofKey.getValue());
+        assertEquals(user.getNationalNumber() + Number.name(), proofKey.getValue());
         assertEquals(result, proofValue.getValue());
     }
 
@@ -351,8 +354,8 @@ class NotificationServiceImplTest {
         when(redissonClient.getMap("proofs_" + nationalNumber)).thenReturn(proofNotifications);
         when(proofNotifications.remove(connectionNumberCaptor.capture())).thenReturn(null);
 
-        notificationService.removeProofNotification(nationalNumber, connectionNumber);
+        notificationService.removeProofNotification(nationalNumber, connectionNumber, nationalNumber);
 
-        assertEquals(connectionNumber, connectionNumberCaptor.getValue());
+        assertEquals(connectionNumber + nationalNumber, connectionNumberCaptor.getValue());
     }
 }

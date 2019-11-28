@@ -1,6 +1,6 @@
-package com.mokujin.ssi.model.government.document.impl;
+package com.mokujin.ssi.model.government.document;
 
-import com.mokujin.ssi.model.government.document.NationalDocument;
+import com.mokujin.ssi.model.document.national.NationalDocument;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -30,7 +30,7 @@ public class NationalPassport extends NationalDocument {
 
     public NationalPassport(String number, String firstName, String lastName, String fatherName,
                             Long dateOfBirth, String placeOfBirth, String image, String sex, String issuer, Long dateOfIssue) {
-        super(Type.passport.name());
+        super(NationalDocumentType.Passport.name());
         this.number = number;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -45,7 +45,7 @@ public class NationalPassport extends NationalDocument {
 
 
     public NationalPassport() {
-        super(Type.passport.name());
+        super(NationalDocumentType.Passport.name());
     }
 
 }

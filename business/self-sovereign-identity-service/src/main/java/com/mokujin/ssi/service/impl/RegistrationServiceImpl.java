@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokujin.ssi.model.exception.BusinessException;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.government.KnownIdentity;
-import com.mokujin.ssi.model.government.document.Document;
-import com.mokujin.ssi.model.government.document.impl.Certificate;
-import com.mokujin.ssi.model.government.document.impl.Diploma;
-import com.mokujin.ssi.model.government.document.impl.NationalNumber;
-import com.mokujin.ssi.model.government.document.impl.NationalPassport;
+import com.mokujin.ssi.model.government.document.Certificate;
+import com.mokujin.ssi.model.government.document.Diploma;
+import com.mokujin.ssi.model.government.document.NationalNumber;
+import com.mokujin.ssi.model.government.document.NationalPassport;
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
@@ -27,9 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.mokujin.ssi.model.internal.Role.DOCTOR;
-import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
-import static org.hyperledger.indy.sdk.anoncreds.AnoncredsResults.IssuerCreateCredentialResult;
-import static org.hyperledger.indy.sdk.anoncreds.AnoncredsResults.ProverCreateCredentialRequestResult;
+import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.proverCreateMasterSecret;
 import static org.hyperledger.indy.sdk.did.Did.createAndStoreMyDid;
 import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
 import static org.hyperledger.indy.sdk.ledger.Ledger.buildNymRequest;
@@ -190,73 +187,33 @@ public class RegistrationServiceImpl implements RegistrationService {
         String nationalNumberSchemaDefinition = nationalNumberSchema.getSchemaDefinition();
         NationalNumber nationalNumber = knownIdentity.getNationalNumber();
 
-        this.issueCredential(userWallet, governmentPseudonym, nationalNumberSchemaDefinitionId,
-                nationalNumberSchemaDefinition, nationalNumber, masterSecretId);
+        credentialService.issueCredential(userWallet, government.getWallet(), governmentPseudonym.getDid(),
+                nationalNumberSchemaDefinitionId, nationalNumberSchemaDefinition, nationalNumber, masterSecretId);
 
         String passportSchemaDefinitionId = passportSchema.getSchemaDefinitionId();
         String passportSchemaDefinition = passportSchema.getSchemaDefinition();
         NationalPassport nationalPassport = knownIdentity.getNationalPassport();
 
-        this.issueCredential(userWallet, governmentPseudonym, passportSchemaDefinitionId,
-                passportSchemaDefinition, nationalPassport, masterSecretId);
+        credentialService.issueCredential(userWallet, government.getWallet(), governmentPseudonym.getDid(),
+                passportSchemaDefinitionId, passportSchemaDefinition, nationalPassport, masterSecretId);
 
         if (knownIdentity.getRole().equals(DOCTOR)) {
             String diplomaSchemaDefinitionId = diplomaSchema.getSchemaDefinitionId();
             String diplomaSchemaDefinition = diplomaSchema.getSchemaDefinition();
             Diploma diploma = knownIdentity.getDiploma();
 
-            this.issueCredential(userWallet, governmentPseudonym, diplomaSchemaDefinitionId,
-                    diplomaSchemaDefinition, diploma, masterSecretId);
+            credentialService.issueCredential(userWallet, government.getWallet(), governmentPseudonym.getDid(),
+                    diplomaSchemaDefinitionId, diplomaSchemaDefinition, diploma, masterSecretId);
 
             String certificateSchemaDefinitionId = certificateSchema.getSchemaDefinitionId();
             String certificationSchemaDefinition = certificateSchema.getSchemaDefinition();
             List<Certificate> certificates = knownIdentity.getCertificates();
 
             for (Certificate certificate : certificates) {
-                this.issueCredential(userWallet, governmentPseudonym, certificateSchemaDefinitionId,
-                        certificationSchemaDefinition, certificate, masterSecretId);
+                credentialService.issueCredential(userWallet, government.getWallet(), governmentPseudonym.getDid(),
+                        certificateSchemaDefinitionId, certificationSchemaDefinition, certificate, masterSecretId);
             }
         }
 
-    }
-
-    void issueCredential(Wallet userWallet, CreateAndStoreMyDidResult governmentPseudonym,
-                         String schemaDefinitionId, String schemaDefinition,
-                         Document document, String masterSecretId) throws Exception {
-        String credentialOffer = issuerCreateCredentialOffer(
-                government.getWallet(),
-                schemaDefinitionId).get();
-        log.info("'credentialOffer={}'", credentialOffer);
-
-        ProverCreateCredentialRequestResult proverCreateCredentialRequestResult = proverCreateCredentialReq(
-                userWallet,
-                governmentPseudonym.getDid(),
-                credentialOffer,
-                schemaDefinition,
-                masterSecretId)
-                .get();
-        log.info("'proverCreateCredentialRequestResult={}'", proverCreateCredentialRequestResult);
-
-        String credential = credentialService.getCredential(document);
-        log.info("'credential={}'", credential);
-
-        IssuerCreateCredentialResult issuerCreateCredentialResult = issuerCreateCredential(
-                government.getWallet(),
-                credentialOffer,
-                proverCreateCredentialRequestResult.getCredentialRequestJson(),
-                credential,
-                null,
-                0)
-                .get();
-        log.info("'issuerCreateCredentialResult={}'", issuerCreateCredentialResult);
-
-        String gottenCredential = proverStoreCredential(
-                userWallet,
-                null,
-                proverCreateCredentialRequestResult.getCredentialRequestMetadataJson(),
-                issuerCreateCredentialResult.getCredentialJson(),
-                schemaDefinition,
-                issuerCreateCredentialResult.getRevocRegDeltaJson()).get();
-        log.info("'gottenCredential={}'", gottenCredential);
     }
 }

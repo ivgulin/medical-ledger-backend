@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
-import com.mokujin.ssi.model.government.document.impl.NationalNumber;
-import com.mokujin.ssi.model.government.document.impl.NationalPassport;
+import com.mokujin.ssi.model.government.document.NationalNumber;
+import com.mokujin.ssi.model.government.document.NationalPassport;
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Identity;
@@ -130,7 +130,7 @@ class IdentityServiceImplTest {
                 document.put("number", nationalNumber);
                 document.put("registrationDate", registrationDate);
                 document.put("issuer", issuer);
-                document.put("type", "number");
+                document.put("resourceType", "Number");
 
                 ObjectNode credential = objectMapper.createObjectNode();
                 credential.put("referent", credentialId);

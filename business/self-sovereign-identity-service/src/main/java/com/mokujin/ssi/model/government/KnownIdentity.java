@@ -1,9 +1,9 @@
 package com.mokujin.ssi.model.government;
 
-import com.mokujin.ssi.model.government.document.impl.Certificate;
-import com.mokujin.ssi.model.government.document.impl.Diploma;
-import com.mokujin.ssi.model.government.document.impl.NationalNumber;
-import com.mokujin.ssi.model.government.document.impl.NationalPassport;
+import com.mokujin.ssi.model.government.document.Certificate;
+import com.mokujin.ssi.model.government.document.Diploma;
+import com.mokujin.ssi.model.government.document.NationalNumber;
+import com.mokujin.ssi.model.government.document.NationalPassport;
 import com.mokujin.ssi.model.internal.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;

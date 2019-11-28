@@ -1,8 +1,10 @@
-package com.mokujin.ssi.model.government.document.impl;
+package com.mokujin.user.model.document.impl.national;
 
-import com.mokujin.ssi.model.government.document.NationalDocument;
+import com.mokujin.user.model.document.NationalDocument;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import static com.mokujin.user.model.document.Document.NationalDocumentType.Certificate;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -32,7 +34,7 @@ public class Certificate extends NationalDocument {
 
     public Certificate(String number, String firstName, String lastName, String fatherName, Long dateOfExam,
                        Long dateOfIssue, String qualification, String courseOfStudy, Long expiresIn, String issuer) {
-        super(Type.certificate.name());
+        super(Certificate.name());
         this.number = number;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -46,7 +48,7 @@ public class Certificate extends NationalDocument {
     }
 
     public Certificate() {
-        super(Type.certificate.name());
+        super(Certificate.name());
     }
 
     public enum Category {

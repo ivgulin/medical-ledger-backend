@@ -2,34 +2,45 @@ package com.mokujin.user.model.document;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.mokujin.user.model.document.impl.Certificate;
-import com.mokujin.user.model.document.impl.Diploma;
-import com.mokujin.user.model.document.impl.NationalNumber;
-import com.mokujin.user.model.document.impl.NationalPassport;
+import com.mokujin.user.model.document.impl.medical.dicom.MedicalImage;
+import com.mokujin.user.model.document.impl.medical.hl7.Procedure;
+import com.mokujin.user.model.document.impl.national.Certificate;
+import com.mokujin.user.model.document.impl.national.Diploma;
+import com.mokujin.user.model.document.impl.national.NationalNumber;
+import com.mokujin.user.model.document.impl.national.NationalPassport;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import java.io.Serializable;
 
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.EXISTING_PROPERTY;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 @Data
 @AllArgsConstructor
-@JsonTypeInfo(use = NAME, property = "type", include = EXISTING_PROPERTY)
+@JsonTypeInfo(use = NAME, property = "resourceType", include = EXISTING_PROPERTY)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = NationalPassport.class, name = "passport"),
-        @JsonSubTypes.Type(value = Diploma.class, name = "diploma"),
-        @JsonSubTypes.Type(value = Certificate.class, name = "certificate"),
-        @JsonSubTypes.Type(value = NationalNumber.class, name = "number")
+        @JsonSubTypes.Type(value = NationalPassport.class, name = "Passport"),
+        @JsonSubTypes.Type(value = Diploma.class, name = "Diploma"),
+        @JsonSubTypes.Type(value = Certificate.class, name = "Certificate"),
+        @JsonSubTypes.Type(value = NationalNumber.class, name = "Number"),
+        @JsonSubTypes.Type(value = Procedure.class, name = "Procedure"),
+        @JsonSubTypes.Type(value = MedicalImage.class, name = "MedicalImage")
 })
-public class Document {
+public class Document implements Serializable {
 
-    private String type;
+    private String resourceType;
 
-    public enum Type {
-        passport,
-        diploma,
-        certificate,
-        number
+    public enum NationalDocumentType {
+        Passport,
+        Diploma,
+        Certificate,
+        Number
+    }
+
+    public enum MedicalDocumentType {
+        Procedure,
+        MedicalImage
     }
 
 }

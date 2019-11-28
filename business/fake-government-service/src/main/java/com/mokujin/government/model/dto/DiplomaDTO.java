@@ -6,12 +6,12 @@ import lombok.Data;
 @Data
 public class DiplomaDTO extends Diploma {
 
-    private String type;
+    private String resourceType;
 
     public DiplomaDTO(Diploma diploma) {
         super(diploma.getId(), diploma.getNumber(), diploma.getFirstName(), diploma.getLastName(),
                 diploma.getFatherName(), diploma.getPlaceOfStudy(), diploma.getCourseOfStudy(),
                 diploma.getDateOfIssue(), diploma.getQualification(), diploma.getIssuer());
-        this.type = "diploma";
+        this.resourceType = DocumentType.Diploma.name();
     }
 }

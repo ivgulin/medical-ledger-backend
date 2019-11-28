@@ -1,6 +1,6 @@
-package com.mokujin.ssi.model.government.document.impl;
+package com.mokujin.ssi.model.government.document;
 
-import com.mokujin.ssi.model.government.document.NationalDocument;
+import com.mokujin.ssi.model.document.national.NationalDocument;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,14 +15,14 @@ public class NationalNumber extends NationalDocument {
     private String issuer;
 
     public NationalNumber(String number, Long registrationDate, String issuer) {
-        super(Type.number.name());
+        super(NationalDocumentType.Number.name());
         this.number = number;
         this.registrationDate = registrationDate;
         this.issuer = issuer;
     }
 
     public NationalNumber() {
-        super(Type.number.name());
+        super(NationalDocumentType.Number.name());
     }
 
 }

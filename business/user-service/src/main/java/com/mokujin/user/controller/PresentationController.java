@@ -45,7 +45,7 @@ public class PresentationController {
         return new ResponseEntity<>(OK);
     }
 
-    @PostMapping("/present")
+    @PostMapping("/present/{connectionNumber}")
     public ResponseEntity present(@RequestBody Document document,
                                   @PathVariable String connectionNumber,
                                   @RequestHeader("Public-Key") String publicKey,
@@ -60,8 +60,8 @@ public class PresentationController {
 
     @PostMapping("/verify")
     public ResponseEntity<Affirmation> verify(@RequestBody Proof proof,
-                                              @PathVariable String nationalNumber,
-                                              @PathVariable String connectionNumber) {
+                                              @RequestParam String nationalNumber,
+                                              @RequestParam String connectionNumber) {
         log.info("'present' is invoked: '{}, {}, {}'", proof, nationalNumber, connectionNumber);
 
         Affirmation affirmation = presentationService.verifyProof(proof, nationalNumber, connectionNumber);

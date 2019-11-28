@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -32,11 +31,11 @@ public class User {
 
     private String photo;
 
-    private List<Credential> nationalCredentials = new ArrayList<>();
+    private List<Credential> nationalCredentials;
 
-    private List<Contact> contacts = new ArrayList<>();
+    private List<Contact> contacts;
 
-    private List<Credential> credentials = new ArrayList<>();
+    private List<Credential> credentials;
 
-    private List<HealthRecord> records = new ArrayList<>();
+    private List<HealthRecord> records;
 }

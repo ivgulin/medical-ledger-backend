@@ -1,10 +1,17 @@
 package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.document.Document.MedicalDocumentType;
+import com.mokujin.ssi.model.document.medical.dicom.MedicalImage;
+import com.mokujin.ssi.model.document.medical.hl7.LedgerModifiedProcedure;
+import com.mokujin.ssi.model.document.medical.hl7.Procedure;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
-import com.mokujin.ssi.model.government.document.impl.NationalNumber;
-import com.mokujin.ssi.model.government.document.impl.NationalPassport;
+import com.mokujin.ssi.model.government.document.NationalNumber;
+import com.mokujin.ssi.model.government.document.NationalPassport;
 import com.mokujin.ssi.model.internal.*;
 import com.mokujin.ssi.service.IdentityService;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +21,11 @@ import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.mokujin.ssi.model.internal.Role.DOCTOR;
@@ -67,10 +77,7 @@ public class IdentityServiceImpl implements IdentityService {
         String credentials = proverGetCredentials(wallet, "{}").get();
         log.info("'credentials={}'", credentials);
 
-        List<Credential> credentialList = credentials.equals("[]")
-                ? new ArrayList<>()
-                : objectMapper.readValue(credentials, new TypeReference<List<Credential>>() {
-        });
+        List<Credential> credentialList = this.processCredentials(credentials);
         identity.setCredentials(credentialList);
         log.info("identity = '{}'", identity);
 
@@ -110,6 +117,43 @@ public class IdentityServiceImpl implements IdentityService {
         log.info("'nymRegisterIdentityPseudonymResponse={}'", nymRegisterIdentityPseudonymResponse);
     }
 
+    private List<Credential> processCredentials(String credentials) throws IOException {
+        ArrayNode credentialsNode = (ArrayNode) objectMapper.readTree(credentials);
+
+        MedicalImage medicalImage = null;
+        Procedure procedure = null;
+        for (JsonNode credentialNode : credentialsNode) {
+            ObjectNode attrs = (ObjectNode) credentialNode.get("attrs");
+            String resourceType = attrs.get("resourceType").textValue();
+
+            if (resourceType.equals(MedicalDocumentType.MedicalImage.name())) {
+                Map<String, String> dicomProperties = objectMapper
+                        .convertValue(attrs, new TypeReference<HashMap<String, String>>() {
+                        });
+                medicalImage = new MedicalImage(dicomProperties);
+                ((ObjectNode) credentialNode).remove("attrs");
+            }
+            if (resourceType.equals(MedicalDocumentType.Procedure.name())) {
+                LedgerModifiedProcedure modifiedProcedure = objectMapper.convertValue(attrs, LedgerModifiedProcedure.class);
+                procedure = new Procedure(modifiedProcedure);
+                ((ObjectNode) credentialNode).remove("attrs");
+            }
+        }
+
+        List<Credential> credentialList = credentials.equals("[]")
+                ? new ArrayList<>()
+                : objectMapper.convertValue(credentialsNode, new TypeReference<List<Credential>>() {
+        });
+
+        for (Credential credential : credentialList) {
+            if (credential.getSchemaId().contains(MedicalDocumentType.MedicalImage.name()))
+                credential.setDocument(medicalImage);
+            if (credential.getSchemaId().contains(MedicalDocumentType.Procedure.name()))
+                credential.setDocument(procedure);
+        }
+        return credentialList;
+    }
+
     @Override
     public void exchangeContacts(Identity doctorIdentity, Identity patientIdentity,
                                  CreateAndStoreMyDidResult patientPseudonym,
@@ -136,7 +180,6 @@ public class IdentityServiceImpl implements IdentityService {
                 .isVisible(true)
                 .build();
         String contactJson = objectMapper.writeValueAsString(contact);
-        System.out.println("contactJson = " + contactJson);
         Did.setDidMetadata(userIdentity.getWallet(), contactPseudonym.getDid(), contactJson).get();
 
         userIdentity.addPseudonym(Pseudonym.builder()

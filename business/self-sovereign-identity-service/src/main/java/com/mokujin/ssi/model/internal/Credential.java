@@ -1,7 +1,7 @@
 package com.mokujin.ssi.model.internal;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.mokujin.ssi.model.government.document.Document;
+import com.mokujin.ssi.model.document.Document;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -9,6 +9,6 @@ public interface HealthDataService {
 
     List<HealthRecord> save(String publicKey, String privateKey, HealthRecord healthRecord);
 
-    User send(String publicKey, String privateKey, HealthRecord healthRecord, String connectionNumber);
+    User share(String publicKey, String privateKey, HealthRecord healthRecord, String doctorNumber);
 
 }

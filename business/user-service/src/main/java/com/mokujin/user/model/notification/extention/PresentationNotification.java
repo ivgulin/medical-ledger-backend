@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+import static com.mokujin.user.model.notification.Notification.Type.PRESENTATION;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PresentationNotification extends SystemNotification {
@@ -15,9 +17,9 @@ public class PresentationNotification extends SystemNotification {
 
     private List<String> attributes;
 
-    public PresentationNotification(Long date, Type type, Contact contact, String titleEn, String titleUkr,
+    public PresentationNotification(Long date, Contact contact, String titleEn, String titleUkr,
                                     String contentEn, String contentUkr, String documentType, List<String> attributes) {
-        super(date, type, contact, titleEn, titleUkr, contentEn, contentUkr);
+        super(date, PRESENTATION, contact, titleEn, titleUkr, contentEn, contentUkr);
         this.documentType = documentType;
         this.attributes = attributes;
     }

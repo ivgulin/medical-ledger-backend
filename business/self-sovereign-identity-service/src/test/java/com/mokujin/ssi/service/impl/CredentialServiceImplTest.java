@@ -2,10 +2,10 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.document.Document;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
-import com.mokujin.ssi.model.government.document.Document;
-import com.mokujin.ssi.model.government.document.impl.NationalNumber;
-import com.mokujin.ssi.model.government.document.impl.NationalPassport;
+import com.mokujin.ssi.model.government.document.NationalNumber;
+import com.mokujin.ssi.model.government.document.NationalPassport;
 import com.mokujin.ssi.service.CredentialService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,9 +17,10 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+// TODO: 11/26/2019 fix tests
 class CredentialServiceImplTest {
 
-    private CredentialService credentialService = new CredentialServiceImpl(new ObjectMapper());
+    private CredentialService credentialService = new CredentialServiceImpl(new ObjectMapper(), null, null, null, null, null);
 
     private static Stream<Arguments> getCredentials_provideDocumentsAndResultExpectations() {
 
@@ -61,12 +62,12 @@ class CredentialServiceImplTest {
         attributeThree.put("raw", issuer);
 
         ObjectNode attributeFour = objectMapper.createObjectNode();
-        attributeFour.put("raw", "number");
+        attributeFour.put("raw", "Number");
 
         nationalNumberNode.set("number", attributeOne);
         nationalNumberNode.set("registrationDate", attributeTwo);
         nationalNumberNode.set("issuer", attributeThree);
-        nationalNumberNode.set("type", attributeFour);
+        nationalNumberNode.set("resourceType", attributeFour);
         return nationalNumberNode;
     }
 
@@ -106,7 +107,7 @@ class CredentialServiceImplTest {
         attributeTen.put("raw", String.valueOf(someDate));
 
         ObjectNode attributeEleven = objectMapper.createObjectNode();
-        attributeEleven.put("raw", "passport");
+        attributeEleven.put("raw", "Passport");
 
         passportNode.set("number", attributeOne);
         passportNode.set("firstName", attributeTwo);
@@ -118,7 +119,7 @@ class CredentialServiceImplTest {
         passportNode.set("sex", attributeEight);
         passportNode.set("issuer", attributeNine);
         passportNode.set("dateOfIssue", attributeTen);
-        passportNode.set("type", attributeEleven);
+        passportNode.set("resourceType", attributeEleven);
         return passportNode;
     }
 

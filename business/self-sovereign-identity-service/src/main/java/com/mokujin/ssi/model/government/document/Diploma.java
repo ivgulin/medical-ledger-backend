@@ -1,6 +1,6 @@
-package com.mokujin.ssi.model.government.document.impl;
+package com.mokujin.ssi.model.government.document;
 
-import com.mokujin.ssi.model.government.document.NationalDocument;
+import com.mokujin.ssi.model.document.national.NationalDocument;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -28,7 +28,7 @@ public class Diploma extends NationalDocument {
 
     public Diploma(String number, String firstName, String lastName, String fatherName, String placeOfStudy,
                    String courseOfStudy, Long dateOfIssue, String qualification, String issuer) {
-        super(Type.diploma.name());
+        super(NationalDocumentType.Diploma.name());
         this.number = number;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -41,6 +41,6 @@ public class Diploma extends NationalDocument {
     }
 
     public Diploma() {
-        super(Type.diploma.name());
+        super(NationalDocumentType.Diploma.name());
     }
 }

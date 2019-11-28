@@ -2,9 +2,9 @@ package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.document.Document;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.government.KnownIdentity;
-import com.mokujin.ssi.model.government.document.Document;
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Schema;
@@ -21,7 +21,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import static com.mokujin.ssi.model.government.document.Document.Type.*;
+import static com.mokujin.ssi.model.document.Document.NationalDocumentType.Number;
+import static com.mokujin.ssi.model.document.Document.NationalDocumentType.*;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -72,22 +73,22 @@ public class VerificationServiceImpl implements VerificationService {
             ObjectNode credConfig = objectMapper.createObjectNode();
 
             String proofRequest;
-            if (document.getType().equals(passport.name())) {
+            if (document.getResourceType().equals(Passport.name())) {
                 proofRequest = credentialService.getProofRequest(passportSchema, document);
                 schemaConfig.set(passportSchema.getSchemaId(), objectMapper.readTree(passportSchema.getSchema()));
                 credConfig.set(passportSchema.getSchemaDefinitionId(),
                         objectMapper.readTree(passportSchema.getSchemaDefinition()));
-            } else if (document.getType().equals(number.name())) {
+            } else if (document.getResourceType().equals(Number.name())) {
                 proofRequest = credentialService.getProofRequest(nationalNumberSchema, document);
                 schemaConfig.set(nationalNumberSchema.getSchemaId(), objectMapper.readTree(nationalNumberSchema.getSchema()));
                 credConfig.set(nationalNumberSchema.getSchemaDefinitionId(),
                         objectMapper.readTree(nationalNumberSchema.getSchemaDefinition()));
-            } else if (document.getType().equals(diploma.name())) {
+            } else if (document.getResourceType().equals(Diploma.name())) {
                 proofRequest = credentialService.getProofRequest(diplomaSchema, document);
                 schemaConfig.set(diplomaSchema.getSchemaId(), objectMapper.readTree(diplomaSchema.getSchema()));
                 credConfig.set(diplomaSchema.getSchemaDefinitionId(),
                         objectMapper.readTree(diplomaSchema.getSchemaDefinition()));
-            } else if (document.getType().equals(certificate.name())) {
+            } else if (document.getResourceType().equals(Certificate.name())) {
                 proofRequest = credentialService.getProofRequest(certificateSchema, document);
                 schemaConfig.set(certificateSchema.getSchemaId(), objectMapper.readTree(certificateSchema.getSchema()));
                 credConfig.set(certificateSchema.getSchemaDefinitionId(),
@@ -115,14 +116,11 @@ public class VerificationServiceImpl implements VerificationService {
                     "{}").get();
             log.info("'proofApplication={}'", proofApplication);
 
-            String formedCredential = credentialService.getFormedCredential(suitableCredential);
-
             return Proof.builder()
                     .proofRequest(proofRequest)
                     .proofApplication(proofApplication)
                     .schemaConfig(schemaConfig.toString())
                     .credConfig(credConfig.toString())
-                    .formedCredential(formedCredential)
                     .build();
         } catch (LedgerException e) {
             log.error("Exception was thrown: " + e);
