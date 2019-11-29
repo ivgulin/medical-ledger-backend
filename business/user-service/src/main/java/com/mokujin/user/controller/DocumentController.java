@@ -86,17 +86,4 @@ public class DocumentController {
         log.info("'share' returned '{}'", user);
         return ResponseEntity.ok(user);
     }
-
-    @DeleteMapping("/delete/{credentialId}")
-    public ResponseEntity delete(@PathVariable String credentialId,
-                                 @RequestHeader("Public-Key") String publicKey,
-                                 @RequestHeader("Private-Key") String privateKey) {
-
-        log.info("'delete' invoked with params '{}, {}, {}'", publicKey, privateKey, credentialId);
-
-        documentService.deleteDocument(publicKey, privateKey, credentialId);
-
-        log.info("'delete' is executed successfully");
-        return new ResponseEntity(OK);
-    }
 }

@@ -36,12 +36,9 @@ class RegistrationServiceImplTest {
         String password = "test";
         UserCredentials credentials = new UserCredentials(email, password);
 
-        String encrypted = "encrypted";
-        when(bCryptPasswordEncoder.encode(email + password)).thenReturn(encrypted);
-
         ProcessedUserCredentials expected = ProcessedUserCredentials.builder()
                 .publicKey(email)
-                .privateKey(encrypted)
+                .privateKey(password)
                 .build();
         ProcessedUserCredentials result = registrationService.createWallet(credentials);
 

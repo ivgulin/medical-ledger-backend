@@ -17,7 +17,4 @@ public interface DocumentService {
     User askDocument(String publicKey, String privateKey, List<String> keywords, String patientNumber);
 
     User shareDocument(String publicKey, String privateKey, Document document, String doctorNumber);
-
-    void deleteDocument(String publicKey, String privateKey, String credentialId);
-
 }

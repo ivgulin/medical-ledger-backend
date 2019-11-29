@@ -332,7 +332,13 @@ public class NotificationServiceImpl implements NotificationService {
                 break;
             case "PROOF":
                 this.removeProofNotification(nationalNumber, notification.getContact().getNationalNumber(),
-                        ((PresentationNotification) notification).getDocumentType());
+                        ((ProofNotification) notification).getProof().getDocument().getResourceType());
+                break;
+            case "HEALTH":
+                this.removeHealthNotification(nationalNumber, notification.getContact().getNationalNumber());
+                break;
+            case "OFFER":
+                this.removeOfferNotification(nationalNumber, notification.getContact().getNationalNumber());
                 break;
             case "ASK":
                 this.removeAskNotification(nationalNumber, notification.getContact().getNationalNumber());
