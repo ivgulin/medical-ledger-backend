@@ -38,6 +38,7 @@ pipeline {
             steps {
                 println 'stage: maven build'
                 withMaven(maven: 'maven3') {
+                    sh 'mvn install:install-file -Dfile=./business/user-service/external/pixelmed.jar -DgroupId=pixelmed -DartifactId=pixelmed -Dversion=1.0 -Dpackaging=jar'
                     sh 'mvn -B -Dmaven.test.skip=true clean package'
                 }
             }
