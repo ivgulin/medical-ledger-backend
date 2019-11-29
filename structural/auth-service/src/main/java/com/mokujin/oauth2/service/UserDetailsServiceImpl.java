@@ -30,8 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                         "&private=" + credentials[1], AuthResponse.class);
 
         if (authResponse.isExists()) {
-            User user = new User(credentials[0],
-                    "$2a$10$APikXN.LGwEBvb4KkHN0wegMpgLbDKNI2SoJ6tUu.4ZCAwMPf2K2u",
+            User user = new User(username, "$2a$10$APikXN.LGwEBvb4KkHN0wegMpgLbDKNI2SoJ6tUu.4ZCAwMPf2K2u",
                     Collections.singleton(authResponse.getRole()));
             return new UserDetailsImpl(user);
         } else {
