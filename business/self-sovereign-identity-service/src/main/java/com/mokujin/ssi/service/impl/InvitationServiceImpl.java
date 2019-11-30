@@ -1,5 +1,6 @@
 package com.mokujin.ssi.service.impl;
 
+import com.mokujin.ssi.model.exception.BusinessException;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.user.request.UserCredentials;
@@ -46,6 +47,9 @@ public class InvitationServiceImpl implements InvitationService {
             identityService.exchangeContacts(doctorIdentity, patientIdentity, patientPseudonym, doctorPseudonym);
 
             return userService.convert(doctorIdentity);
+        } catch (BusinessException e) {
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
             throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());

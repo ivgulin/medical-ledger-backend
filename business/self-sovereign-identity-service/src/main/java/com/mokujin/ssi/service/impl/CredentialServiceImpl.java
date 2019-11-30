@@ -9,6 +9,7 @@ import com.mokujin.ssi.model.document.Document.MedicalDocumentType;
 import com.mokujin.ssi.model.document.medical.dicom.MedicalImage;
 import com.mokujin.ssi.model.document.medical.hl7.ModifiedProcedure;
 import com.mokujin.ssi.model.document.medical.hl7.Procedure;
+import com.mokujin.ssi.model.exception.BusinessException;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.internal.Identity;
@@ -223,9 +224,11 @@ public class CredentialServiceImpl implements CredentialService {
 
             patientIdentity = identityService.findByWallet(patientWallet);
             return userService.convert(patientIdentity);
+        } catch (BusinessException e) {
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
-            e.printStackTrace();
             throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }

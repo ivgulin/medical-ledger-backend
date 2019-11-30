@@ -3,7 +3,9 @@ package com.mokujin.ssi.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.document.Document;
+import com.mokujin.ssi.model.exception.BusinessException;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
+import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.KnownIdentity;
 import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Identity;
@@ -93,7 +95,7 @@ public class VerificationServiceImpl implements VerificationService {
                 schemaConfig.set(certificateSchema.getSchemaId(), objectMapper.readTree(certificateSchema.getSchema()));
                 credConfig.set(certificateSchema.getSchemaDefinitionId(),
                         objectMapper.readTree(certificateSchema.getSchemaDefinition()));
-            } else throw new LedgerException(NOT_FOUND, "No type of document was provided.");
+            } else throw new ResourceNotFoundException("No type of document was provided.");
 
 
             String suitableCredential = proverGetCredentialsForProofReq(
@@ -122,7 +124,7 @@ public class VerificationServiceImpl implements VerificationService {
                     .schemaConfig(schemaConfig.toString())
                     .credConfig(credConfig.toString())
                     .build();
-        } catch (LedgerException e) {
+        } catch (BusinessException e) {
             log.error("Exception was thrown: " + e);
             throw new LedgerException(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {

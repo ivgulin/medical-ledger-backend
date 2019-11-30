@@ -98,11 +98,12 @@ public class RegistrationServiceImpl implements RegistrationService {
             log.info("'user={}'", user);
             return user;
 
+        } catch (BusinessException e) {
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
-            if (e instanceof BusinessException) {
-                throw new LedgerException(((BusinessException) e).getStatusCode(), e.getMessage());
-            } else throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
+            throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

@@ -1,6 +1,7 @@
 package com.mokujin.ssi.service.impl;
 
 import com.mokujin.ssi.model.document.national.NationalDocument;
+import com.mokujin.ssi.model.exception.BusinessException;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.document.NationalNumber;
@@ -81,6 +82,9 @@ public class UserServiceImpl implements UserService {
         try (Wallet userWallet = walletService.getOrCreateWallet(publicKey, privateKey);) {
             Identity userIdentity = identityService.findByWallet(userWallet);
             return this.convert(userIdentity);
+        } catch (BusinessException e) {
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
             throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());

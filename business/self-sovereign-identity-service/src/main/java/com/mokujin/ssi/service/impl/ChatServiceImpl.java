@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokujin.ssi.model.chat.Chat;
 import com.mokujin.ssi.model.chat.LedgerChatResponse;
 import com.mokujin.ssi.model.chat.Message;
+import com.mokujin.ssi.model.exception.BusinessException;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.service.ChatService;
 import com.mokujin.ssi.service.WalletService;
@@ -28,6 +29,9 @@ public class ChatServiceImpl implements ChatService {
 
         try (Wallet wallet = walletService.getOrCreateWallet(publicKey, privateKey);) {
             return this.getOrCreateChat(connectionNumber, wallet);
+        } catch (BusinessException e) {
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
             throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
@@ -63,6 +67,9 @@ public class ChatServiceImpl implements ChatService {
 
             WalletRecord.updateValue(wallet, "chat", connectionNumber, chatInString);
             return chat;
+        }catch (BusinessException e) {
+            log.error("Exception was thrown: " + e);
+            throw new LedgerException(e.getStatusCode(), e.getMessage());
         } catch (Exception e) {
             log.error("Exception was thrown: " + e);
             throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
