@@ -117,25 +117,26 @@ public class IdentityServiceImpl implements IdentityService {
         log.info("'nymRegisterIdentityPseudonymResponse={}'", nymRegisterIdentityPseudonymResponse);
     }
 
-    private List<Credential> processCredentials(String credentials) throws IOException {
+    List<Credential> processCredentials(String credentials) throws IOException {
         ArrayNode credentialsNode = (ArrayNode) objectMapper.readTree(credentials);
 
         MedicalImage medicalImage = null;
         Procedure procedure = null;
         for (JsonNode credentialNode : credentialsNode) {
+            System.out.println("credentialNode = " + credentialNode.toString());
             ObjectNode attrs = (ObjectNode) credentialNode.get("attrs");
             String resourceType = attrs.get("resourceType").textValue();
 
             if (resourceType.equals(MedicalDocumentType.MedicalImage.name())) {
                 Map<String, String> dicomProperties = objectMapper
-                        .convertValue(attrs, new TypeReference<HashMap<String, String>>() {
-                        });
+                        .convertValue(attrs, new TypeReference<HashMap<String, String>>() {});
                 medicalImage = new MedicalImage(dicomProperties);
                 ((ObjectNode) credentialNode).remove("attrs");
             }
             if (resourceType.equals(MedicalDocumentType.Procedure.name())) {
                 LedgerModifiedProcedure modifiedProcedure = objectMapper.convertValue(attrs, LedgerModifiedProcedure.class);
                 procedure = new Procedure(modifiedProcedure);
+                System.out.println("procedure = " + procedure);
                 ((ObjectNode) credentialNode).remove("attrs");
             }
         }

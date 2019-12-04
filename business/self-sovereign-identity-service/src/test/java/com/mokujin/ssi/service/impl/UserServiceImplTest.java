@@ -9,12 +9,13 @@ import com.mokujin.ssi.model.internal.Contact;
 import com.mokujin.ssi.model.internal.Credential;
 import com.mokujin.ssi.model.internal.Identity;
 import com.mokujin.ssi.model.internal.Pseudonym;
+import com.mokujin.ssi.model.record.impl.HeartHealthRecord;
 import com.mokujin.ssi.model.user.response.User;
+import com.mokujin.ssi.service.HealthDataService;
 import com.mokujin.ssi.service.IdentityService;
 import com.mokujin.ssi.service.WalletService;
 import lombok.SneakyThrows;
 import org.hyperledger.indy.sdk.wallet.Wallet;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,12 +41,14 @@ class UserServiceImplTest {
     @Mock
     private IdentityService identityService;
 
+    @Mock
+    private HealthDataService healthDataService;
+
     @InjectMocks
     private UserServiceImpl userService;
 
     @Test
-    @Disabled
-        // TODO: 23.11.19 fix it
+    @SneakyThrows
     void convert_identityIsOk_userIsReturned() {
 
         String name = "John";
@@ -76,10 +79,17 @@ class UserServiceImplTest {
                         .build())
                 .build();
 
+        Wallet wallet = mock(Wallet.class);
+
         Identity identity = Identity.builder()
+                .wallet(wallet)
                 .credentials(new ArrayList<>(Arrays.asList(passportCredential, testCredential, nationalNumberCredential)))
                 .pseudonyms(Collections.singletonList(pseudonym))
                 .build();
+
+        HeartHealthRecord healthRecord = new HeartHealthRecord();
+        healthRecord.setOxygenSaturation(90);
+        when(healthDataService.getRecords(wallet)).thenReturn(Collections.singletonList(healthRecord));
 
         User expected = User.builder()
                 .lastName(lastName)
@@ -90,7 +100,9 @@ class UserServiceImplTest {
                 .contacts(Collections.singletonList(pseudonym.getContact()))
                 .credentials(Collections.singletonList(testCredential))
                 .nationalCredentials(Arrays.asList(passportCredential, nationalNumberCredential))
+                .records(Collections.singletonList(healthRecord))
                 .build();
+
 
         User result = userService.convert(identity);
 
@@ -109,7 +121,7 @@ class UserServiceImplTest {
 
     @Test
     @SneakyThrows
-    void get_exceptionOccursInsideTryBlock_walletIsClosedAndExceptionIsThrown() {
+    void get_businessExceptionOccursInsideTryBlock_walletIsClosedAndExceptionIsThrown() {
 
         String publicKey = "public";
         String privateKey = "private";
@@ -118,6 +130,22 @@ class UserServiceImplTest {
         when(walletService.getOrCreateWallet(publicKey, privateKey)).thenReturn(wallet);
 
         when(identityService.findByWallet(wallet)).thenThrow(new LedgerException(INTERNAL_SERVER_ERROR, "test"));
+
+        assertThrows(LedgerException.class, () -> userService.get(publicKey, privateKey));
+        verify(wallet, times(1)).close();
+    }
+
+    @Test
+    @SneakyThrows
+    void get_exceptionOccursInsideTryBlock_walletIsClosedAndExceptionIsThrown() {
+
+        String publicKey = "public";
+        String privateKey = "private";
+
+        Wallet wallet = Mockito.mock(Wallet.class);
+        when(walletService.getOrCreateWallet(publicKey, privateKey)).thenReturn(wallet);
+
+        when(identityService.findByWallet(wallet)).thenThrow(new Exception("test"));
 
         assertThrows(LedgerException.class, () -> userService.get(publicKey, privateKey));
         verify(wallet, times(1)).close();

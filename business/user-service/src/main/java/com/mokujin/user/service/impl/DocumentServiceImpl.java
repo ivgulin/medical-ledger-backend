@@ -19,6 +19,7 @@ import com.mokujin.user.service.UserService;
 import com.pixelmed.dicom.*;
 import com.pixelmed.display.ConsumerFormatImageMaker;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -103,11 +105,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     }
 
-    private String getTagInformation(AttributeTag attrTag, AttributeList list) {
-        return Attribute.getDelimitedStringValuesOrEmptyString(list, attrTag);
-    }
-
-    private Document convertToDocument(DocumentDraft documentDraft) {
+    Document convertToDocument(DocumentDraft documentDraft) {
         if (documentDraft.getType().equals(Document.MedicalDocumentType.Procedure.name())) {
             return this.convertToProcedure((ProcedureDraft) documentDraft);
         } else if (documentDraft.getType().equals(Document.MedicalDocumentType.MedicalImage.name())) {
@@ -115,7 +113,7 @@ public class DocumentServiceImpl implements DocumentService {
         } else throw new ClientException(NOT_FOUND, "Invalid document type has been provided.");
     }
 
-    private Procedure convertToProcedure(ProcedureDraft procedureDraft) {
+    Procedure convertToProcedure(ProcedureDraft procedureDraft) {
 
         String name = procedureDraft.getName();
         Narrative text = new Narrative(Narrative.NarrativeStatus.generated,
@@ -172,7 +170,8 @@ public class DocumentServiceImpl implements DocumentService {
                 recorder, asserter, performer, reasons, bodySites, complications, followUps, notes);
     }
 
-    private MedicalImage convertToMedicalImage(MedicalImageDraft medicalImageDraft) {
+    @SneakyThrows
+    MedicalImage convertToMedicalImage(MedicalImageDraft medicalImageDraft) {
 
         byte[] imageBytes = Base64.decodeBase64(medicalImageDraft.getImage());
 
@@ -184,18 +183,18 @@ public class DocumentServiceImpl implements DocumentService {
 
             Map<String, String> dicomMap = new HashMap<>();
             List<Field> fields = Arrays.asList(TagFromName.class.getDeclaredFields());
-            fields.stream().filter(field -> field.getType() == AttributeTag.class).forEach(field -> {
+            List<Field> attributes = fields.stream()
+                    .filter(field -> field.getType() == AttributeTag.class)
+                    .collect(Collectors.toList());
 
-                if (Modifier.isFinal(field.getModifiers())) {
-                    try {
-                        String tagInformation = this.getTagInformation((AttributeTag) field.get(null), list);
-                        if (!tagInformation.isEmpty())
-                            dicomMap.put(field.getName(), tagInformation);
-                    } catch (IllegalAccessException e) {
-                        throw new ServerException(INTERNAL_SERVER_ERROR, e.getMessage());
-                    }
+            for (Field attribute : attributes) {
+                if (Modifier.isFinal(attribute.getModifiers())) {
+                    String tagInformation = this.getTagInformation((AttributeTag) attribute.get(null), list);
+                    if (!tagInformation.isEmpty())
+                        dicomMap.put(attribute.getName(), tagInformation);
+
                 }
-            });
+            }
 
             BufferedImage bufferedImage = ConsumerFormatImageMaker.makeEightBitImage(list);
             ImageIO.write(bufferedImage, "png", baos);
@@ -212,5 +211,9 @@ public class DocumentServiceImpl implements DocumentService {
             log.error("Exception was thrown: " + e);
             throw new ServerException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    String getTagInformation(AttributeTag attrTag, AttributeList list) {
+        return Attribute.getDelimitedStringValuesOrEmptyString(list, attrTag);
     }
 }

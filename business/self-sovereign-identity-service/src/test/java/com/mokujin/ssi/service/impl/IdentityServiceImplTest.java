@@ -3,6 +3,8 @@ package com.mokujin.ssi.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.document.medical.dicom.MedicalImage;
+import com.mokujin.ssi.model.document.medical.hl7.Procedure;
 import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
 import com.mokujin.ssi.model.government.document.NationalNumber;
 import com.mokujin.ssi.model.government.document.NationalPassport;
@@ -26,12 +28,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static com.mokujin.ssi.model.internal.Role.DOCTOR;
 import static com.mokujin.ssi.model.internal.Role.PATIENT;
+import static java.util.Collections.*;
 import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -153,13 +157,13 @@ class IdentityServiceImplTest {
                 .wallet(wallet)
                 .role(DOCTOR)
                 .image(photo)
-                .credentials(Collections.singletonList(Credential.builder()
+                .credentials(singletonList(Credential.builder()
                         .id(credentialId)
                         .document(new NationalNumber(nationalNumber, registrationDate, issuer))
                         .schemaId(schemaId)
                         .schemaDefinitionId(credDefId)
                         .build()))
-                .pseudonyms(Collections.singletonList(Pseudonym.builder()
+                .pseudonyms(singletonList(Pseudonym.builder()
                         .contact(Contact.builder()
                                 .contactName(contactName)
                                 .photo(photo)
@@ -204,11 +208,60 @@ class IdentityServiceImplTest {
         Identity expected = Identity.builder()
                 .wallet(wallet)
                 .role(PATIENT)
-                .credentials(Collections.emptyList())
-                .pseudonyms(Collections.emptyList())
+                .credentials(emptyList())
+                .pseudonyms(emptyList())
                 .build();
 
         Identity result = identityService.findByWallet(wallet);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    @SneakyThrows
+    void processCredentials_inputWithSpecificDocuments_listOfCredentialsAreReturned() {
+
+        ObjectNode medicalImageNode = objectMapper.createObjectNode();
+        medicalImageNode.put("Image", "image");
+        medicalImageNode.put("resourceType", "MedicalImage");
+
+        String reference = "ref";
+        String imageSchemaId = "schema MedicalImage";
+        String procedureSchemaId = "schema Procedure";
+        String credId = "cred id";
+
+        ObjectNode medicalImageCredential = objectMapper.createObjectNode();
+        medicalImageCredential.put("referent", reference);
+        medicalImageCredential.set("attrs", medicalImageNode);
+        medicalImageCredential.put("schema_id", imageSchemaId);
+        medicalImageCredential.put("cred_def_id", credId);
+
+        ObjectNode procedureNode = objectMapper.createObjectNode();
+        procedureNode.put("resourceType", "Procedure");
+        procedureNode.put("textStatus", "generated");
+
+        ObjectNode procedureCredential = objectMapper.createObjectNode();
+        procedureCredential.put("referent", reference);
+        procedureCredential.set("attrs", procedureNode);
+        procedureCredential.put("schema_id", procedureSchemaId);
+        procedureCredential.put("cred_def_id", credId);
+
+        ArrayNode credentials = objectMapper.createArrayNode();
+        credentials.add(medicalImageCredential).add(procedureCredential);
+
+        String credentialsString = credentials.toString();
+
+        List<Credential> expected = new ArrayList<>();
+        HashMap<String, String> attributes = new HashMap<>();
+        attributes.put("Image", "image");
+        attributes.put("resourceType", "MedicalImage");
+        expected.add(new Credential(reference, new MedicalImage(attributes), imageSchemaId, credId));
+        expected.add(new Credential(reference, new Procedure(), procedureSchemaId, credId));
+
+        List<Credential> result = identityService.processCredentials(credentialsString);
+
+        Credential credential = result.stream().filter(r -> r.getDocument() instanceof Procedure).findFirst().get();
+        credential.setDocument(new Procedure());
 
         assertEquals(expected, result);
     }

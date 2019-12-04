@@ -49,7 +49,7 @@ class InvitationServiceImplTest {
 
     @Test
     @SneakyThrows
-    void connect_exceptionOccursInsideTryBlock_walletIsClosedAndExceptionIsThrown() {
+    void connect_businessExceptionOccursInsideTryBlock_walletIsClosedAndExceptionIsThrown() {
 
         String publicKey = "public";
         String privateKey = "private";
@@ -59,6 +59,24 @@ class InvitationServiceImplTest {
         when(walletService.getOrCreateWallet(publicKey, privateKey)).thenReturn(wallet);
 
         doThrow(new LedgerException(INTERNAL_SERVER_ERROR, "Test exception"))
+                .when(identityService).findByWallet(wallet);
+
+        assertThrows(LedgerException.class, () -> invitationService.connect(publicKey, privateKey, userCredentials));
+        verify(wallet, times(2)).close();
+    }
+
+    @Test
+    @SneakyThrows
+    void connect_exceptionOccursInsideTryBlock_walletIsClosedAndExceptionIsThrown() {
+
+        String publicKey = "public";
+        String privateKey = "private";
+        UserCredentials userCredentials = new UserCredentials(publicKey, privateKey);
+
+        Wallet wallet = Mockito.mock(Wallet.class);
+        when(walletService.getOrCreateWallet(publicKey, privateKey)).thenReturn(wallet);
+
+        doThrow(new Exception("Test exception"))
                 .when(identityService).findByWallet(wallet);
 
         assertThrows(LedgerException.class, () -> invitationService.connect(publicKey, privateKey, userCredentials));

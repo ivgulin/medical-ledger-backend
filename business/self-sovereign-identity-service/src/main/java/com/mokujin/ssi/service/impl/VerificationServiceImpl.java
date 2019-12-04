@@ -27,7 +27,6 @@ import static com.mokujin.ssi.model.document.Document.NationalDocumentType.Numbe
 import static com.mokujin.ssi.model.document.Document.NationalDocumentType.*;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.*;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 
 @Slf4j

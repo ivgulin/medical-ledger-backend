@@ -6,21 +6,173 @@ import com.mokujin.ssi.model.document.Document;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.government.document.NationalNumber;
 import com.mokujin.ssi.model.government.document.NationalPassport;
-import com.mokujin.ssi.service.CredentialService;
+import com.mokujin.ssi.service.IdentityService;
+import com.mokujin.ssi.service.SchemaService;
+import com.mokujin.ssi.service.UserService;
+import com.mokujin.ssi.service.WalletService;
+import lombok.SneakyThrows;
+import mockit.MockUp;
+import org.hyperledger.indy.sdk.anoncreds.Anoncreds;
+import org.hyperledger.indy.sdk.anoncreds.AnoncredsResults;
+import org.hyperledger.indy.sdk.did.DidResults;
+import org.hyperledger.indy.sdk.pool.Pool;
+import org.hyperledger.indy.sdk.wallet.Wallet;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
-// TODO: 11/26/2019 fix tests
 class CredentialServiceImplTest {
 
-    private CredentialService credentialService = new CredentialServiceImpl(new ObjectMapper(), null, null, null, null, null);
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    @Mock
+    private SchemaService schemaService;
+
+    @Mock
+    private IdentityService identityService;
+
+    @Mock
+    private WalletService walletService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private Pool pool;
+
+    private CredentialServiceImpl credentialService;
+
+    @BeforeEach
+    void setUp() {
+        credentialService = new CredentialServiceImpl(objectMapper, schemaService, identityService,
+                walletService, userService, pool);
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("getCredentials_provideDocumentsAndResultExpectations")
+    void getCredential_everyDocumentIsProvided_jsonStringIsReturned(Document document, String expected) {
+
+        String credential = credentialService.getCredential(document);
+        System.out.println("credential = " + credential);
+        String result = credential.replaceAll(",\"encoded\":\"[^\"]*\"", "");
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getCredential_documentHasNullField_exceptionIsThrown() {
+        NationalNumber nationalNumber = new NationalNumber(null, null, null);
+        assertThrows(LedgerException.class, () -> credentialService.getCredential(nationalNumber));
+    }
+
+    @Test
+    @SneakyThrows
+    void issueCredential_validInputs_methodIsExecuted() {
+
+        Wallet userWallet = mock(Wallet.class);
+        Wallet trustAnchorWallet = mock(Wallet.class);
+        String trustAnchorPseudonymDid = "gov did";
+
+        String masterSecretId = "key";
+        NationalNumber nationalNumber = new NationalNumber();
+        String credential = "credential";
+
+        AnoncredsResults.ProverCreateCredentialRequestResult credentialRequestResult = mock(AnoncredsResults.ProverCreateCredentialRequestResult.class);
+        String credentialRequest = "cred req";
+        String credentialRequestMetadata = "cred req metadata";
+        when(credentialRequestResult.getCredentialRequestJson()).thenReturn(credentialRequest);
+        when(credentialRequestResult.getCredentialRequestMetadataJson()).thenReturn(credentialRequestMetadata);
+
+        AnoncredsResults.IssuerCreateCredentialResult issuerCreateCredentialResult = mock(AnoncredsResults.IssuerCreateCredentialResult.class);
+        String credentialsResult = "creds result";
+        String revocRegDelta = "delta";
+        when(issuerCreateCredentialResult.getCredentialJson()).thenReturn(credentialsResult);
+        when(issuerCreateCredentialResult.getRevocRegDeltaJson()).thenReturn(revocRegDelta);
+
+        String schemaDefinitionId = "schema def id";
+        String schemaDefinition = "schema def";
+
+        String credentialOffer = "offer";
+
+        new MockUp<Anoncreds>() {
+            @mockit.Mock
+            public CompletableFuture<String> issuerCreateCredentialOffer(Wallet wallet, String credDefId) {
+                assertEquals(trustAnchorWallet, wallet);
+                assertEquals(schemaDefinitionId, credDefId);
+
+                CompletableFuture<String> future = new CompletableFuture<>();
+                future.complete(credentialOffer);
+                return future;
+            }
+
+            @mockit.Mock
+            public CompletableFuture<AnoncredsResults.ProverCreateCredentialRequestResult> proverCreateCredentialReq(Wallet wallet,
+                                                                                                                     String proverDid,
+                                                                                                                     String credentialOfferJson,
+                                                                                                                     String credentialDefJson,
+                                                                                                                     String masterSecretId1) {
+                assertEquals(userWallet, wallet);
+                assertEquals(trustAnchorPseudonymDid, proverDid);
+                assertEquals(credentialOffer, credentialOfferJson);
+                assertEquals(schemaDefinition, credentialDefJson);
+                assertEquals(masterSecretId, masterSecretId1);
+
+                CompletableFuture<AnoncredsResults.ProverCreateCredentialRequestResult> future = new CompletableFuture<>();
+                future.complete(credentialRequestResult);
+                return future;
+            }
+
+            @mockit.Mock
+            public CompletableFuture<AnoncredsResults.IssuerCreateCredentialResult> issuerCreateCredential(Wallet wallet,
+                                                                                                           String credOfferJson,
+                                                                                                           String credReqJson,
+                                                                                                           String credValuesJson,
+                                                                                                           String revRegId,
+                                                                                                           int blobStorageReaderHandle) {
+                assertEquals(trustAnchorWallet, wallet);
+                assertEquals(credentialOffer, credOfferJson);
+                assertEquals(credentialRequest, credReqJson);
+                assertEquals(credential, credValuesJson);
+
+                CompletableFuture<AnoncredsResults.IssuerCreateCredentialResult> future = new CompletableFuture<>();
+                future.complete(issuerCreateCredentialResult);
+                return future;
+            }
+
+            @mockit.Mock
+            public CompletableFuture<String> proverStoreCredential(Wallet wallet, String credId,
+                                                                   String credReqMetadataJson, String credJson,
+                                                                   String credDefJson, String revRegDefJson) {
+                assertEquals(userWallet, wallet);
+                assertEquals(credentialRequestMetadata, credReqMetadataJson);
+                assertEquals(credentialsResult, credJson);
+                assertEquals(schemaDefinition, credDefJson);
+                assertEquals(revocRegDelta, revRegDefJson);
+
+                CompletableFuture<String> future = new CompletableFuture<>();
+                future.complete(credentialOffer);
+                return future;
+            }
+        };
+
+        credentialService = spy(credentialService);
+        doReturn(credential).when(credentialService).getCredential(nationalNumber);
+
+        credentialService.issueCredential(userWallet, trustAnchorWallet, trustAnchorPseudonymDid, schemaDefinitionId,
+                schemaDefinition, nationalNumber, masterSecretId);
+    }
+
 
     private static Stream<Arguments> getCredentials_provideDocumentsAndResultExpectations() {
 
@@ -123,20 +275,4 @@ class CredentialServiceImplTest {
         return passportNode;
     }
 
-    @ParameterizedTest
-    @MethodSource("getCredentials_provideDocumentsAndResultExpectations")
-    void getCredential_everyDocumentIsProvided_jsonStringIsReturned(Document document, String expected) {
-
-        String credential = credentialService.getCredential(document);
-        System.out.println("credential = " + credential);
-        String result = credential.replaceAll(",\"encoded\":\"[^\"]*\"", "");
-
-        assertEquals(expected, result);
-    }
-
-    @Test
-    void getCredential_documentHasNullField_exceptionIsThrown() {
-        NationalNumber nationalNumber = new NationalNumber(null, null, null);
-        assertThrows(LedgerException.class, () -> credentialService.getCredential(nationalNumber));
-    }
 }

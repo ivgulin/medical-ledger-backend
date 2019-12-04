@@ -27,7 +27,7 @@ public class HealthDataServiceImpl implements HealthDataService {
 
     @Override
     public List<HealthRecord> save(String publicKey, String privateKey, HealthRecord healthRecord) {
-        try (Wallet wallet = walletService.getOrCreateWallet(publicKey, privateKey);) {
+        try (Wallet wallet = walletService.getOrCreateWallet(publicKey, privateKey)) {
 
             List<HealthRecord> records = this.getRecords(wallet);
             records.add(healthRecord);

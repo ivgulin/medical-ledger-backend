@@ -48,6 +48,22 @@ class NotificationServiceImplTest {
     @InjectMocks
     private NotificationServiceImpl notificationService;
 
+    private static Stream<Arguments> provideNotifications() {
+
+        Contact contact = Contact.builder().nationalNumber("contact number").build();
+
+        return Stream.of(
+                Arguments.of(new SystemNotification(null, INVITATION, contact, "INVITATION", "", "", "")),
+                Arguments.of(new SystemNotification(null, CONNECTION, contact, "CONNECTION", "", "", "")),
+                Arguments.of(new PresentationNotification(null, contact, "", "", "", "", Number.name(), Collections.emptyList())),
+                Arguments.of(new ProofNotification(null, contact, "", "", "", "", new Proof("", "", "", "", new NationalNumber()))),
+                Arguments.of(new HealthNotification(null, contact, "", "", "", "", new BodyMeasurement())),
+                Arguments.of(new OfferNotification(null, contact, "", "", "", "", new MedicalImage())),
+                Arguments.of(new AskNotification(null, contact, "", "", "", "", Collections.emptyList())),
+                Arguments.of(new DocumentNotification(null, contact, "", "", "", "", new MedicalImage()))
+        );
+    }
+
     @Test
     void getNotifications_validInputs_collectedNotificationsAreReturned() {
 
@@ -348,7 +364,6 @@ class NotificationServiceImplTest {
         assertEquals(result, presentationValue.getValue());
     }
 
-
     @Test
     void removePresentationNotification_validInputs_notificationIsDeleted() {
         String number = "number";
@@ -541,7 +556,6 @@ class NotificationServiceImplTest {
 
     }
 
-
     @Test
     void addAskNotification_validInputs_notificationIsReturned() {
         String number = "number";
@@ -670,21 +684,5 @@ class NotificationServiceImplTest {
             verify(notificationService, times(1))
                     .removeDocumentNotification(nationalNumber, notification.getContact().getNationalNumber());
         }
-    }
-
-    private static Stream<Arguments> provideNotifications() {
-
-        Contact contact = Contact.builder().nationalNumber("contact number").build();
-
-        return Stream.of(
-                Arguments.of(new SystemNotification(null, INVITATION, contact, "INVITATION", "", "", "")),
-                Arguments.of(new SystemNotification(null, CONNECTION, contact, "CONNECTION", "", "", "")),
-                Arguments.of(new PresentationNotification(null, contact, "", "", "", "", Number.name(), Collections.emptyList())),
-                Arguments.of(new ProofNotification(null, contact, "", "", "", "", new Proof("", "", "", "", new NationalNumber()))),
-                Arguments.of(new HealthNotification(null, contact, "", "", "", "", new BodyMeasurement())),
-                Arguments.of(new OfferNotification(null, contact, "", "", "", "", new MedicalImage())),
-                Arguments.of(new AskNotification(null, contact, "", "", "", "", Collections.emptyList())),
-                Arguments.of(new DocumentNotification(null, contact, "", "", "", "", new MedicalImage()))
-        );
     }
 }

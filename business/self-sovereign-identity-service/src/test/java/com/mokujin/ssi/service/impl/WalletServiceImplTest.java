@@ -1,6 +1,9 @@
 package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mokujin.ssi.model.internal.Role;
 import com.mokujin.ssi.model.user.response.Auth;
 import com.mokujin.ssi.service.WalletService;
 import lombok.SneakyThrows;
@@ -8,13 +11,15 @@ import lombok.extern.slf4j.Slf4j;
 import mockit.Mock;
 import mockit.MockUp;
 import org.hyperledger.indy.sdk.IndyException;
+import org.hyperledger.indy.sdk.did.Did;
 import org.hyperledger.indy.sdk.wallet.Wallet;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -22,7 +27,9 @@ import static org.mockito.Mockito.mock;
 @Slf4j
 class WalletServiceImplTest {
 
-    private WalletService walletService = new WalletServiceImpl(new ObjectMapper());
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    private WalletService walletService = new WalletServiceImpl(objectMapper);
 
     @Test
     @SneakyThrows
@@ -75,25 +82,64 @@ class WalletServiceImplTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"valid,valid,true", "invalid,valid,false"})
-    @Disabled
-        // TODO: 23.11.19 fix it
-    void doesWalletExist_validInputs_walletIsReturned(String publicKey, String privateKey, boolean expected) {
+    @MethodSource("provideKeysAndResultExpectations")
+    void doesWalletExist_validInputs_walletIsReturned(String publicKey, String privateKey, Auth expectedAuth) {
 
-        Wallet wallet = mock(Wallet.class);
+        Wallet doctorWallet = mock(Wallet.class);
+        Wallet patientWallet = mock(Wallet.class);
+
         new MockUp<Wallet>() {
             @Mock
             public CompletableFuture<Wallet> openWallet(String config, String credentials) throws Exception {
-                System.out.println("public = " + config);
+                CompletableFuture<Wallet> future = new CompletableFuture<>();
 
                 if (config.equals("{\"id\":\"invalid\"}")) throw new Exception();
-                CompletableFuture<Wallet> future = new CompletableFuture<>();
-                future.complete(wallet);
+                if (config.equals("{\"id\":\"doctor\"}")) future.complete(doctorWallet);
+                if (config.equals("{\"id\":\"patient\"}")) future.complete(patientWallet);
+
+                return future;
+            }
+        };
+
+        new MockUp<Did>() {
+            @mockit.Mock
+            public CompletableFuture<String> getListMyDidsWithMeta(Wallet wallet) {
+                ArrayNode contacts = objectMapper.createArrayNode();
+
+                if (wallet.equals(doctorWallet)) {
+                    ObjectNode verinym = objectMapper.createObjectNode();
+                    verinym.put("contactName", "John Doe");
+                    verinym.put("verinym", true);
+
+                    String verinymInString = verinym.toString();
+
+                    ObjectNode verinymData = objectMapper.createObjectNode();
+                    verinymData.put("did", "did");
+                    verinymData.put("verkey", "some verkey");
+                    verinymData.put("tempVerkey", "some temporal verkey");
+                    verinymData.put("metadata", verinymInString);
+
+                    contacts.add(verinymData);
+                }
+
+                CompletableFuture<String> future = new CompletableFuture<>();
+                future.complete(contacts.toString());
+
                 return future;
             }
         };
 
         Auth auth = walletService.doesWalletExist(publicKey, privateKey);
-        assertEquals(expected, auth);
+        assertEquals(expectedAuth, auth);
+    }
+
+    private static Stream<Arguments> provideKeysAndResultExpectations() {
+
+
+        return Stream.of(
+                Arguments.of("invalid", "valid", new Auth(false, null)),
+                Arguments.of("doctor", "valid", new Auth(true, Role.DOCTOR)),
+                Arguments.of("patient", "valid", new Auth(true, Role.PATIENT))
+        );
     }
 }

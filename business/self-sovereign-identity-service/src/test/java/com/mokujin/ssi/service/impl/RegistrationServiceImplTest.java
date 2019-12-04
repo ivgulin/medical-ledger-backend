@@ -1,10 +1,13 @@
-/*
 package com.mokujin.ssi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mokujin.ssi.model.exception.extention.LedgerException;
-import com.mokujin.ssi.model.government.KnownIdentity;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.document.Document;
+import com.mokujin.ssi.model.exception.extention.LedgerException;
+import com.mokujin.ssi.model.exception.extention.ResourceNotFoundException;
+import com.mokujin.ssi.model.government.KnownIdentity;
+import com.mokujin.ssi.model.government.document.Certificate;
+import com.mokujin.ssi.model.government.document.Diploma;
 import com.mokujin.ssi.model.government.document.NationalNumber;
 import com.mokujin.ssi.model.government.document.NationalPassport;
 import com.mokujin.ssi.model.internal.Credential;
@@ -18,24 +21,25 @@ import lombok.extern.slf4j.Slf4j;
 import mockit.MockUp;
 import org.hyperledger.indy.sdk.anoncreds.Anoncreds;
 import org.hyperledger.indy.sdk.did.Did;
+import org.hyperledger.indy.sdk.ledger.Ledger;
 import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static com.mokujin.ssi.model.internal.Role.DOCTOR;
 import static com.mokujin.ssi.model.internal.Role.PATIENT;
-import static org.hyperledger.indy.sdk.anoncreds.AnoncredsResults.IssuerCreateCredentialResult;
-import static org.hyperledger.indy.sdk.anoncreds.AnoncredsResults.ProverCreateCredentialRequestResult;
 import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -133,7 +137,7 @@ class RegistrationServiceImplTest {
 
     @Test
     @SneakyThrows
-    void register_newIdentityWithPatientRole_newPatientIsReturned() {
+    void register_newIdentityWithDoctorRole_newDoctorIsReturned() {
         String nationalNumberValue = "1234567890";
         String name = "John";
         String lastName = "Doe";
@@ -156,7 +160,7 @@ class RegistrationServiceImplTest {
         NationalPassport nationalPassport = new NationalPassport("number", name, lastName, name, date,
                 "place", "image", "male", issuer, date);
         NationalNumber nationalNumber = new NationalNumber(nationalNumberValue, date, issuer);
-        KnownIdentity knownIdentity = new KnownIdentity(PATIENT, nationalPassport, nationalNumber, null, null);
+        KnownIdentity knownIdentity = new KnownIdentity(DOCTOR, nationalPassport, nationalNumber, null, null);
         when(verificationService.verifyNewbie(details)).thenReturn(knownIdentity);
 
         CreateAndStoreMyDidResult pseudonym = mock(CreateAndStoreMyDidResult.class);
@@ -171,6 +175,7 @@ class RegistrationServiceImplTest {
         };
 
         registrationService = spy(registrationService);
+        doNothing().when(registrationService).grandVerinym(identity, knownIdentity);
         doNothing().when(registrationService).exchangeContacts(identity, knownIdentity, pseudonym, pseudonym);
         doNothing().when(registrationService).issueCredentials(key, wallet, pseudonym, knownIdentity);
 
@@ -180,6 +185,26 @@ class RegistrationServiceImplTest {
         User result = registrationService.register(details, key, key);
         verify(wallet, times(1)).close();
         assertEquals(user, result);
+    }
+
+    @Test
+    @SneakyThrows
+    void register_subMethodThrowsBusinessException_exceptionIsThrown() {
+        UserRegistrationDetails details = new UserRegistrationDetails();
+        String key = "key";
+
+        Wallet wallet = mock(Wallet.class);
+        when(walletService.getOrCreateWallet(key, key)).thenReturn(wallet);
+
+        Identity identity = Identity.builder()
+                .wallet(wallet)
+                .credentials(new ArrayList<>())
+                .pseudonyms(new ArrayList<>())
+                .build();
+        when(identityService.findByWallet(wallet)).thenThrow(new ResourceNotFoundException("test"));
+
+        assertThrows(LedgerException.class, () -> registrationService.register(details, key, key));
+        verify(wallet, times(1)).close();
     }
 
     @Test
@@ -214,10 +239,99 @@ class RegistrationServiceImplTest {
         verify(wallet, times(1)).close();
     }
 
-    // TODO: 17.11.19 redo it
     @Test
     @SneakyThrows
-    @Disabled
+    void grandVerinym_validInputs_exceptionIsThrown() {
+
+        String verinymDid = "did";
+        String verinymVerkey = "key";
+        CreateAndStoreMyDidResult verinym = mock(CreateAndStoreMyDidResult.class);
+        when(verinym.getDid()).thenReturn(verinymDid);
+        when(verinym.getVerkey()).thenReturn(verinymVerkey);
+        Wallet wallet = mock(Wallet.class);
+        Identity identity = Identity.builder().wallet(wallet).build();
+
+        new MockUp<Did>() {
+            @mockit.Mock
+            public CompletableFuture<CreateAndStoreMyDidResult> createAndStoreMyDid(Wallet wallet1, String didJson) {
+                assertEquals(wallet, wallet1);
+
+                CompletableFuture<CreateAndStoreMyDidResult> future = new CompletableFuture<>();
+                future.complete(verinym);
+                return future;
+            }
+        };
+
+        String name = "name";
+        String number = "number";
+        String image = "photo";
+
+        KnownIdentity knownIdentity = new KnownIdentity();
+        NationalPassport nationalPassport = new NationalPassport();
+        nationalPassport.setFirstName(name);
+        nationalPassport.setLastName(name);
+        nationalPassport.setFatherName(name);
+        nationalPassport.setImage(image);
+        knownIdentity.setNationalPassport(nationalPassport);
+        NationalNumber nationalNumber = new NationalNumber();
+        nationalNumber.setNumber(number);
+        knownIdentity.setNationalNumber(nationalNumber);
+
+        new MockUp<Did>() {
+            @mockit.Mock
+            public CompletableFuture<Void> setDidMetadata(Wallet wallet1, String did, String metadata) throws IOException {
+                assertEquals(wallet, wallet1);
+                assertEquals(verinymDid, did);
+
+                ObjectMapper objectMapper = new ObjectMapper();
+
+                ObjectNode result = (ObjectNode) objectMapper.readTree(metadata);
+
+                ObjectNode objectNode = objectMapper.createObjectNode();
+                objectNode.put("contactName", name + " " + name + " " + name);
+                objectNode.put("photo", image);
+                objectNode.put("nationalNumber", number);
+                objectNode.put("verinym", true);
+                objectNode.put("visible", false);
+
+                assertEquals(objectNode, result);
+
+                return CompletableFuture.runAsync(() -> log.debug("In mock."));
+            }
+        };
+
+        new MockUp<Ledger>() {
+            @mockit.Mock
+            public CompletableFuture<String> buildNymRequest(String submitterDid, String targetDid, String verkey,
+                                                             String alias, String role) {
+
+                assertEquals(steward.getVerinymDid(), submitterDid);
+                assertEquals(verinymDid, targetDid);
+                assertEquals(verinymVerkey, verkey);
+
+                CompletableFuture<String> future = new CompletableFuture<>();
+                future.complete(verinymDid);
+                return future;
+            }
+
+            @mockit.Mock
+            public CompletableFuture<String> signAndSubmitRequest(Pool pool, Wallet wallet, String submitterDid,
+                                                                  String requestJson) {
+                assertEquals(steward.getWallet(), wallet);
+                assertEquals(steward.getVerinymDid(), submitterDid);
+                assertEquals(verinymDid, requestJson);
+
+                CompletableFuture<String> future = new CompletableFuture<>();
+                future.complete("completed");
+                return future;
+            }
+        };
+
+        registrationService.grandVerinym(identity, knownIdentity);
+    }
+
+    @Test
+    @SneakyThrows
     void exchangeContacts_validInputs_methodIsExecuted() {
 
         Wallet wallet = mock(Wallet.class);
@@ -249,33 +363,54 @@ class RegistrationServiceImplTest {
         knownIdentity.setNationalPassport(nationalPassport);
         knownIdentity.setNationalNumber(nationalNumber);
 
+
         new MockUp<Did>() {
             @mockit.Mock
-            public CompletableFuture<Void> setDidMetadata(Wallet wallet, String did, String metadata) {
+            public CompletableFuture<Void> setDidMetadata(Wallet wallet, String did, String metadata) throws IOException {
                 assertTrue(wallet.equals(government.getWallet()) || wallet.equals(identity.getWallet()));
                 assertTrue(did.equals(governmentPseudonymDid) || did.equals(userPseudonymDid));
 
-                String expectedGovJson = "{\"contactName\":\"Government\",\"photo\":\"photo\"" +
-                        ",\"nationalNumber\":null,\"visible\":false,\"verinym\":false}";
-                String expectedUserJson = "{\"contactName\":\"Doe John John\",\"photo\":\"image\"," +
-                        "\"nationalNumber\":\"12345\",\"visible\":false,\"verinym\":false}";
-                assertTrue(metadata.equals(expectedGovJson) || metadata.equals(expectedUserJson));
+                log.debug("metadata = " + metadata);
+
+                ObjectMapper objectMapper = new ObjectMapper();
+
+                ObjectNode result = (ObjectNode) objectMapper.readTree(metadata);
+
+                ObjectNode expectedGov = objectMapper.createObjectNode();
+                expectedGov.put("contactName", "Government");
+                expectedGov.put("photo", "test");
+                expectedGov.set("nationalNumber", null);
+                expectedGov.put("verinym", false);
+                expectedGov.put("visible", false);
+
+
+                ObjectNode expectedUser = objectMapper.createObjectNode();
+                expectedUser.put("contactName", "Doe John John");
+                expectedUser.put("photo", "image");
+                expectedUser.put("nationalNumber", "12345");
+                expectedUser.put("verinym", false);
+                expectedUser.put("visible", false);
+
+                String s = expectedGov.toString();
+                log.debug("s = " + s);
+
+                assertTrue(result.equals(expectedGov) || result.equals(expectedUser));
 
                 return CompletableFuture.runAsync(() -> log.debug("In mock."));
             }
         };
-
-        when(government.getWallet()).thenReturn(wallet);
 
         registrationService.exchangeContacts(identity, knownIdentity, governmentPseudonym, userPseudonym);
     }
 
     @Test
     @SneakyThrows
-    void issueCredentials_validInputs_methodIsExecuted() {
+    void issueCredentials_validInputsOfPatient_patientGetsPassportAndNationalNumber() {
 
         Wallet userWallet = mock(Wallet.class);
         CreateAndStoreMyDidResult governmentPseudonym = mock(CreateAndStoreMyDidResult.class);
+        String pseudonymDid = "did";
+        when(governmentPseudonym.getDid()).thenReturn(pseudonymDid);
         String key = "key";
 
         NationalPassport nationalPassport = new NationalPassport();
@@ -299,11 +434,10 @@ class RegistrationServiceImplTest {
         ArgumentCaptor<Document> documentCaptor = ArgumentCaptor.forClass(Document.class);
 
         registrationService = spy(registrationService);
-        doNothing().when(registrationService).issueCredential(any(), any(), anyString(), anyString(), any(), anyString());
 
         registrationService.issueCredentials(key, userWallet, governmentPseudonym, knownIdentity);
-        verify(registrationService, times(2)).issueCredential(any(), any(),
-                schemaDefinitionIdCaptor.capture(), schemaDefinitionCaptor.capture(),
+        verify(credentialService, times(2)).issueCredential(any(), any(),
+                anyString(), schemaDefinitionIdCaptor.capture(), schemaDefinitionCaptor.capture(),
                 documentCaptor.capture(), anyString());
 
         assertEquals(Arrays.asList(nationalNumberSchema.getSchemaDefinition(),
@@ -315,99 +449,50 @@ class RegistrationServiceImplTest {
 
     @Test
     @SneakyThrows
-    void issueCredential_validInputs_methodIsExecuted() {
+    void issueCredentials_validInputsOfDoctor_doctorGetsPassportAndNationalNumberAndDiplomaAndCertificate() {
 
         Wallet userWallet = mock(Wallet.class);
         CreateAndStoreMyDidResult governmentPseudonym = mock(CreateAndStoreMyDidResult.class);
-        String governmentPseudonymDid = "gov did";
-        when(governmentPseudonym.getDid()).thenReturn(governmentPseudonymDid);
+        String pseudonymDid = "did";
+        when(governmentPseudonym.getDid()).thenReturn(pseudonymDid);
+        String key = "key";
 
-        String masterSecretId = "key";
+        NationalPassport nationalPassport = new NationalPassport();
         NationalNumber nationalNumber = new NationalNumber();
-        String credential = "credential";
-
-        ProverCreateCredentialRequestResult credentialRequestResult = mock(ProverCreateCredentialRequestResult.class);
-        String credentialRequest = "cred req";
-        String credentialRequestMetadata = "cred req metadata";
-        when(credentialRequestResult.getCredentialRequestJson()).thenReturn(credentialRequest);
-        when(credentialRequestResult.getCredentialRequestMetadataJson()).thenReturn(credentialRequestMetadata);
-
-        IssuerCreateCredentialResult issuerCreateCredentialResult = mock(IssuerCreateCredentialResult.class);
-        String credentialsResult = "creds result";
-        String revocRegDelta = "delta";
-        when(issuerCreateCredentialResult.getCredentialJson()).thenReturn(credentialsResult);
-        when(issuerCreateCredentialResult.getRevocRegDeltaJson()).thenReturn(revocRegDelta);
-
-        String schemaDefinitionId = nationalNumberSchema.getSchemaDefinitionId();
-        String schemaDefinition = nationalNumberSchema.getSchemaDefinition();
-
-        String credentialOffer = "offer";
+        Diploma diploma = new Diploma();
+        List<Certificate> certificates = Collections.singletonList(new Certificate());
+        KnownIdentity knownIdentity = new KnownIdentity(DOCTOR, nationalPassport, nationalNumber, diploma, certificates);
 
         new MockUp<Anoncreds>() {
             @mockit.Mock
-            public CompletableFuture<String> issuerCreateCredentialOffer(Wallet wallet, String credDefId) {
-                assertEquals(government.getWallet(), wallet);
-                assertEquals(schemaDefinitionId, credDefId);
+            public CompletableFuture<String> proverCreateMasterSecret(Wallet wallet, String masterSecretId) {
+                assertEquals(userWallet, wallet);
+                assertEquals(key, masterSecretId);
 
                 CompletableFuture<String> future = new CompletableFuture<>();
-                future.complete(credentialOffer);
-                return future;
-            }
-
-            @mockit.Mock
-            public CompletableFuture<ProverCreateCredentialRequestResult> proverCreateCredentialReq(Wallet wallet,
-                                                                                                    String proverDid,
-                                                                                                    String credentialOfferJson,
-                                                                                                    String credentialDefJson,
-                                                                                                    String masterSecretId1) {
-                assertEquals(userWallet, wallet);
-                assertEquals(governmentPseudonymDid, proverDid);
-                assertEquals(credentialOffer, credentialOfferJson);
-                assertEquals(schemaDefinition, credentialDefJson);
-                assertEquals(masterSecretId, masterSecretId1);
-
-                CompletableFuture<ProverCreateCredentialRequestResult> future = new CompletableFuture<>();
-                future.complete(credentialRequestResult);
-                return future;
-            }
-
-            @mockit.Mock
-            public CompletableFuture<IssuerCreateCredentialResult> issuerCreateCredential(Wallet wallet,
-                                                                                          String credOfferJson,
-                                                                                          String credReqJson,
-                                                                                          String credValuesJson,
-                                                                                          String revRegId,
-                                                                                          int blobStorageReaderHandle) {
-                assertEquals(government.getWallet(), wallet);
-                assertEquals(credentialOffer, credOfferJson);
-                assertEquals(credentialRequest, credReqJson);
-                assertEquals(credential, credValuesJson);
-
-                CompletableFuture<IssuerCreateCredentialResult> future = new CompletableFuture<>();
-                future.complete(issuerCreateCredentialResult);
-                return future;
-            }
-
-            @mockit.Mock
-            public CompletableFuture<String> proverStoreCredential(Wallet wallet, String credId,
-                                                                   String credReqMetadataJson, String credJson,
-                                                                   String credDefJson, String revRegDefJson) {
-                assertEquals(userWallet, wallet);
-                assertEquals(credentialRequestMetadata, credReqMetadataJson);
-                assertEquals(credentialsResult, credJson);
-                assertEquals(schemaDefinition, credDefJson);
-                assertEquals(revocRegDelta, revRegDefJson);
-
-                CompletableFuture<String> future = new CompletableFuture<>();
-                future.complete(credentialOffer);
+                future.complete(key);
                 return future;
             }
         };
 
-        when(credentialService.getCredential(nationalNumber)).thenReturn(credential);
+        ArgumentCaptor<String> schemaDefinitionCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> schemaDefinitionIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Document> documentCaptor = ArgumentCaptor.forClass(Document.class);
 
-        registrationService.issueCredential(userWallet, governmentPseudonym, schemaDefinitionId,
-                schemaDefinition, nationalNumber, masterSecretId);
+        registrationService = spy(registrationService);
+
+        registrationService.issueCredentials(key, userWallet, governmentPseudonym, knownIdentity);
+        verify(credentialService, times(4)).issueCredential(any(), any(),
+                anyString(), schemaDefinitionIdCaptor.capture(), schemaDefinitionCaptor.capture(),
+                documentCaptor.capture(), anyString());
+
+        assertEquals(Arrays.asList(nationalNumberSchema.getSchemaDefinition(),
+                passportSchema.getSchemaDefinition(), diplomaSchema.getSchemaDefinition(),
+                certificateSchema.getSchemaDefinition()), schemaDefinitionCaptor.getAllValues());
+        assertEquals(Arrays.asList(nationalNumberSchema.getSchemaDefinitionId(),
+                passportSchema.getSchemaDefinitionId(), diplomaSchema.getSchemaDefinitionId(),
+                certificateSchema.getSchemaDefinitionId()), schemaDefinitionIdCaptor.getAllValues());
+        assertEquals(Arrays.asList(nationalNumber, nationalPassport, diploma, certificates.get(0)),
+                documentCaptor.getAllValues());
     }
 }
-*/

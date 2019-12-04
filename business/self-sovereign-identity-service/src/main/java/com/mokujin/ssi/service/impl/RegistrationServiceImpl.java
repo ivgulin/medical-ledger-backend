@@ -27,6 +27,7 @@ import java.util.List;
 
 import static com.mokujin.ssi.model.internal.Role.DOCTOR;
 import static org.hyperledger.indy.sdk.anoncreds.Anoncreds.proverCreateMasterSecret;
+import static org.hyperledger.indy.sdk.did.Did.*;
 import static org.hyperledger.indy.sdk.did.Did.createAndStoreMyDid;
 import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
 import static org.hyperledger.indy.sdk.ledger.Ledger.buildNymRequest;
@@ -107,7 +108,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
     }
 
-    private void grandVerinym(Identity userIdentity, KnownIdentity knownIdentity) throws Exception {
+    void grandVerinym(Identity userIdentity, KnownIdentity knownIdentity) throws Exception {
         CreateAndStoreMyDidResult verinym = createAndStoreMyDid(userIdentity.getWallet(), "{}").get();
         log.info("'verinym={}'", verinym);
 
@@ -118,11 +119,11 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .contactName(lastName + " " + firstName + " " + fatherName)
                 .photo(knownIdentity.getNationalPassport().getImage())
                 .nationalNumber(knownIdentity.getNationalNumber().getNumber())
-                .isVisible(false)
                 .isVerinym(true)
+                .isVisible(false)
                 .build();
         String selfContactJson = objectMapper.writeValueAsString(selfContact);
-        Did.setDidMetadata(userIdentity.getWallet(), verinym.getDid(), selfContactJson).get();
+        setDidMetadata(userIdentity.getWallet(), verinym.getDid(), selfContactJson).get();
 
         userIdentity.setVerinymDid(verinym.getDid());
 
@@ -152,7 +153,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .build();
         String trustAnchorContactForUserJson = objectMapper.writeValueAsString(trustAnchorContactForUser);
         System.out.println("trustAnchorContactForUserJson = " + trustAnchorContactForUserJson);
-        Did.setDidMetadata(userIdentity.getWallet(), userForGovernmentPseudonym.getDid(), trustAnchorContactForUserJson).get();
+        setDidMetadata(userIdentity.getWallet(), userForGovernmentPseudonym.getDid(), trustAnchorContactForUserJson).get();
 
         String firstName = knownIdentity.getNationalPassport().getFirstName();
         String lastName = knownIdentity.getNationalPassport().getLastName();
@@ -165,7 +166,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .build();
         String userContactForTrustAnchorJson = objectMapper.writeValueAsString(userContactForTrustAnchor);
         System.out.println("userContactForTrustAnchorJson = " + userContactForTrustAnchorJson);
-        Did.setDidMetadata(government.getWallet(), governmentPseudonym.getDid(), userContactForTrustAnchorJson).get();
+        setDidMetadata(government.getWallet(), governmentPseudonym.getDid(), userContactForTrustAnchorJson).get();
 
         userIdentity.addPseudonym(Pseudonym.builder()
                 .pseudonymDid(userForGovernmentPseudonym.getDid())
