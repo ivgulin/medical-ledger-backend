@@ -51,6 +51,16 @@ public class KnownIdentityController {
         return ResponseEntity.ok(knownIdentity);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<Iterable<KnownIdentity>> getAll() {
+        log.info("'getAll' is invoked");
+
+        Iterable<KnownIdentity> identities = knownIdentityService.getAll();
+
+        log.info("'getAll' returned value '{}'", identities);
+        return ResponseEntity.ok(identities);
+    }
+
     @PostMapping("/issue-credentials")
     public ResponseEntity<KnownIdentityDTO> issueCredentials(@RequestBody @Valid Person person) {
         log.info("'issueCredentials' is invoked: '{}'", person);

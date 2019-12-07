@@ -97,6 +97,7 @@ public class CredentialServiceImpl implements CredentialService {
     }
 
     @Override
+    @SneakyThrows
     public String getProofRequest(Schema schema, Document document) {
 
         ObjectNode proofRequestNode = objectMapper.createObjectNode();
@@ -116,20 +117,13 @@ public class CredentialServiceImpl implements CredentialService {
         int attributeNumber = 0;
         for (Field field : fields) {
             field.setAccessible(true);
-            try {
-                ObjectNode attribute = objectMapper.createObjectNode();
-                String fieldName = field.getName();
-                Object value = field.get(document);
-                if (Objects.nonNull(value)) {
-                    attribute.put("name", fieldName);
-                    attribute.set("restrictions", restrictionsNode);
-                    requestedAttributes.set("attr" + ++attributeNumber + "_referent", attribute);
-                }
-            } catch (Exception e) {
-                log.error("Exception was thrown: " + e);
-                throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
-            } finally {
-                field.setAccessible(false);
+            ObjectNode attribute = objectMapper.createObjectNode();
+            String fieldName = field.getName();
+            Object value = field.get(document);
+            if (Objects.nonNull(value)) {
+                attribute.put("name", fieldName);
+                attribute.set("restrictions", restrictionsNode);
+                requestedAttributes.set("attr" + ++attributeNumber + "_referent", attribute);
             }
         }
 

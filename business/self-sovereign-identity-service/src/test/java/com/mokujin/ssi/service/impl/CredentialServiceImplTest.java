@@ -3,9 +3,11 @@ package com.mokujin.ssi.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mokujin.ssi.model.document.Document;
+import com.mokujin.ssi.model.document.medical.dicom.MedicalImage;
 import com.mokujin.ssi.model.exception.extention.LedgerException;
 import com.mokujin.ssi.model.government.document.NationalNumber;
 import com.mokujin.ssi.model.government.document.NationalPassport;
+import com.mokujin.ssi.model.internal.Schema;
 import com.mokujin.ssi.service.IdentityService;
 import com.mokujin.ssi.service.SchemaService;
 import com.mokujin.ssi.service.UserService;
@@ -14,7 +16,6 @@ import lombok.SneakyThrows;
 import mockit.MockUp;
 import org.hyperledger.indy.sdk.anoncreds.Anoncreds;
 import org.hyperledger.indy.sdk.anoncreds.AnoncredsResults;
-import org.hyperledger.indy.sdk.did.DidResults;
 import org.hyperledger.indy.sdk.pool.Pool;
 import org.hyperledger.indy.sdk.wallet.Wallet;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -74,6 +79,49 @@ class CredentialServiceImplTest {
     void getCredential_documentHasNullField_exceptionIsThrown() {
         NationalNumber nationalNumber = new NationalNumber(null, null, null);
         assertThrows(LedgerException.class, () -> credentialService.getCredential(nationalNumber));
+    }
+
+    @Test
+    void getCredential_medicalImageHasNullMap_exceptionIsThrown() {
+        MedicalImage medicalImage = new MedicalImage(null);
+        assertThrows(LedgerException.class, () -> credentialService.getCredential(medicalImage));
+    }
+
+    @Test
+    @SneakyThrows
+    void getProofRequest_validInputs_proofRequestIdReturned() {
+        Schema schema = Schema.builder().schemaDefinitionId("id").build();
+        String number = "number";
+        NationalNumber nationalNumber = new NationalNumber();
+        nationalNumber.setNumber(number);
+
+        ObjectNode expected = objectMapper.createObjectNode();
+        expected.put("name", nationalNumber.getResourceType());
+        expected.put("version", "1.0");
+
+        ObjectNode restrictionsNode = objectMapper.createObjectNode();
+        restrictionsNode.put("cred_def_id", schema.getSchemaDefinitionId());
+
+        ObjectNode requestedAttributes = objectMapper.createObjectNode();
+
+        ObjectNode typeAttribute = objectMapper.createObjectNode();
+        typeAttribute.put("name", "resourceType");
+        typeAttribute.set("restrictions", restrictionsNode);
+        requestedAttributes.set("attr1_referent", typeAttribute);
+
+        ObjectNode numberAttribute = objectMapper.createObjectNode();
+        numberAttribute.put("name", "number");
+        numberAttribute.set("restrictions", restrictionsNode);
+        requestedAttributes.set("attr1_referent", numberAttribute);
+
+        expected.set("requested_attributes", requestedAttributes);
+        expected.set("requested_predicates", objectMapper.createObjectNode());
+
+        String proofRequest = credentialService.getProofRequest(schema, nationalNumber);
+        ObjectNode result = (ObjectNode) objectMapper.readTree(proofRequest);
+        result.remove("nonce");
+
+        assertEquals(expected, result);
     }
 
     @Test
@@ -193,10 +241,15 @@ class CredentialServiceImplTest {
 
         ObjectNode nationalNumberNode = getNationalNumber(nationalNumber, someDate, issuer, objectMapper);
 
+        ObjectNode medicalImageNode = getMedicalImage(objectMapper);
+        Map<String, String> attributesMap = new HashMap<>();
+        attributesMap.put("test", "test");
+
         return Stream.of(
                 Arguments.of(new NationalPassport(number, name, lastName, name, someDate, placeOfBirth,
                         image, sex, issuer, someDate), passportNode.toString()),
-                Arguments.of(new NationalNumber(nationalNumber, someDate, issuer), nationalNumberNode.toString())
+                Arguments.of(new NationalNumber(nationalNumber, someDate, issuer), nationalNumberNode.toString()),
+                Arguments.of(new MedicalImage(attributesMap), medicalImageNode.toString())
         );
     }
 
@@ -273,6 +326,20 @@ class CredentialServiceImplTest {
         passportNode.set("dateOfIssue", attributeTen);
         passportNode.set("resourceType", attributeEleven);
         return passportNode;
+    }
+
+    private static ObjectNode getMedicalImage(ObjectMapper objectMapper) {
+        ObjectNode medicalImageNode = objectMapper.createObjectNode();
+
+        ObjectNode attributeOne = objectMapper.createObjectNode();
+        attributeOne.put("raw", "test");
+
+        ObjectNode attributeTwo = objectMapper.createObjectNode();
+        attributeTwo.put("raw", "MedicalImage");
+
+        medicalImageNode.set("test", attributeOne);
+        medicalImageNode.set("resourceType", attributeTwo);
+        return medicalImageNode;
     }
 
 }

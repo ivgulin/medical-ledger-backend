@@ -69,6 +69,11 @@ public class KnownIdentityServiceImpl implements KnownIdentityService {
     }
 
     @Override
+    public Iterable<KnownIdentity> getAll() {
+        return knownIdentityRepository.findAll();
+    }
+
+    @Override
     public KnownIdentityDTO getWithImage(Person person) {
         KnownIdentityDTO knownIdentity = new KnownIdentityDTO(knownIdentityRepository
                 .findByNationalNumber_Number(person.getNationalNumber())

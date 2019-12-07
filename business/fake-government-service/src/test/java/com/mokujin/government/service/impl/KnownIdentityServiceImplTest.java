@@ -183,6 +183,17 @@ class KnownIdentityServiceImplTest {
     }
 
     @Test
+    void getAll_identitiesExists_iterableIsReturned() {
+        ArrayList<KnownIdentity> expected = new ArrayList<>();
+        expected.add(KnownIdentity.builder().id(1).build());
+        when(knownIdentityRepository.findAll()).thenReturn(expected);
+
+        Iterable<KnownIdentity> result = knownIdentityService.getAll();
+
+        assertEquals(expected, result);
+    }
+
+    @Test
     void getWithImage_everyDocumentInThePlace_knownIdentityIsReturned() {
         String nationalNumberValue = "number";
         String fatherName = "fathername";
