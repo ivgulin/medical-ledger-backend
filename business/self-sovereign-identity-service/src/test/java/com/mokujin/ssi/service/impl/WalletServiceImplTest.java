@@ -31,6 +31,16 @@ class WalletServiceImplTest {
 
     private WalletService walletService = new WalletServiceImpl(objectMapper);
 
+    private static Stream<Arguments> provideKeysAndResultExpectations() {
+
+
+        return Stream.of(
+                Arguments.of("invalid", "valid", new Auth(false, null)),
+                Arguments.of("doctor", "valid", new Auth(true, Role.DOCTOR)),
+                Arguments.of("patient", "valid", new Auth(true, Role.PATIENT))
+        );
+    }
+
     @Test
     @SneakyThrows
     void getOrCreateWallet_validInputs_walletIsReturned() {
@@ -131,15 +141,5 @@ class WalletServiceImplTest {
 
         Auth auth = walletService.doesWalletExist(publicKey, privateKey);
         assertEquals(expectedAuth, auth);
-    }
-
-    private static Stream<Arguments> provideKeysAndResultExpectations() {
-
-
-        return Stream.of(
-                Arguments.of("invalid", "valid", new Auth(false, null)),
-                Arguments.of("doctor", "valid", new Auth(true, Role.DOCTOR)),
-                Arguments.of("patient", "valid", new Auth(true, Role.PATIENT))
-        );
     }
 }

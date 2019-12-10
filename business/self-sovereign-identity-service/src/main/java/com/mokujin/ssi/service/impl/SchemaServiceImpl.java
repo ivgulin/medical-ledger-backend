@@ -70,37 +70,37 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @SneakyThrows
-    private String createSchema(Pool pool, Identity government, String schemaName,
-                                String version, String attributes) {
+    String createSchema(Pool pool, Identity trustAnchor, String schemaName,
+                        String version, String attributes) {
         log.info("'create schema attributes={}'", attributes);
 
         AnoncredsResults.IssuerCreateSchemaResult schemaBlueprint = issuerCreateSchema(
-                government.getVerinymDid(),
+                trustAnchor.getVerinymDid(),
                 schemaName,
                 version,
                 attributes).get();
         log.info("'schema={}'", schemaBlueprint);
 
         String schemaRequest = buildSchemaRequest(
-                government.getVerinymDid(),
+                trustAnchor.getVerinymDid(),
                 schemaBlueprint.getSchemaJson()).get();
 
         String schemaResponse = signAndSubmitRequest(
                 pool,
-                government.getWallet(),
-                government.getVerinymDid(),
+                trustAnchor.getWallet(),
+                trustAnchor.getVerinymDid(),
                 schemaRequest).get();
         log.info("'schemaResponse={}'", schemaResponse);
 
-        return Cache.getSchema(pool, government.getWallet(), government.getVerinymDid(),
+        return Cache.getSchema(pool, trustAnchor.getWallet(), trustAnchor.getVerinymDid(),
                 schemaBlueprint.getSchemaId(), "{}").get();
     }
 
     @SneakyThrows
-    private String createSchemaDefinition(Pool pool, Identity government, String tag, String schema) {
+    String createSchemaDefinition(Pool pool, Identity trustAnchor, String tag, String schema) {
         AnoncredsResults.IssuerCreateAndStoreCredentialDefResult schemaDefinition = issuerCreateAndStoreCredentialDef(
-                government.getWallet(),
-                government.getVerinymDid(),
+                trustAnchor.getWallet(),
+                trustAnchor.getVerinymDid(),
                 schema,
                 tag,
                 null,
@@ -108,17 +108,17 @@ public class SchemaServiceImpl implements SchemaService {
                 .get();
 
         String schemaDefinitionRequest = buildCredDefRequest(
-                government.getVerinymDid(),
+                trustAnchor.getVerinymDid(),
                 schemaDefinition.getCredDefJson()).get();
         log.info("'schemaDefinitionRequest={}'", schemaDefinitionRequest);
         String schemaDefinitionResponse = signAndSubmitRequest(
                 pool,
-                government.getWallet(),
-                government.getVerinymDid(),
+                trustAnchor.getWallet(),
+                trustAnchor.getVerinymDid(),
                 schemaDefinitionRequest).get();
         log.info("'schemaDefinitionResponse={}'", schemaDefinitionResponse);
 
-        return Cache.getCredDef(pool, government.getWallet(),
-                government.getVerinymDid(), schemaDefinition.getCredDefId(), "{}").get();
+        return Cache.getCredDef(pool, trustAnchor.getWallet(),
+                trustAnchor.getVerinymDid(), schemaDefinition.getCredDefId(), "{}").get();
     }
 }

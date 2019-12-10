@@ -279,7 +279,7 @@ public class CredentialServiceImpl implements CredentialService {
         }
     }
 
-    private ArrayNode prepareAttributes(Document document) {
+    ArrayNode prepareAttributes(Document document) {
         ArrayNode response = objectMapper.createArrayNode();
 
         if (document.getResourceType().equals(MedicalDocumentType.MedicalImage.name())) {
@@ -291,19 +291,12 @@ public class CredentialServiceImpl implements CredentialService {
             Class<?> superclass = document.getClass().getSuperclass();
             fields.addAll(Arrays.stream(superclass.getDeclaredFields()).collect(Collectors.toList()));
 
-            fields.forEach(f -> {
-                f.setAccessible(true);
-                try {
-                    response.add(f.getName());
-                } catch (Exception e) {
-                    log.error("Exception was thrown: " + e);
-                    throw new LedgerException(INTERNAL_SERVER_ERROR, e.getMessage());
-                } finally {
-                    f.setAccessible(false);
-                }
-            });
+            for (Field field : fields) {
+                field.setAccessible(true);
+                response.add(field.getName());
+                field.setAccessible(false);
+            }
         }
-
         return response;
     }
 }

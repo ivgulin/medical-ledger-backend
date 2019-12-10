@@ -129,7 +129,8 @@ public class IdentityServiceImpl implements IdentityService {
 
             if (resourceType.equals(MedicalDocumentType.MedicalImage.name())) {
                 Map<String, String> dicomProperties = objectMapper
-                        .convertValue(attrs, new TypeReference<HashMap<String, String>>() {});
+                        .convertValue(attrs, new TypeReference<HashMap<String, String>>() {
+                        });
                 medicalImage = new MedicalImage(dicomProperties);
                 ((ObjectNode) credentialNode).remove("attrs");
             }

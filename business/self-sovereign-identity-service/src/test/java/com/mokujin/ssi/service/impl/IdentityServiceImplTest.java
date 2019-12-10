@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -35,7 +34,8 @@ import java.util.stream.Stream;
 
 import static com.mokujin.ssi.model.internal.Role.DOCTOR;
 import static com.mokujin.ssi.model.internal.Role.PATIENT;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.hyperledger.indy.sdk.did.DidResults.CreateAndStoreMyDidResult;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
